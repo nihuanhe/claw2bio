@@ -1,0 +1,20 @@
+Claw2Bio bulk-rnaseq QC summary
+==============================
+Input: examples/input/counts_matrix.csv
+Genes: 18975 before / 18971 after filtering
+Samples: 6
+Groups:
+group
+   Control     Mutant Mutant_Rap 
+         2          2          2 
+
+Library sizes:
+                                   sample      group library_size
+CJI1.A.CD1.ET1.1         CJI1.A.CD1.ET1.1    Control     19964793
+CJI2.B.CD1.ET2.1         CJI2.B.CD1.ET2.1    Control     19964174
+CJI3.I.K5PP3W.ET1.1   CJI3.I.K5PP3W.ET1.1     Mutant     19973654
+CJI4.J.K5PP3W.ET2.1   CJI4.J.K5PP3W.ET2.1     Mutant     19978706
+CJI5.K.K5PP3W.Rap1.1 CJI5.K.K5PP3W.Rap1.1 Mutant_Rap     19983620
+CJI6.L.K5PP3W.Rap2.1 CJI6.L.K5PP3W.Rap2.1 Mutant_Rap     19979163
+
+PCA variance explained: PC1 58.7%, PC2 20.1%
