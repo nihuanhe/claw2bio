@@ -6,4 +6,5 @@ __pycache__/
 .mpl-cache-*/
 .Rhistory
 .RData
-resources/
+resources/*.zip
+resources/*.tar.gz
