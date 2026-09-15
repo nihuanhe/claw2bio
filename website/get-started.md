@@ -10,14 +10,14 @@ Pick **one** of these free, graphical tools (all understand Claw2Bio skills out 
 
 | IDE | Why we recommend it |
 |---|---|
-| **Trae (CN)** | Free, Chinese UI, works without VPN — our default pick for beginners |
-| **WorkBuddy** | Lightweight agent workbench |
+| **WorkBuddy** | Our default pick — the skills were battle-tested in it; lightweight agent workbench |
+| **Trae (CN)** | Free, Chinese UI, works without VPN — solid alternative for users in China |
 | **ZCode** | Simple onboarding |
 | **OpenCode** | Open source |
 | **LobsterAI** | Biomedicine-oriented |
 
-> Detailed install walkthroughs with screenshots are being added. For now, download
-> your chosen IDE from its official site and install with default options.
+> Detailed install walkthroughs with screenshots (WorkBuddy first) are being added.
+> For now, download your chosen IDE from its official site and install with default options.
 
 **Advanced users** who already use a command-line agent (Claude Code, Codex, pi agent,
 DeepSeek harness): skip to Step 2 — Claw2Bio ships a root `AGENTS.md` index and
