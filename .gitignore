@@ -1,0 +1,30 @@
+# ---- Python ----
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.ipynb_checkpoints/
+.mpl-cache-*/
+.pytest_cache/
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+
+# ---- Website build artifacts ----
+website/node_modules/
+website/.vitepress/dist/
+website/.vitepress/cache/
+
+# ---- Batch-2 skills: old structure, pending sanitization + COS data split ----
+# Their full-size example data will be hosted on Tencent COS; only mini
+# examples (a few MB) enter the repo after rework. See plan.md F.
+experiment-data/IF-免疫荧光/
+experiment-data/OFT/
+experiment-data/WB-imageJ-定量/
+figure-generation/brain-if-atlas-annotate/
+figure-generation/compress-image/
+
+# ---- Large raw data types (full datasets live on COS, not in git) ----
+*.tif
+*.tiff

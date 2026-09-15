@@ -1,0 +1,9 @@
+Target,Sample,Rep1,Rep2,Rep3
+ND1 Ct,Ctrl-BD-sEVs,15.1,14.19,14.66
+ND1 Ct,Stress-BD-sEVs,14.27,14.08,14.72
+ND5 Ct,Ctrl-BD-sEVs,14.25,14.64,14.47
+ND5 Ct,Stress-BD-sEVs,14.88,14.93,14.87
+B2M Ct,Ctrl-BD-sEVs,22.99,22.4,22.53
+B2M Ct,Stress-BD-sEVs,22.62,22.73,22.27
+POLG Ct,Ctrl-BD-sEVs,22.14,22.53,22.43
+POLG Ct,Stress-BD-sEVs,22.8,22,22.48

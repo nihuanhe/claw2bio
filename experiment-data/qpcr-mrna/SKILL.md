@@ -1,0 +1,107 @@
+---
+name: qpcr-mrna
+description: General-purpose mRNA qPCR ΔΔCt analysis with publication-ready bar plots. Takes a CSV in Target/Sample/Rep1~Rep3 format, auto-detects reference genes (default GAPDH), computes fold change, and outputs one 300-dpi bar plot per Target.（中文摘要：通用 mRNA qPCR ΔΔCt 分析，输入 Target/Sample/Rep1~Rep3 格式 CSV，自动识别内参基因，计算 Fold change，每个 Target 输出一张 300 dpi 发表级柱状图。）
+---
+
+# Skill: qpcr-mrna
+
+## Trigger phrases
+
+- mRNA qPCR
+- run mRNA bar plot
+- qpcr-mrna
+- ΔΔCt analysis
+- relative expression
+- 跑 mRNA 柱状图 / 相对表达量分析
+
+## What it does
+
+1. Reads a raw Ct table (`Target, Sample, Rep1, Rep2, Rep3`).
+2. Auto-detects reference-gene rows (default `GAPDH`; override with `--ref-targets`, e.g. `GAPDH,ACTB,TUBB`).
+3. For each non-reference Target computes:
+   - `ΔCt = Ct_target - mean(Ct_refs)`
+   - `ΔΔCt = ΔCt - mean(ΔCt_of_control_group)`
+   - `Fold = 2^(-ΔΔCt)`
+4. Appends ΔCt, fold change, and statistics to the output CSV.
+5. Generates one 300-dpi bar plot per Target.
+6. Statistics:
+   - 2 groups: independent-samples t-test
+   - ≥3 groups: one-way ANOVA + Dunnett (each treatment vs control)
+
+## Usage
+
+### Single file
+
+```bash
+python scripts/run_mrna.py <input.csv> <output_dir> --name <FigureName> --overwrite
+```
+
+Example:
+
+```bash
+cd qpcr-mrna
+python scripts/run_mrna.py \
+  examples/input/mrna-input.csv \
+  examples/output \
+  --name Figure1 --overwrite
+```
+
+### Custom reference genes
+
+```bash
+python scripts/run_mrna.py data.csv results --ref-targets ACTB --control Ctrl --overwrite
+```
+
+### Batch mode
+
+```bash
+python scripts/batch_mrna.py "path/to/mrna-qpcr-folder" --ref-targets GAPDH --overwrite
+```
+
+## Input CSV format
+
+```csv
+Target,Sample,Rep1,Rep2,Rep3
+IL6,Ctrl,20.10,20.30,20.20
+IL6,Treat,17.50,17.80,17.60
+TNF,Ctrl,22.00,22.20,22.10
+TNF,Treat,21.90,22.10,22.00
+GAPDH,Ctrl,18.00,18.10,18.05
+GAPDH,Treat,18.20,18.30,18.25
+```
+
+- Reference-gene rows use the same format as regular Target rows.
+- The `Sample` column defines the x-axis group names; the first Sample encountered is treated as the control group by default.
+- Supports 2–6 groups (and more, with an extended layout).
+
+## Output files
+
+- `<name>.csv`: raw Ct + ΔCt + fold change + statistics
+- `<name>_<target>_barplot.png`: one plot per Target
+
+## Customization
+
+| Flag | Description |
+|------|-------------|
+| `--name` | Output file name prefix |
+| `--ref-targets` | Reference-gene Target names, comma-separated (default `GAPDH`) |
+| `--control` | Control-group Sample name (default: first Sample) |
+| `--y-label` | Y-axis label |
+| `--dpi` | PNG resolution |
+| `--overwrite` | Overwrite existing outputs |
+
+## Dependencies
+
+Python 3.10+ with:
+
+```bash
+pip install pandas numpy scipy matplotlib
+```
+
+## Notes
+
+- Never modifies the input CSV; results are written as new files in the **output directory**.
+- If an output file already exists and `--overwrite` is not set, the script stops with an error.
+- Batch mode skips unparseable files and continues with the rest.
+
+> 中文提示：本工具不会修改原始输入 CSV，计算结果写入输出目录；输出已存在时需加 `--overwrite`；批量模式会跳过无法解析的文件继续处理。

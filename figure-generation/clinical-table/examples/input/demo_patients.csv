@@ -1,0 +1,12 @@
+﻿序号,HAMA,FOXP3,NOXA,HAMA--,FOXP3--,NOXA--,Age-,Age,Sex,Height,Weight,BMI-,BMI,"Tumor differentiation
+",Tumor,Nodes,Metastasis,Cancer stage--,Cancer stage
+1,20,12.74,23.88,low,low,low,59,≥60 years,Female,154,56,23.61275089,≥24,G2,T1,N0,M0,Ⅰ,I - II
+2,31,18.71,31.52,high,low,high,32,＜60 years,Female,157,44.5,18.05347073,＜24,G3,T1,N0,Mx,Ⅰ,I - II
+3,28,25.81,25.28,low,low,low,39,＜60 years,Female,160,56,21.875,＜24,G2,T3,N0,Mx,ⅡA ,I - II
+4,46,42.97,30.96,high,high,high,26,＜60 years,Male,150,70,31.11111111,＜24,G3,Tx,N0,/,IV,III - IV
+5,33,33.31,18.56,high,high,low,34,＜60 years,Female,150,55,24.44444444,≥24,Miss,T4b,N0,/,IV,III - IV
+6,19,32.24,18.96,low,high,low,35,＜60 years,Female,156,60,24.65483235,≥24,Miss,T0,N0,Mx,I,I - II
+7,30,33.56,33.1,high,high,high,41,＜60 years,Female,160,49,19.140625,≥24,G2,T3,N1a,Mx,ⅢB ,III - IV
+8,28,35.57,33.07,low,high,high,40,＜60 years,Male,172,65,21.97133586,＜24,G2,T1,N0,Mx,Ⅰ ,III - IV
+9,43,40.3,38.91,high,high,high,42,＜60 years,Male,172,72,24.33747972,＜24,G2,T2,N0,Mx,Ⅰ ,III - IV
+10,32,21.08,18.58,high,low,low,38,＜60 years,Female,151,57.5,25.21819218,≥24,G2,T3,N0,Mx,ⅡA ,I - II
