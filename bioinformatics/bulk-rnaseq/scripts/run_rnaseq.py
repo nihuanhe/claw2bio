@@ -137,6 +137,8 @@ def main():
     ap.add_argument("--padj", type=float, default=0.05)
     ap.add_argument("--log2fc", type=float, default=1.0)
     ap.add_argument("--skip-enrich", action="store_true")
+    ap.add_argument("--install-deps", action="store_true",
+                    help="let the pipeline install missing R packages itself (BiocManager/CRAN)")
     ap.add_argument("--rscript", default=None, help="path to Rscript executable")
     ap.add_argument("--overwrite", action="store_true")
     args = ap.parse_args()
@@ -151,11 +153,35 @@ def main():
     print("Group sizes:\n" + sizes.to_string())
     print(f"Control group: {control}")
 
+    # ---- Stage 00: dependency check BEFORE anything else ----
+    here = os.path.dirname(os.path.abspath(__file__))
+    dep_cmd = [rscript, os.path.join(here, "00_check_deps.R"), "--organism", args.organism]
+    if args.install_deps:
+        dep_cmd.append("--install")
+    dep = subprocess.run(dep_cmd)
+    if dep.returncode != 0:
+        print(
+            "\n" + "=" * 64 + "\n"
+            "R package dependencies are missing. Choose how to install them:\n"
+            "\n"
+            "  A) Let the AI agent install them now:\n"
+            "     re-run this command with --install-deps\n"
+            "\n"
+            "  B) Install manually (e.g. via miniconda or R), then re-run:\n"
+            "       conda install -c bioconda bioconductor-deseq2 bioconductor-edger \\\n"
+            "         bioconductor-limma bioconductor-clusterprofiler\n"
+            "     or in R:  BiocManager::install(c('DESeq2','edgeR','limma', ...))\n"
+            "\n"
+            "缺少 R 依赖包。请选择：A) 让 AI agent 自动安装（重跑时加 --install-deps）；\n"
+            "B) 手动安装（miniconda 或在 R 里用 BiocManager），装好后重跑。\n"
+            "=" * 64)
+        sys.exit(3)
+
     forced = None if args.engine == "auto" else args.engine
     engine = select_engine(is_integer, min_n, args.voom_min_n, forced)
 
     common = [args.counts, args.metadata, args.output,
-              "--control", control,
+              "--control", control, "--organism", args.organism,
               "--padj", str(args.padj), "--log2fc", str(args.log2fc)]
 
     run_stage(rscript, STAGE_QC, common, "01_qc")

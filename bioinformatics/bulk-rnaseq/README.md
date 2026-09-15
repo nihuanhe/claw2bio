@@ -16,6 +16,10 @@ bulk RNA-seq 差异表达与富集分析流程，引擎按数据自动分叉；�
 3. **Visualization** — volcano plots (top-10 labels), z-scored DEG heatmap.
 4. **Enrichment** — clusterProfiler GO (BP/MF/CC) + KEGG, up/down separately per contrast.
 
+**Gene ID conversion is built into the DEG step**: Ensembl IDs (version-stripped)
+or Symbols are mapped to gene Symbols via the OrgDb; DEG tables gain a `symbol`
+column and volcano/heatmap figures label genes by symbol.
+
 ## Installation
 
 ```bash
@@ -29,6 +33,12 @@ BiocManager::install(c("DESeq2", "edgeR", "limma", "clusterProfiler", "DOSE",
                        "org.Mm.eg.db", "org.Hs.eg.db", "enrichplot"))
 install.packages(c("pheatmap", "ggplot2", "ggrepel"))
 ```
+
+**You don't have to do this by hand**: stage 00 checks every dependency before the
+analysis starts. If anything is missing you pick the route — let the agent install
+(`--install-deps`) or install manually (miniconda / BiocManager) — and the pipeline
+re-verifies before running. OrgDb annotation archives are also mirrored on the
+Download page (COS) for fast domestic installation.
 
 ## Quick start
 

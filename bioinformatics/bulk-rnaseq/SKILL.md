@@ -15,9 +15,14 @@ description: Bulk RNA-seq differential expression and enrichment from a count ma
 
 ## What it does
 
+Stage 00 first verifies all R package dependencies and reports anything missing
+(you choose: let the agent install via `--install-deps`, or install manually via
+miniconda/BiocManager) — the pipeline never starts on a broken environment.
+
 Input: a gene-by-sample count matrix CSV + a sample metadata CSV. Output: full
 differential-expression report — QC (PCA, sample correlation), DEG tables per
-contrast, volcano plots, DEG heatmap, GO/KEGG enrichment.
+contrast (with **gene-symbol columns — Ensembl IDs are converted up front**),
+volcano plots labelled with gene symbols, DEG heatmap, GO/KEGG enrichment.
 
 **Engine fork (automatic, data-driven; the rationale is ALWAYS printed):**
 
@@ -90,6 +95,7 @@ The first group in the metadata is the control unless `--control` is given.
 | `--padj` | 0.05 | adjusted-p significance cutoff |
 | `--log2fc` | 1 | |log2FC| cutoff |
 | `--skip-enrich` | off | stop after stage 02 |
+| `--install-deps` | off | auto-install missing R packages (BiocManager/CRAN) |
 | `--rscript` | auto-detect | path to Rscript |
 | `--overwrite` | off | allow non-empty output dir |
 
@@ -97,6 +103,10 @@ The first group in the metadata is the control unless `--control` is given.
 
 - Python 3.10+: `pip install pandas numpy`
 - R (≥4.3) with: `DESeq2 edgeR limma clusterProfiler DOSE org.Mm.eg.db org.Hs.eg.db pheatmap ggplot2 ggrepel enrichplot`
+- Stage 00 checks these before anything runs; missing packages can be installed by
+  the agent (`--install-deps`) or manually (miniconda / BiocManager). The OrgDb
+  annotation packages (used for gene-ID conversion) are also mirrored as archives
+  on the Download page (COS) for fast domestic installation.
 - KEGG enrichment needs network access to rest.kegg.jp; it is skipped gracefully offline.
 
 ## Notes
@@ -104,5 +114,6 @@ The first group in the metadata is the control unless `--control` is given.
 - Never modifies input files; all outputs go to the output directory.
 - Contrasts: every group vs control; when ≤4 groups, all pairwise contrasts are added.
 - Enrichment maps Ensembl (version suffix stripped) or Symbol IDs to Entrez via the OrgDb.
+- DEG tables and figures use converted gene symbols wherever a mapping exists.
 
-> 中文提示：输入可以是原始整数 counts 或已归一化矩阵（自动分流）；对照组默认取 metadata 第一行分组；KEGG 富集需联网，离线时自动跳过；所有输出写入输出目录，不改输入文件。
+> 中文提示：开跑前自动检查 R 依赖，缺包时可选手动安装（miniconda/BiocManager）或加 `--install-deps` 让 agent 代装，装好后还会复检；DEG 表和图默认用转换后的基因名（Symbol）；输入可以是原始整数 counts 或已归一化矩阵（自动分流）；对照组默认取 metadata 第一行分组；KEGG 富集需联网，离线时自动跳过；不改输入文件。
