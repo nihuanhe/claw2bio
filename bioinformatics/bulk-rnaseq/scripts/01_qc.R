@@ -9,16 +9,9 @@ suppressPackageStartupMessages({
 })
 
 args <- commandArgs(trailingOnly = TRUE)
-parse_args <- function(args) {
-  out <- list()
-  i <- 1
-  while (i <= length(args)) {
-    if (startsWith(args[i], "--")) {
-      key <- sub("^--", "", args[i]); out[[key]] <- args[i + 1]; i <- i + 2
-    } else { out[[length(out) + 1]] <- args[i]; i <- i + 1 }
-  }
-  out
-}
+script_dir <- dirname(sub("--file=", "", grep("--file=", commandArgs(FALSE), value = TRUE)[1]))
+source(file.path(script_dir, "rnaseq_utils.R"))
+
 opt <- parse_args(args)
 counts_path   <- opt[[1]]
 metadata_path <- opt[[2]]
@@ -27,20 +20,10 @@ control       <- if (!is.null(opt$control)) opt$control else NULL
 
 dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
 
-counts <- read.csv(counts_path, row.names = 1, check.names = FALSE)
-counts <- as.matrix(counts)
-storage.mode(counts) <- "numeric"
-
-meta <- read.csv(metadata_path, colClasses = "character")
-stopifnot(all(c("sample", "group") %in% colnames(meta)))
-
-# Match and order samples
-meta <- meta[match(colnames(counts), meta$sample), ]
-if (any(is.na(meta$sample))) stop("Sample mismatch between counts and metadata.")
-group <- factor(meta$group)
-if (!is.null(control) && control %in% levels(group)) {
-  group <- relevel(group, ref = control)
-}
+inp <- read_inputs(counts_path, metadata_path, control)
+counts <- inp$counts
+meta  <- inp$meta
+group <- inp$group
 cat("Groups:", paste(levels(group), collapse = ", "), "\n")
 cat("Samples per group:\n"); print(table(group))
 

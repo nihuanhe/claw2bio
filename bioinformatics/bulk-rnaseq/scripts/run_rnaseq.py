@@ -51,8 +51,13 @@ def find_rscript(user_path=None):
     )
 
 
+def read_table_smart(path, **kw):
+    """csv/tsv/txt/space + .gz/.zip: let pandas sniff delimiter & compression."""
+    return pd.read_csv(path, sep=None, engine="python", compression="infer", **kw)
+
+
 def diagnose(counts_path, metadata_path, control):
-    df = pd.read_csv(counts_path, index_col=0)
+    df = read_table_smart(counts_path, index_col=0)
     df = df.apply(pd.to_numeric, errors="coerce")
     if df.shape[1] > df.shape[0]:
         print("! More columns than rows — matrix looks transposed (samples x genes).")
@@ -63,7 +68,7 @@ def diagnose(counts_path, metadata_path, control):
     values = values[~np.isnan(values)]
     is_integer = bool(np.allclose(values, np.round(values)))
 
-    meta = pd.read_csv(metadata_path)
+    meta = read_table_smart(metadata_path)
     if not {"sample", "group"} <= set(meta.columns):
         sys.exit("ERROR: metadata CSV must have columns 'sample' and 'group'.")
     missing = set(df.columns) - set(meta["sample"].astype(str))

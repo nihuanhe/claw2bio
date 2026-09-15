@@ -1,5 +1,20 @@
 # rnaseq_utils.R — shared helpers for the bulk-rnaseq DE scripts.
-# Sourced by 02_de_deseq2.R and 02_de_edger_limma.R (not run standalone).
+# Sourced by 01_qc.R, 02_de_deseq2.R and 02_de_edger_limma.R (not run standalone).
+
+# Smart table reader: handles .csv/.tsv/.txt, space-delimited, and .gz.
+# (.zip must be unpacked first — the driver tells the agent to do so.)
+read_table_smart <- function(path, row_names = TRUE) {
+  first <- readLines(path, n = 1, warn = FALSE)   # readLines handles .gz natively
+  delim <- if (grepl("\t", first)) "\t" else if (grepl(",", first)) "," else if (grepl(";", first)) ";" else ""
+  rn <- if (row_names) 1 else NULL
+  if (delim == "") {
+    df <- read.table(path, header = TRUE, sep = "", row.names = rn, check.names = FALSE)
+  } else {
+    df <- read.table(path, header = TRUE, sep = delim, row.names = rn,
+                     check.names = FALSE, quote = "")
+  }
+  df
+}
 
 parse_args <- function(args) {
   out <- list()
@@ -19,10 +34,11 @@ script_dir <- function() {
 
 # Read counts + metadata, align samples, relevel control.
 read_inputs <- function(counts_path, metadata_path, control = NULL) {
-  counts <- read.csv(counts_path, row.names = 1, check.names = FALSE)
+  counts <- read_table_smart(counts_path, row_names = TRUE)
   counts <- as.matrix(counts)
   storage.mode(counts) <- "numeric"
-  meta <- read.csv(metadata_path, colClasses = "character")
+  meta <- read_table_smart(metadata_path, row_names = FALSE)
+  meta[] <- lapply(meta, as.character)
   stopifnot(all(c("sample", "group") %in% colnames(meta)))
   meta <- meta[match(colnames(counts), meta$sample), ]
   if (any(is.na(meta$sample))) stop("Sample mismatch between counts and metadata.")

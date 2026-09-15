@@ -6,3 +6,4 @@ __pycache__/
 .mpl-cache-*/
 .Rhistory
 .RData
+resources/

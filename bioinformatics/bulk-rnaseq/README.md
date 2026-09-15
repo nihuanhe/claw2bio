@@ -53,10 +53,22 @@ python scripts/run_rnaseq.py \
 
 ## Input
 
+- **Flexible file formats**: `.csv` / `.tsv` / `.txt`, optionally gzipped (`.gz`) —
+  delimiter and compression are auto-detected in both the Python driver and the R
+  stages. Zip/tar bundles must be unpacked first (the agent should handle that).
+  GEO download walkthrough: [`docs/downloading-from-GEO.md`](docs/downloading-from-GEO.md).
 - `counts_matrix.csv`: genes × samples integer counts (or a normalized matrix —
   auto-routed to limma-trend).
 - `sample_metadata.csv`: columns `sample,group`. First group = control unless
   `--control` is passed.
+
+### Input resource: gene-ID conversion packages
+
+DEG outputs use gene symbols converted through Bioconductor OrgDb packages:
+`org.Mm.eg.db` (mouse) / `org.Hs.eg.db` (human). They are large (100–380 MB), so
+we mirror prebuilt Windows-binary archives in `resources/` (and on COS at launch)
+for offline/fast installation: `install.packages("<archive>.zip", repos = NULL,
+type = "win.binary")`. Stage 00 verifies the right one is present.
 
 ## How the engine is chosen
 

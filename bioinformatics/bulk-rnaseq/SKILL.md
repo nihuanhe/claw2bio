@@ -54,6 +54,12 @@ python scripts/run_rnaseq.py \
 
 ## Input format
 
+**File formats are flexible**: the count matrix and metadata may be `.csv`, `.tsv`
+or `.txt`, and may be gzipped (`.gz`) — the pipeline auto-detects delimiter and
+compression (both the Python driver and the R stages). Zip/tar bundles must be
+unpacked first (the agent should do this before calling the skill). For GEO-derived
+data see `docs/downloading-from-GEO.md`.
+
 `counts_matrix.csv` — genes as rows, samples as columns, raw integer counts
 (normalized matrices are accepted too; they route to limma-trend):
 
@@ -72,6 +78,20 @@ CJI3.I,Mutant
 ```
 
 The first group in the metadata is the control unless `--control` is given.
+
+## Input resources: gene-ID conversion packages
+
+DEG tables/figures use gene symbols converted via the Bioconductor OrgDb annotation
+packages — treat them as part of the skill's input assets:
+
+| Organism | Package | Size | Where to get |
+|---|---|---|---|
+| mouse | `org.Mm.eg.db` | ~380 MB installed | `BiocManager::install("org.Mm.eg.db")`, or the prebuilt archive on the Download page (COS) |
+| human | `org.Hs.eg.db` | ~100 MB download | `BiocManager::install("org.Hs.eg.db")`, or the prebuilt archive on the Download page (COS) |
+
+Install a downloaded archive (same R major.minor version, Windows):
+`install.packages("org.Mm.eg.db.zip", repos = NULL, type = "win.binary")`.
+Stage 00 verifies the package matching `--organism` before anything runs.
 
 ## Output files
 
@@ -116,4 +136,4 @@ The first group in the metadata is the control unless `--control` is given.
 - Enrichment maps Ensembl (version suffix stripped) or Symbol IDs to Entrez via the OrgDb.
 - DEG tables and figures use converted gene symbols wherever a mapping exists.
 
-> 中文提示：开跑前自动检查 R 依赖，缺包时可选手动安装（miniconda/BiocManager）或加 `--install-deps` 让 agent 代装，装好后还会复检；DEG 表和图默认用转换后的基因名（Symbol）；输入可以是原始整数 counts 或已归一化矩阵（自动分流）；对照组默认取 metadata 第一行分组；KEGG 富集需联网，离线时自动跳过；不改输入文件。
+> 中文提示：输入可以是 csv/tsv/txt 及 .gz 压缩（自动识别分隔符与压缩；zip/tar 需先解压）；GEO 数据获取见 docs/downloading-from-GEO.md；基因 ID 转换包（org.Mm.eg.db / org.Hs.eg.db）属于本技能输入资源，体积大故随 COS 分发（见 Download 页）；开跑前自动检查 R 依赖，缺包时可选手动安装（miniconda/BiocManager）或加 `--install-deps` 让 agent 代装，装好后还会复检；DEG 表和图默认用转换后的基因名（Symbol）；KEGG 富集需联网，离线自动跳过；不改输入文件。
