@@ -1,0 +1,47 @@
+{
+  "pipeline": "bulk-RNA-seq",
+  "skill_commit": "a3d6c3c",
+  "timestamp": "2026-09-16T14:33:50+08:00",
+  "engine": "limma",
+  "engine_forced": false,
+  "exploratory_no_replicates": false,
+  "input_repairs": [
+    "parsed GEO series_matrix layout ('!' comment header / ID_REF row); re-saved as a plain table for the R stages"
+  ],
+  "input_warnings": [],
+  "parameters": {
+    "control": "Ctrl",
+    "organism": "human",
+    "padj": 0.05,
+    "log2fc": 1.0,
+    "voom_min_n": 8,
+    "batch": null,
+    "paired_by": null,
+    "pairwise_max": 4,
+    "contrasts": null,
+    "exclude_samples": null
+  },
+  "input": {
+    "counts": "synth_series_matrix.txt",
+    "metadata": "series_meta.csv",
+    "genes": 300,
+    "samples": 4,
+    "integer_counts": false
+  },
+  "groups": {
+    "Ctrl": [
+      "GSM001",
+      "GSM002"
+    ],
+    "Treat": [
+      "GSM003",
+      "GSM004"
+    ]
+  },
+  "versions": {
+    "python": "3.13.12",
+    "pandas": "3.0.1",
+    "numpy": "2.4.3",
+    "r": "Rscript (R) version 4.5.2 (2025-10-31)"
+  }
+}

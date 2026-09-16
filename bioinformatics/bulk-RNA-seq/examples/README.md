@@ -1,46 +1,24 @@
-# bulk-RNA-seq example — GSE270189
+# Examples — bulk-RNA-seq 编号测例
 
-## Input
+每个子文件夹是一个真实（或合成）数据集，覆盖一类特殊情况；同时充当回归测试。
+Each numbered case covers one class of special situation and doubles as a regression test.
 
-Real public dataset [GSE270189](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE270189):
-mouse prostate basal cells, 3 groups × 2 replicates (integer gene counts, Ensembl IDs).
+| 编号 | 数据集 | 覆盖的坑 / what it exercises |
+|---|---|---|
+| `1_example_GSE270189_clean-mouse-3groups` | GSE270189 小鼠前列腺基底细胞，3 组 × 2 重复 | 干净基准：整数 counts、Ensembl ID、DESeq2 分支（回归基准） |
+| `2_example_GSE255223_mixed-count-FPKM-annotation` | GSE255223 人 TLE 脑组织 | 混合矩阵（count/FPKM/注释列混排）、`_count` 后缀、`15`→`X15` 的 make.names 毁名、矩阵比 metadata 多 3 个样本 |
+| `3_example_GSE167882_paired-symbol-logcpm-human` | GSE167882 人 CSU 纵向采样 | paired 设计（`--paired-by subject`，duplicateCorrelation）、组名带短横、样本名被 R 毁过（模糊匹配修复）、非整数 → limma-trend |
+| `4_example_GSE214514_multi-group-circadian` | GSE214514 小鼠小胶质细胞 Bmal1 KO × 年龄 | 4 组 25 样本全配对 6 contrasts、tsv.gz 输入、metadata 从 series_matrix 表型行构建 |
+| `5_example_synthetic_dirty-and-series-matrix` | 合成小数据 ×2 | (a) 脏数据综合：后缀+FPKM 列+注释列+重复 symbol+负值+非标准列名+数字开头样本名；(b) series_matrix `!` 头解析 |
 
-- `input/counts_matrix.csv` — 18,975 genes × 6 samples (filtered integer counts)
-- `input/sample_metadata.csv` — Control / Mutant / Mutant_Rap groups
-
-Groups: `Control` (CD1, EtOH), `Mutant` (PTEN-Pik3ca double mutant, EtOH),
-`Mutant_Rap` (double mutant + rapamycin).
-
-## Run
+运行任何一例（以案例 2 为例）：
 
 ```bash
-cd bioinformatics/bulk-RNA-seq
 python scripts/run_rnaseq.py \
-  examples/input/counts_matrix.csv \
-  examples/input/sample_metadata.csv \
-  examples/output \
-  --control Control --organism mouse --overwrite
+  "examples/2_example_GSE255223_mixed-count-FPKM-annotation/input/GSE255223_gene_expression_anno.xls.gz" \
+  "examples/2_example_GSE255223_mixed-count-FPKM-annotation/input/sample_metadata.csv" \
+  "examples/2_example_GSE255223_mixed-count-FPKM-annotation/output" \
+  --control TLE-nonHS --organism human --overwrite
 ```
 
-## What you should see
-
-1. **Engine diagnosis box**: integer counts + min group n = 2 → **DESeq2** selected,
-   with the printed rationale.
-2. **QC**: `QC_PCA_plot.png` (groups separate cleanly), `QC_sample_correlation_heatmap.png`.
-3. **DEGs** (padj < 0.05, |log2FC| > 1), tables include converted gene symbols:
-   - Mutant vs Control: **1380 up / 1688 down**
-   - Mutant_Rap vs Control: **517 up / 763 down**
-   - Mutant vs Mutant_Rap: **855 up / 578 down**
-4. **Volcano + MA plots** per contrast (symbol-labelled) + `DEG_heatmap.png`.
-
-The regular pipeline stops here. Personalized follow-ups on these outputs:
-`../../RNA-seq-enrichment` (GO/KEGG/Reactome), `../../RNA-seq-gene-plot`
-(Trp53/Gapdh bar charts), `../../RNA-seq-GSEA` (GSEA).
-
-## Output committed here
-
-The complete real output of the command above: QC plots + summary, all DEG
-tables (with symbol columns), volcano + MA plots, DEG heatmap, the preprocessing
-artefacts (`filtered_counts.csv`, `normalized_expression.csv`,
-`library_sizes.csv`) consumed by the follow-up skills, and the run records
-(`REPORT.md`, `run_metadata.json`).
+每例的 README 写明"测哪个坑、期望看到什么警告/行为"。决策树文档见 `../docs/decision-tree.md`。

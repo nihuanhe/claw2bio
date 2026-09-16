@@ -1,0 +1,38 @@
+Claw2Bio bulk-RNA-seq QC summary
+==============================
+Input: examples/3_example_GSE167882_paired-symbol-logcpm-human/input/GSE167882_ensembl_expression_matrix.csv
+Genes: 15504 before / 3164 after filtering
+Samples: 21
+Groups:
+group
+       health mid-treatment pre-treatment 
+            6             7             8 
+
+Library sizes:
+                                 sample         group library_size
+Subject 1 - CSU v3   Subject 1 - CSU v3 pre-treatment     38247.51
+Subject 1 - CSU v6   Subject 1 - CSU v6 mid-treatment     38084.39
+Subject 2 - CSU v3   Subject 2 - CSU v3 pre-treatment     38318.14
+Subject 2 - CSU v6   Subject 2 - CSU v6 mid-treatment     38146.34
+Subject 3 - CSU v3   Subject 3 - CSU v3 pre-treatment     38391.10
+Subject 3 - CSU v6   Subject 3 - CSU v6 mid-treatment     37979.94
+Subject 4 - CSU v3   Subject 4 - CSU v3 pre-treatment     38012.78
+Subject 4 - CSU v6   Subject 4 - CSU v6 mid-treatment     38076.40
+Subject 1 - non-CSU Subject 1 - non-CSU        health     38011.15
+Subject 2 - non-CSU Subject 2 - non-CSU        health     38155.64
+Subject 3 - non-CSU Subject 3 - non-CSU        health     37878.22
+Subject 4 - non-CSU Subject 4 - non-CSU        health     37894.33
+Subject 5 - non CSU Subject 5 - non CSU        health     38280.12
+Subject 6 - non CSU Subject 6 - non CSU        health     38329.06
+Subject 5 - CSU v3   Subject 5 - CSU v3 pre-treatment     38488.50
+Subject 5 - CSU v6   Subject 5 - CSU v6 mid-treatment     38413.80
+Subject 6 - CSU v3   Subject 6 - CSU v3 pre-treatment     38515.69
+Subject 6 - CSU v6   Subject 6 - CSU v6 mid-treatment     38149.06
+Subject 7 - CSU v3   Subject 7 - CSU v3 pre-treatment     38346.92
+Subject 7 - CSU v6   Subject 7 - CSU v6 mid-treatment     38074.95
+Subject 8 - CSU v3   Subject 8 - CSU v3 pre-treatment     37989.49
+
+PCA variance explained: PC1 57.6%, PC2 9.0%
+
+Suspected outlier samples (REPORT ONLY -- nothing was excluded):
+  - Subject 6 - non CSU (group health, mean within-group r = 0.76) 

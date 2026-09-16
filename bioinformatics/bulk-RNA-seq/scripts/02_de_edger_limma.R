@@ -84,9 +84,15 @@ if (mode == "trend") {
             file.path(outdir, "normalized_expression.csv"), row.names = FALSE)
 }
 
-# contrasts
-contr_str <- sapply(pairs, function(p) paste0(p[1], " - ", p[2]))
-contr_mat <- makeContrasts(contrasts = contr_str, levels = design)
+# contrasts — built as a numeric matrix (NOT makeContrasts strings) so group
+# names containing dashes/spaces (e.g. "TLE-HS", "mid-treatment") work.
+contr_mat <- matrix(0, nrow = ncol(design), ncol = length(pairs),
+                    dimnames = list(colnames(design),
+                                    sapply(pairs, function(p) paste0(p[1], "_vs_", p[2]))))
+for (i in seq_along(pairs)) {
+  contr_mat[pairs[[i]][1], i] <- 1
+  contr_mat[pairs[[i]][2], i] <- -1
+}
 
 resid_df <- ncol(norm_mat) - qr(design)$rank
 if (resid_df < 1) {

@@ -50,11 +50,29 @@ Example (bundled GSE270189, mouse prostate basal cells, 3 groups × 2 replicates
 ```bash
 cd bioinformatics/bulk-RNA-seq
 python scripts/run_rnaseq.py \
-  examples/input/counts_matrix.csv \
-  examples/input/sample_metadata.csv \
-  examples/output \
+  examples/1_example_GSE270189_clean-mouse-3groups/input/counts_matrix.csv \
+  examples/1_example_GSE270189_clean-mouse-3groups/input/sample_metadata.csv \
+  examples/1_example_GSE270189_clean-mouse-3groups/output \
   --control Control --organism mouse --overwrite
 ```
+
+## 特殊情况速查 / special situations
+
+**先直接跑**：stage 00.5（输入体检）会无损自动修复常见格式坑并逐条打印
+`[fixed]`（混合矩阵拆列、后缀剥离、转置、毁名匹配、重复 symbol 聚合、负值归零、
+metadata 列名归一化、series_matrix 解析……）。其余情况查
+**[docs/decision-tree.md](docs/decision-tree.md)**（症状 → 诊断 → 参数 → 对应 example）。
+
+| 情况 | 入口 |
+|---|---|
+| paired / 重复测量 | `--paired-by <subject列>`（强制 limma + duplicateCorrelation），example 3 |
+| 批次效应 | `--batch <批次列>`（进 design + QC 着色），docs/paired-and-batch.md |
+| 每组 n=1 | 自动降级探索模式（REPORT 显著警告），docs/no-replicates.md |
+| 多组全配对 / 只比子集 | `--pairwise-max N` / `--contrasts "A vs B, C vs D"`，example 4 |
+| 大鼠/其它物种/无 OrgDb | `--organism rat` / `--orgdb <包>` / `--gene-map <两列CSV>` |
+| outlier 样本 | QC 只标记不剔除；确认后 `--exclude-samples s1,s2` |
+
+编号 example 各覆盖一类特殊情况（兼作回归测试），见 `examples/README.md`。
 
 ## Personalized follow-ups (separate skills, all consume this pipeline's outputs)
 
@@ -81,15 +99,18 @@ ENSMUSG00000000001,2014,2003,2847
 ENSMUSG00000000003,13736,19194,...
 ```
 
-`sample_metadata.csv` — exactly two columns:
+`sample_metadata.csv` — required columns `sample,group`; optional columns
+`batch` / a subject column enable `--batch` / `--paired-by`:
 
 ```csv
-sample,group
-CJI1.A,Control
-CJI3.I,Mutant
+sample,group,subject
+S1_pre,pre,Subject1
+S1_post,post,Subject1
 ```
 
 The first group in the metadata is the control unless `--control` is given.
+Non-standard column names (`sample_id`, `condition`, ...) are auto-renamed by the
+inspection stage.
 
 ## Input resources: gene-ID conversion packages
 
@@ -100,6 +121,8 @@ packages — treat them as part of the skill's input assets:
 |---|---|---|---|
 | mouse | `org.Mm.eg.db` | ~380 MB installed | `BiocManager::install("org.Mm.eg.db")`, or the prebuilt archive on the Download page (COS) |
 | human | `org.Hs.eg.db` | ~100 MB download | `BiocManager::install("org.Hs.eg.db")`, or the prebuilt archive on the Download page (COS) |
+| rat | `org.Rn.eg.db` | ~100 MB download | `BiocManager::install("org.Rn.eg.db")` (`--organism rat`) |
+| other | any OrgDb | — | `--orgdb <package>`; no OrgDb available → `--gene-map` two-column CSV |
 
 Install a downloaded archive (same R major.minor version, Windows):
 `install.packages("org.Mm.eg.db.zip", repos = NULL, type = "win.binary")`.
@@ -116,7 +139,9 @@ when Bioconductor/CRAN is slow or unreachable. Also mirrored on COS at launch.
 
 | File | Content |
 |---|---|
-| `QC_PCA_plot.png/pdf`, `QC_sample_correlation_heatmap.png/pdf`, `QC_summary.txt` | QC |
+| `cleaned_counts.csv`, `cleaned_metadata.csv` | only when stage 00.5 repaired something — the actual analysed copies (originals untouched) |
+| `gene_annotation.csv` | annotation columns split off a mixed input matrix; reusable as `--gene-map` |
+| `QC_PCA_plot.png/pdf`, `QC_sample_correlation_heatmap.png/pdf`, `QC_summary.txt` | QC (outlier samples are flagged, never excluded) |
 | `filtered_counts.csv`, `library_sizes.csv`, `normalized_expression.csv` | preprocessing artefacts consumed by follow-up skills (one canonical normalized-matrix name across all engines) |
 | `DEG_<treat>_vs_<ref>.csv` | full DEG table per contrast (common schema across engines) |
 | `Volcano_<treat>_vs_<ref>.png/pdf` | volcano with top-10 gene labels |
@@ -132,7 +157,14 @@ when Bioconductor/CRAN is slow or unreachable. Also mirrored on COS at launch.
 | `--control` | first group in metadata | control group name |
 | `--engine` | `auto` | force `deseq2` / `edger-limma` / `limma` |
 | `--voom-min-n` | 8 | min group size for the voom branch |
-| `--organism` | `mouse` | `mouse` (org.Mm.eg.db) or `human` (org.Hs.eg.db) |
+| `--organism` | `mouse` | `mouse` / `human` / `rat` OrgDb shortcut |
+| `--orgdb` | — | any Bioconductor OrgDb package (overrides `--organism`) |
+| `--gene-map` | — | two-column CSV (id,symbol); OrgDb-free ID conversion |
+| `--batch` | — | metadata column with batch info (design formula + QC colouring) |
+| `--paired-by` | — | subject column for paired/repeated measures (forces limma + duplicateCorrelation) |
+| `--pairwise-max` | 4 | add all pairwise contrasts when #groups ≤ this |
+| `--contrasts` | — | explicit contrasts `'A vs B, C vs D'` (overrides auto) |
+| `--exclude-samples` | — | comma-separated samples to exclude explicitly (never automatic) |
 | `--padj` | 0.05 | adjusted-p significance cutoff |
 | `--log2fc` | 1 | \|log2FC\| cutoff |
 | `--install-deps` | off | auto-install missing R packages (BiocManager/CRAN) |

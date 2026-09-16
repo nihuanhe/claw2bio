@@ -1,0 +1,39 @@
+Claw2Bio bulk-RNA-seq QC summary
+==============================
+Input: examples/4_example_GSE214514_multi-group-circadian/input/GSE214514_counts_all.tsv.gz
+Genes: 20362 before / 18101 after filtering
+Samples: 25
+Groups:
+group
+WT_Young  KO_Aged KO_Young  WT_Aged 
+       6        7        6        6 
+
+Library sizes:
+           sample    group library_size
+Bmal1601 Bmal1601 KO_Young     17853091
+Bmal1602 Bmal1602 KO_Young     13974235
+Bmal1621 Bmal1621 KO_Young     13251084
+Bmal1631 Bmal1631 KO_Young     14211647
+Bmal1632 Bmal1632 KO_Young     16069764
+Bmal1633 Bmal1633 KO_Young     14155595
+Bmal1634 Bmal1634 WT_Young     15818300
+Bmal1641 Bmal1641 WT_Young     13549741
+Bmal1642 Bmal1642 WT_Young     10623085
+Bmal1643 Bmal1643 WT_Young     11189795
+Bmal1644 Bmal1644 WT_Young      6911474
+Bmal1645 Bmal1645 WT_Young      7681437
+Bmal121   Bmal121  WT_Aged      9584209
+Bmal122   Bmal122  WT_Aged      7874009
+Bmal131   Bmal131  WT_Aged     10963018
+Bmal132   Bmal132  WT_Aged      8913657
+Bmal133   Bmal133  WT_Aged      7526108
+Bmal171   Bmal171  WT_Aged     13117536
+Bmal141   Bmal141  KO_Aged     15501740
+Bmal142   Bmal142  KO_Aged     12954159
+Bmal151   Bmal151  KO_Aged     13234435
+Bmal191   Bmal191  KO_Aged      9383153
+Bmal192   Bmal192  KO_Aged      6834188
+Bmal193   Bmal193  KO_Aged     15821381
+Bmal1211 Bmal1211  KO_Aged     10121606
+
+PCA variance explained: PC1 56.2%, PC2 11.4%

@@ -1,0 +1,22 @@
+sample,group,subject
+Subject 1 - CSU v3,pre-treatment,Subject1
+Subject 1 - CSU v6,mid-treatment,Subject1
+Subject 2 - CSU v3,pre-treatment,Subject2
+Subject 2 - CSU v6,mid-treatment,Subject2
+Subject 3 - CSU v3,pre-treatment,Subject3
+Subject 3 - CSU v6,mid-treatment,Subject3
+Subject 4 - CSU v3,pre-treatment,Subject4
+Subject 4 - CSU v6,mid-treatment,Subject4
+Subject 1 - non-CSU,health,Subject1
+Subject 2 - non-CSU,health,Subject2
+Subject 3 - non-CSU,health,Subject3
+Subject 4 - non-CSU,health,Subject4
+Subject 5 - non CSU,health,Subject5
+Subject 6 - non CSU,health,Subject6
+Subject 5 - CSU v3,pre-treatment,Subject5
+Subject 5 - CSU v6,mid-treatment,Subject5
+Subject 6 - CSU v3,pre-treatment,Subject6
+Subject 6 - CSU v6,mid-treatment,Subject6
+Subject 7 - CSU v3,pre-treatment,Subject7
+Subject 7 - CSU v6,mid-treatment,Subject7
+Subject 8 - CSU v3,pre-treatment,Subject8

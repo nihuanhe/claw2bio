@@ -1,0 +1,54 @@
+{
+  "pipeline": "bulk-RNA-seq",
+  "skill_commit": "a3d6c3c",
+  "timestamp": "2026-09-16T14:28:24+08:00",
+  "engine": "deseq2",
+  "engine_forced": false,
+  "exploratory_no_replicates": false,
+  "input_repairs": [
+    "kept 9 '*_count' columns; split off 9 other numeric column(s): BB7_FPKM, CC7_FPKM, EE6_FPKM, s29_FPKM ...",
+    "split off 9 annotation column(s) (gene_name, description, GO_id, GO_term, KO_ID ...) -> gene_annotation.csv (usable later as --gene-map)",
+    "stripped sample-name suffixes (_count/_FPKM/.bam/...) from matrix columns",
+    "dropped row(s) containing non-numeric/NA values (13 cell(s))",
+    "matched 1 matrix column name(s) to metadata via fuzzy matching (undoes R check.names-style mangling): 15 -> X15",
+    "matrix contained 3 sample(s) absent from metadata; excluded from analysis (metadata defines the analysis set): ['16', 's5', 's9']"
+  ],
+  "input_warnings": [],
+  "parameters": {
+    "control": "TLE-nonHS",
+    "organism": "human",
+    "padj": 0.05,
+    "log2fc": 1.0,
+    "voom_min_n": 8,
+    "batch": null,
+    "paired_by": null,
+    "pairwise_max": 4,
+    "contrasts": null,
+    "exclude_samples": null
+  },
+  "input": {
+    "counts": "GSE255223_gene_expression_anno.xls.gz",
+    "metadata": "sample_metadata.csv",
+    "genes": 50320,
+    "samples": 6,
+    "integer_counts": true
+  },
+  "groups": {
+    "TLE-HS": [
+      "BB7",
+      "CC7",
+      "EE6"
+    ],
+    "TLE-nonHS": [
+      "s29",
+      "X15",
+      "s7"
+    ]
+  },
+  "versions": {
+    "python": "3.13.12",
+    "pandas": "3.0.1",
+    "numpy": "2.4.3",
+    "r": "Rscript (R) version 4.5.2 (2025-10-31)"
+  }
+}

@@ -1,0 +1,22 @@
+"sample","group","library_size"
+"Subject 1 - CSU v3","pre-treatment",38247.512659
+"Subject 1 - CSU v6","mid-treatment",38084.393478
+"Subject 2 - CSU v3","pre-treatment",38318.138239
+"Subject 2 - CSU v6","mid-treatment",38146.343195
+"Subject 3 - CSU v3","pre-treatment",38391.103503
+"Subject 3 - CSU v6","mid-treatment",37979.93556
+"Subject 4 - CSU v3","pre-treatment",38012.78339
+"Subject 4 - CSU v6","mid-treatment",38076.399625
+"Subject 1 - non-CSU","health",38011.145005
+"Subject 2 - non-CSU","health",38155.642383
+"Subject 3 - non-CSU","health",37878.220658
+"Subject 4 - non-CSU","health",37894.333226
+"Subject 5 - non CSU","health",38280.117293
+"Subject 6 - non CSU","health",38329.060741
+"Subject 5 - CSU v3","pre-treatment",38488.500991
+"Subject 5 - CSU v6","mid-treatment",38413.803847
+"Subject 6 - CSU v3","pre-treatment",38515.685147
+"Subject 6 - CSU v6","mid-treatment",38149.056831
+"Subject 7 - CSU v3","pre-treatment",38346.917492
+"Subject 7 - CSU v6","mid-treatment",38074.954011
+"Subject 8 - CSU v3","pre-treatment",37989.487857

@@ -1,0 +1,18 @@
+Claw2Bio bulk-RNA-seq QC summary
+==============================
+Input: examples/5_example_synthetic_dirty-and-series-matrix/output_series\cleaned_counts.csv
+Genes: 300 before / 40 after filtering
+Samples: 4
+Groups:
+group
+ Ctrl Treat 
+    2     2 
+
+Library sizes:
+       sample group library_size
+GSM001 GSM001  Ctrl     367.3367
+GSM002 GSM002  Ctrl     379.0826
+GSM003 GSM003 Treat     370.5809
+GSM004 GSM004 Treat     362.4393
+
+PCA variance explained: PC1 49.0%, PC2 29.1%

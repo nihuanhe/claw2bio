@@ -1,0 +1,18 @@
+Claw2Bio bulk-RNA-seq QC summary
+==============================
+Input: examples/5_example_synthetic_dirty-and-series-matrix/output_dirty\cleaned_counts.csv
+Genes: 201 before / 201 after filtering
+Samples: 4
+Groups:
+group
+TLE-nonHS    TLE-HS 
+        2         2 
+
+Library sizes:
+    sample     group library_size
+15      15    TLE-HS       211471
+s29    s29    TLE-HS       199224
+BB7    BB7 TLE-nonHS       210785
+s7      s7 TLE-nonHS       205859
+
+PCA variance explained: PC1 40.3%, PC2 34.9%
