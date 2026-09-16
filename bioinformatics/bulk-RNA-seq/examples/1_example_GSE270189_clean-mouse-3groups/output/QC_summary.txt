@@ -1,6 +1,6 @@
 Claw2Bio bulk-RNA-seq QC summary
 ==============================
-Input: examples/input/counts_matrix.csv
+Input: examples/1_example_GSE270189_clean-mouse-3groups/input/counts_matrix.csv
 Genes: 18975 before / 18971 after filtering
 Samples: 6
 Groups:

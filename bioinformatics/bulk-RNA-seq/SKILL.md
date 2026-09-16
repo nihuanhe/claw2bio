@@ -1,6 +1,6 @@
 ---
 name: bulk-RNA-seq
-description: Bulk RNA-seq differential expression from a count matrix (regular pipeline — stops at DEG tables). Data-driven engine fork — non-integer/normalized input → limma-trend, integer counts with small n → DESeq2, integer counts with large n → edgeR+limma-voom — always printing WHY the engine was chosen. Outputs QC (PCA/correlation), DEG tables, volcano plots, DEG heatmap. Follow-up personalized skills consume its outputs — RNA-seq-enrichment (GO/KEGG/Reactome), RNA-seq-gene-plot (gene-of-interest bar charts), RNA-seq-GSEA (GSEA).（中文摘要：bulk RNA-seq 从 counts 矩阵到差异表达的常规流程（到 DEG 为止）。按数据自动选择引擎并强制打印理由。富集、指定基因柱状图、GSEA 是三个独立的后续个性化 skill，都吃本流程的产出。）
+description: Bulk RNA-seq differential expression from a count matrix (regular pipeline — stops at DEG tables), hardened for real-world messy inputs. Stage-00.5 inspection auto-repairs mixed count/FPKM/annotation matrices, GEO series_matrix headers, transposed matrices, mangled sample names, duplicate symbols. Data-driven engine fork — non-integer/normalized → limma-trend, integer small-n → DESeq2, integer large-n → edgeR+voom, paired/repeated-measures (--paired-by) → limma + duplicateCorrelation, batch via --batch, n=1 → exploratory mode — always printing WHY. Outputs QC (PCA/correlation, outlier flags), DEG tables, volcano + MA plots, DEG heatmap, run_metadata.json. Species: mouse/human/rat shortcuts, any OrgDb via --orgdb, or OrgDb-free --gene-map. Special situations documented in docs/decision-tree.md with numbered example cases. Follow-up personalized skills consume its outputs — RNA-seq-enrichment (GO/KEGG/Reactome), RNA-seq-gene-plot (gene-of-interest bar charts), RNA-seq-GSEA (GSEA).（中文摘要：bulk RNA-seq 从 counts 矩阵到差异表达的通用流程（到 DEG 为止）。输入体检 stage 自动修复混合矩阵/series_matrix/转置/毁名/重复 symbol 等常见坑；按数据自动选引擎并强制打印理由；paired 用 --paired-by、批次用 --batch、n=1 自动降级探索模式；物种支持鼠/人/大鼠快捷、任意 OrgDb 或自备 gene-map；特殊情况查 docs/decision-tree.md。富集、指定基因柱状图、GSEA 是三个独立的后续个性化 skill，都吃本流程的产出。）
 ---
 
 # Skill: bulk-RNA-seq (regular pipeline: counts → DEG)
@@ -35,8 +35,11 @@ are separate skills that consume these outputs.
 | Non-integer / normalized values (FPKM, TPM, log) | limma-trend |
 | Integer counts, min group n < 8 | DESeq2 |
 | Integer counts, min group n ≥ 8 | edgeR + limma-voom |
+| `--paired-by` declared (any of the above) | **limma family forced** + duplicateCorrelation |
+| Any group with n = 1 | **exploratory mode**: limma-trend, fold change only, loud REPORT banner |
 
 Override with `--engine deseq2|edger-limma|limma`; tune the threshold with `--voom-min-n`.
+Batch enters the design formula via `--batch` (DESeq2 `~batch+group`; limma `~0+group+batch`).
 
 ## Usage
 
