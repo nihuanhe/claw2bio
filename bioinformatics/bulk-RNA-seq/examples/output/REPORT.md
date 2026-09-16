@@ -1,9 +1,15 @@
 # Analysis Report — bulk-RNA-seq (regular pipeline: counts → DEG)
 
-- Input counts: `counts_matrix.csv`
+- Input counts: `counts_matrix.csv` (18975 genes × 6 samples)
 - Metadata: `sample_metadata.csv` (control group: `Control`)
 - Engine: **deseq2** (rationale was printed at run time)
 - Personalized follow-ups on these outputs: `../RNA-seq-enrichment` (GO/KEGG/Reactome), `../RNA-seq-gene-plot` (gene bar charts), `../RNA-seq-gsea` (GSEA)
+
+## Input grouping / 输入分组结构
+
+- **Control** (n=2): CJI1.A.CD1.ET1.1, CJI2.B.CD1.ET2.1
+- **Mutant** (n=2): CJI3.I.K5PP3W.ET1.1, CJI4.J.K5PP3W.ET2.1
+- **Mutant_Rap** (n=2): CJI5.K.K5PP3W.Rap1.1, CJI6.L.K5PP3W.Rap2.1
 
 | File | Produced by | What it is / use |
 |---|---|---|

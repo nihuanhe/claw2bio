@@ -201,11 +201,11 @@ def main():
     run_stage(rscript, ENGINE_SCRIPTS[engine], de_args, f"02_de ({engine})")
     print("\nRegular pipeline finished (QC + DEG). Outputs in:", os.path.abspath(args.output))
     print("Next personalized steps: ../RNA-seq-enrichment, ../RNA-seq-gene-plot, ../RNA-seq-gsea")
-    write_report(args.output, engine, control, args.counts, args.metadata)
+    write_report(args.output, engine, control, args.counts, args.metadata, meta, df)
     print("REPORT.md written to the output directory (file guide / 文件说明).")
 
 
-def write_report(outdir, engine, control, counts_path, meta_path):
+def write_report(outdir, engine, control, counts_path, meta_path, meta, counts_df):
     """Write REPORT.md into the output dir: file -> producing stage -> purpose."""
     import re
     rules = [
@@ -232,13 +232,25 @@ def write_report(outdir, engine, control, counts_path, meta_path):
         (r"^DEG_heatmap\.", "02_de (" + engine + ")",
          "Z-scored heatmap of the union of significant DEGs / 显著差异基因热图"),
     ]
+    # group structure of the input matrix / 输入矩阵的分组结构
+    group_lines = []
+    for g, sub in meta.groupby("group", sort=False):
+        samples = list(sub["sample"])
+        shown = samples if len(samples) <= 12 else samples[:12] + [f"... (+{len(samples) - 12} more)"]
+        group_lines.append(f"- **{g}** (n={len(samples)}): {', '.join(shown)}")
+    group_block = "\n".join(group_lines)
+
     lines = [
         "# Analysis Report — bulk-RNA-seq (regular pipeline: counts → DEG)",
         "",
-        f"- Input counts: `{os.path.basename(counts_path)}`",
+        f"- Input counts: `{os.path.basename(counts_path)}` ({counts_df.shape[0]} genes × {counts_df.shape[1]} samples)",
         f"- Metadata: `{os.path.basename(meta_path)}` (control group: `{control}`)",
         f"- Engine: **{engine}** (rationale was printed at run time)",
         "- Personalized follow-ups on these outputs: `../RNA-seq-enrichment` (GO/KEGG/Reactome), `../RNA-seq-gene-plot` (gene bar charts), `../RNA-seq-gsea` (GSEA)",
+        "",
+        "## Input grouping / 输入分组结构",
+        "",
+        group_block,
         "",
         "| File | Produced by | What it is / use |",
         "|---|---|---|",
