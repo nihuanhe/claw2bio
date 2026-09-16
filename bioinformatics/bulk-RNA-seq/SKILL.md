@@ -148,7 +148,12 @@ when Bioconductor/CRAN is slow or unreachable. Also mirrored on COS at launch.
   the agent (`--install-deps`) or manually (miniconda / BiocManager). The OrgDb
   annotation packages (used for gene-ID conversion) are also mirrored as archives
   on the Download page (COS) for fast domestic installation.
-- KEGG enrichment needs network access to rest.kegg.jp; it is skipped gracefully offline.
+- KEGG enrichment tries rest.kegg.jp first and falls back to a **local pathway
+  cache** (`resources/pathway_cache/`, built once by `scripts/build_pathway_cache.R`);
+  GO is always offline (OrgDb), and **Reactome is always offline** via cached
+  open-license tables — so enrichment works without any network.
+- KEGG cache files are for local use only (KEGG license forbids redistribution);
+  Reactome tables are open-license and are mirrored on COS at launch.
 
 ## Notes
 
@@ -157,4 +162,4 @@ when Bioconductor/CRAN is slow or unreachable. Also mirrored on COS at launch.
 - Enrichment maps Ensembl (version suffix stripped) or Symbol IDs to Entrez via the OrgDb.
 - DEG tables and figures use converted gene symbols wherever a mapping exists.
 
-> 中文提示：`--genes` 指定关注基因（如 TP53,GAPDH；物种符号要对，鼠用 Trp53/Gapdh），自动出“单基因跨组丰度柱状图（带 SD 误差线+散点+统计）”和“同组内两基因表达对比柱状图（配对 t 检验）”；输入可以是 csv/tsv/txt 及 .gz 压缩（自动识别分隔符与压缩；zip/tar 需先解压）；GEO 数据获取见 docs/downloading-from-GEO.md；基因 ID 转换包（org.Mm.eg.db / org.Hs.eg.db）属于本技能输入资源，体积大故随 COS 分发（见 Download 页）；开跑前自动检查 R 依赖，缺包时可选手动安装（miniconda/BiocManager）或加 `--install-deps` 让 agent 代装，装好后还会复检；DEG 表和图默认用转换后的基因名（Symbol）；KEGG 富集需联网，离线自动跳过；不改输入文件。
+> 中文提示：KEGG 优先联网跑、失败自动回落本地缓存（`build_pathway_cache.R` 一次性下载）；Reactome 与 GO 永远离线可跑（缓存表已在 resources/pathway_cache/）；KEGG 缓存因版权仅限本地使用、不上 COS，Reactome 表可随 COS 分发；`--genes` 指定关注基因（如 TP53,GAPDH；物种符号要对，鼠用 Trp53/Gapdh），自动出“单基因跨组丰度柱状图（带 SD 误差线+散点+统计）”和“同组内两基因表达对比柱状图（配对 t 检验）”；输入可以是 csv/tsv/txt 及 .gz 压缩（自动识别分隔符与压缩；zip/tar 需先解压）；GEO 数据获取见 docs/downloading-from-GEO.md；基因 ID 转换包（org.Mm.eg.db / org.Hs.eg.db）属于本技能输入资源，体积大故随 COS 分发（见 Download 页）；开跑前自动检查 R 依赖，缺包时可选手动安装（miniconda/BiocManager）或加 `--install-deps` 让 agent 代装，装好后还会复检；DEG 表和图默认用转换后的基因名（Symbol）；不改输入文件。

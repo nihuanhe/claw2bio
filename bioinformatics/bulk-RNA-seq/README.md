@@ -113,7 +113,10 @@ bulk-RNA-seq/
 - trend branch: log-transform if max > 50, then `lmFit` + `eBayes(trend=TRUE, robust=TRUE)`.
 - Multiple testing: BH adjusted p values everywhere.
 - Enrichment: Ensembl IDs (version-stripped) or Symbols → Entrez via OrgDb; GO with
-  `readable=TRUE`; KEGG via KEGG REST (skipped gracefully when offline).
+  `readable=TRUE`; KEGG via KEGG REST with **offline fallback** to a local cache
+  (`resources/pathway_cache/`, see `scripts/build_pathway_cache.R`); Reactome always
+  offline via cached open-license tables. KEGG cache stays local (license); Reactome
+  tables are redistributable and ship on COS.
 
 ## Notes
 

@@ -25,9 +25,22 @@ outdir   <- opt[[2]]
 organism <- if (!is.null(opt$organism)) opt$organism else "mouse"
 padj_cut <- as.numeric(if (!is.null(opt$padj)) opt$padj else 0.05)
 lfc_cut  <- as.numeric(if (!is.null(opt$log2fc)) opt$log2fc else 1)
+offline  <- !is.null(opt$offline)
+options(timeout = 600)
 
 orgdb_name <- if (organism == "human") "org.Hs.eg.db" else "org.Mm.eg.db"
 kegg_code  <- if (organism == "human") "hsa" else "mmu"
+
+script_dir <- dirname(sub("--file=", "", grep("--file=", commandArgs(FALSE), value = TRUE)[1]))
+cache_dir <- file.path(script_dir, "..", "resources", "pathway_cache")
+load_cache <- function(prefix) {
+  t2g <- file.path(cache_dir, sprintf("%s_%s_term2gene.csv", prefix, kegg_code))
+  t2n <- file.path(cache_dir, sprintf("%s_%s_term2name.csv", prefix, kegg_code))
+  if (!file.exists(t2g)) return(NULL)
+  t2g <- read.csv(t2g, colClasses = "character")
+  t2n <- if (file.exists(t2n)) read.csv(t2n, colClasses = "character") else NULL
+  list(t2g = t2g, t2n = t2n)
+}
 
 if (!requireNamespace(orgdb_name, quietly = TRUE)) {
   cat(sprintf("OrgDb package %s not installed — skipping enrichment.\n", orgdb_name))
@@ -69,16 +82,47 @@ run_one <- function(entrez, label) {
              width = 9, height = 7, dpi = 300)
     }
   }
-  # KEGG (needs network for KEGG REST)
-  kk <- tryCatch(
-    enrichKEGG(entrez, organism = kegg_code, pAdjustMethod = "BH", pvalueCutoff = 0.05),
-    error = function(e) { cat(sprintf("  %s: KEGG skipped (%s)\n", label, conditionMessage(e))); NULL })
+  # KEGG — online REST first (unless --offline), local cache fallback
+  kk <- NULL
+  if (!offline) {
+    kk <- tryCatch(
+      enrichKEGG(entrez, organism = kegg_code, pAdjustMethod = "BH", pvalueCutoff = 0.05),
+      error = function(e) { cat(sprintf("  %s: KEGG online failed (%s) — trying local cache\n",
+                                        label, conditionMessage(e))); NULL })
+  }
+  if (is.null(kk)) {
+    cache <- load_cache("kegg")
+    if (!is.null(cache)) {
+      kk <- tryCatch(
+        enricher(entrez, TERM2GENE = cache$t2g, TERM2NAME = cache$t2n,
+                 pAdjustMethod = "BH", pvalueCutoff = 0.05),
+        error = function(e) NULL)
+      if (!is.null(kk)) cat(sprintf("  %s: KEGG via OFFLINE cache\n", label))
+    } else if (offline) {
+      cat(sprintf("  %s: --offline and no KEGG cache found (run build_pathway_cache.R)\n", label))
+    }
+  }
   if (!is.null(kk) && nrow(as.data.frame(kk)) > 0) {
     write.csv(as.data.frame(kk), file.path(outdir, sprintf("KEGG_%s.csv", label)),
               row.names = FALSE)
     p <- dotplot(kk, showCategory = 15, title = sprintf("KEGG — %s", label))
     ggsave(file.path(outdir, sprintf("KEGG_%s_dotplot.png", label)), p,
            width = 9, height = 7, dpi = 300)
+  }
+  # Reactome — fully offline via local cache (open-license tables)
+  rcache <- load_cache("reactome")
+  if (!is.null(rcache)) {
+    rr <- tryCatch(
+      enricher(entrez, TERM2GENE = rcache$t2g, TERM2NAME = rcache$t2n,
+               pAdjustMethod = "BH", pvalueCutoff = 0.05),
+      error = function(e) NULL)
+    if (!is.null(rr) && nrow(as.data.frame(rr)) > 0) {
+      write.csv(as.data.frame(rr), file.path(outdir, sprintf("Reactome_%s.csv", label)),
+                row.names = FALSE)
+      p <- dotplot(rr, showCategory = 15, title = sprintf("Reactome — %s", label))
+      ggsave(file.path(outdir, sprintf("Reactome_%s_dotplot.png", label)), p,
+             width = 9, height = 7, dpi = 300)
+    }
   }
 }
 
