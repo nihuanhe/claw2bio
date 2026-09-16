@@ -31,7 +31,7 @@ python scripts/run_rnaseq.py \
    - Mutant vs Control: **1380 up / 1688 down**
    - Mutant_Rap vs Control: **517 up / 763 down**
    - Mutant vs Mutant_Rap: **855 up / 578 down**
-4. **Volcano plots** per contrast (symbol-labelled) + `DEG_heatmap.png`.
+4. **Volcano + MA plots** per contrast (symbol-labelled) + `DEG_heatmap.png`.
 
 The regular pipeline stops here. Personalized follow-ups on these outputs:
 `../../RNA-seq-enrichment` (GO/KEGG/Reactome), `../../RNA-seq-gene-plot`
@@ -40,6 +40,7 @@ The regular pipeline stops here. Personalized follow-ups on these outputs:
 ## Output committed here
 
 The complete real output of the command above: QC plots + summary, all DEG
-tables (with symbol columns), volcano plots, DEG heatmap, and the preprocessing
-artefacts (`filtered_counts.csv`, `vst_normalized_counts.csv`,
-`library_sizes.csv`) consumed by the follow-up skills.
+tables (with symbol columns), volcano + MA plots, DEG heatmap, the preprocessing
+artefacts (`filtered_counts.csv`, `normalized_expression.csv`,
+`library_sizes.csv`) consumed by the follow-up skills, and the run records
+(`REPORT.md`, `run_metadata.json`).

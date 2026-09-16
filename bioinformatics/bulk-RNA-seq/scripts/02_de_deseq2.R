@@ -47,10 +47,10 @@ dds <- DESeqDataSetFromMatrix(countData = counts, colData = col_data, design = ~
 dds <- DESeq(dds)
 cat("DESeq2 model fitted.\n")
 
-# vst-normalized values for heatmap
+# vst-normalized values for heatmap / downstream skills (canonical name)
 vsd <- vst(dds, blind = FALSE)
 write.csv(data.frame(gene = rownames(assay(vsd)), assay(vsd), check.names = FALSE),
-          file.path(outdir, "vst_normalized_counts.csv"), row.names = FALSE)
+          file.path(outdir, "normalized_expression.csv"), row.names = FALSE)
 
 pairs <- build_contrasts(inp$group, control)
 cat("Contrasts:", paste(sapply(pairs, function(p) paste0(p[1], "_vs_", p[2])), collapse = ", "), "\n")
@@ -65,6 +65,7 @@ for (pr in pairs) {
   df <- add_symbols(df, ORGANISM)   # gene ID conversion: Ensembl -> Symbol
   name <- save_deg(df, treat, ref, outdir)
   make_volcano(df, treat, ref, outdir)
+  make_ma(df, treat, ref, outdir, x_is_log = FALSE)   # baseMean = raw-count scale
   deg_tables[[name]] <- df
 }
 

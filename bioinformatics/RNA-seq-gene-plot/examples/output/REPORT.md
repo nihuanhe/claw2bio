@@ -1,6 +1,6 @@
 # Analysis Report — RNA-seq-gene-plot (gene-of-interest expression bars)
 
-- Matrix: `vst_normalized_counts.csv`; metadata: `sample_metadata.csv`
+- Matrix: `normalized_expression.csv`; metadata: `sample_metadata.csv`
 - Genes queried: Trp53, Gapdh
 - Prerequisite: bulk-RNA-seq regular pipeline (this skill consumes its outputs)
 

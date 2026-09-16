@@ -1,12 +1,12 @@
 # Examples — RNA-seq-gene-plot
 
 `input/` holds products of the **bulk-RNA-seq** skill's example run (GSE270189,
-DESeq2 branch): the vst-normalized matrix, the sample metadata, and one DEG
+DESeq2 branch): the normalized expression matrix, the sample metadata, and one DEG
 table (for symbol mapping). `output/` is the real result of:
 
 ```bash
 Rscript scripts/gene_expression.R \
-  examples/input/vst_normalized_counts.csv \
+  examples/input/normalized_expression.csv \
   examples/input/sample_metadata.csv \
   --genes Trp53,Gapdh --control Control --outdir examples/output
 ```

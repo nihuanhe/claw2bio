@@ -17,7 +17,8 @@ bulk RNA-seq 差异表达常规流程（到 DEG 为止），引擎按数据自�
    - non-integer / normalized input → **limma-trend**
    - integer counts, min group n < 8 → **DESeq2**
    - integer counts, min group n ≥ 8 → **edgeR + limma-voom**
-3. **Visualization** — volcano plots (top-10 labels), z-scored DEG heatmap.
+3. **Visualization** — volcano plots (top-10 labels), MA plots per contrast,
+   z-scored DEG heatmap.
 
 The pipeline **stops at DEG tables**. Personalized follow-ups (separate skills):
 `RNA-seq-enrichment` (GO/KEGG/Reactome), `RNA-seq-gene-plot` (gene-of-interest
@@ -119,3 +120,6 @@ bulk-RNA-seq/
 
 - Inputs are never modified; everything lands in the output directory.
 - With ≤4 groups, all pairwise contrasts are produced; otherwise every group vs control.
+- The normalized matrix always lands at `normalized_expression.csv` regardless of
+  engine; group names in output file names are sanitised; every run also writes a
+  machine-readable `run_metadata.json` (engine, parameters, versions, timestamp).

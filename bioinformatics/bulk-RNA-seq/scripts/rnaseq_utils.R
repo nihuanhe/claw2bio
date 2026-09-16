@@ -85,11 +85,19 @@ add_symbols <- function(df, organism = "mouse") {
   df
 }
 
+# Sanitise a (group / contrast) name for use in output filenames.
+# Group names may contain spaces, dashes or non-ASCII characters; filenames must not.
+sanitize_name <- function(x) {
+  x <- gsub("[^A-Za-z0-9._-]+", "_", x)
+  x <- gsub("_+", "_", x)
+  gsub("^_|_$", "", x)
+}
+
 # Standardised DEG table: gene, symbol?, log2FoldChange, stat, pvalue, padj
 save_deg <- function(df, treat, ref, outdir) {
   name <- paste0(treat, "_vs_", ref)
   df <- df[order(df$padj, -abs(df$log2FoldChange)), ]
-  write.csv(df, file.path(outdir, paste0("DEG_", name, ".csv")), row.names = FALSE)
+  write.csv(df, file.path(outdir, paste0("DEG_", sanitize_name(name), ".csv")), row.names = FALSE)
   sig <- !is.na(df$padj) & df$padj < PADJ_CUTOFF & !is.na(df$log2FoldChange)
   up   <- sum(sig & df$log2FoldChange >  LFC_CUTOFF)
   down <- sum(sig & df$log2FoldChange < -LFC_CUTOFF)
@@ -113,9 +121,35 @@ make_volcano <- function(df, treat, ref, outdir) {
     ggtitle(paste0(treat, " vs ", ref)) +
     theme_bw() + theme(legend.position = "top")
   if (nrow(top) > 0) p <- p + ggrepel::geom_text_repel(data = top, aes(label = .data[[label_col]]), size = 3, max.overlaps = 20)
-  name <- paste0("Volcano_", treat, "_vs_", ref)
+  name <- paste0("Volcano_", sanitize_name(paste0(treat, "_vs_", ref)))
   ggsave(file.path(outdir, paste0(name, ".png")), p, width = 9, height = 7, dpi = 300)
   ggsave(file.path(outdir, paste0(name, ".pdf")), p, width = 9, height = 7)
+}
+
+# MA plot: mean expression vs log2FC — the basic check that normalisation worked
+# and that logFC does not depend on expression level.
+# x_is_log = TRUE when baseMean is already on a log scale (limma AveExpr);
+# FALSE for raw-count baseMean (DESeq2) -> plotted on log10 axis.
+make_ma <- function(df, treat, ref, outdir, x_is_log = FALSE) {
+  ok <- !is.na(df$padj) & !is.na(df$log2FoldChange) & !is.na(df$baseMean)
+  d <- df[ok, ]
+  if (x_is_log) d <- d[is.finite(d$baseMean), ] else d <- d[d$baseMean > 0, ]
+  if (nrow(d) < 10) { cat("  (too few genes for MA plot)\n"); return(invisible(NULL)) }
+  d$sig <- "Not significant"
+  d$sig[d$padj < PADJ_CUTOFF & d$log2FoldChange >  LFC_CUTOFF] <- "Up"
+  d$sig[d$padj < PADJ_CUTOFF & d$log2FoldChange < -LFC_CUTOFF] <- "Down"
+  p <- ggplot(d, aes(baseMean, log2FoldChange, color = sig)) +
+    geom_point(alpha = 0.5, size = 1) +
+    scale_color_manual(values = c("Down" = "#0072B2", "Not significant" = "grey70", "Up" = "#D55E00")) +
+    geom_hline(yintercept = c(-LFC_CUTOFF, 0, LFC_CUTOFF), lty = c(2, 1, 2), color = "grey50") +
+    labs(x = if (x_is_log) "Average log expression" else "Mean of normalised counts (log10 scale)",
+         y = "log2 fold change",
+         title = paste0("MA: ", treat, " vs ", ref), color = NULL) +
+    theme_bw() + theme(legend.position = "top")
+  if (!x_is_log) p <- p + scale_x_log10()
+  name <- paste0("MA_", sanitize_name(paste0(treat, "_vs_", ref)))
+  ggsave(file.path(outdir, paste0(name, ".png")), p, width = 8, height = 6, dpi = 300)
+  ggsave(file.path(outdir, paste0(name, ".pdf")), p, width = 8, height = 6)
 }
 
 # Heatmap of top DEGs across all contrasts (needs normalized matrix, genes x samples)

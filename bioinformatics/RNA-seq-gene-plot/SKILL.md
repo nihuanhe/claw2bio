@@ -16,15 +16,16 @@ symbol→ID mapping) and produces publication-style bar charts:
   points, with a **paired** t-test per group (same samples, two genes).
 
 **Prerequisite / 前提**: run `bioinformatics/bulk-RNA-seq` first; then hand this
-skill its `vst_normalized_counts.csv` (or `voom_normalized_logcpm.csv` /
-`log_expression_used.csv`), the `sample_metadata.csv`, and any `DEG_*.csv`.
+skill its `normalized_expression.csv` (legacy names `vst_normalized_counts.csv` /
+`voom_normalized_logcpm.csv` / `log_expression_used.csv` from older pipeline
+versions also work), the `sample_metadata.csv`, and any `DEG_*.csv`.
 
 ## Quick start
 
 ```bash
 cd bioinformatics/RNA-seq-gene-plot
 Rscript scripts/gene_expression.R \
-  examples/input/vst_normalized_counts.csv \
+  examples/input/normalized_expression.csv \
   examples/input/sample_metadata.csv \
   --genes Trp53,Gapdh --control Control --outdir examples/output
 ```

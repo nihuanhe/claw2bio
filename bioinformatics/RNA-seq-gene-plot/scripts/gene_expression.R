@@ -3,8 +3,9 @@
 #   A) one gene  : abundance across groups (bar + SD + jittered points + stats)
 #   B) two genes : within-group comparison of two genes (e.g. TP53 vs GAPDH)
 # PREREQUISITE: run the bulk-RNA-seq regular pipeline first; this consumes its
-# normalized matrix (vst_normalized_counts.csv / voom_normalized_logcpm.csv /
-# log_expression_used.csv) and optionally a DEG_*.csv for symbol mapping.
+# normalized matrix (normalized_expression.csv; legacy names
+# vst_normalized_counts.csv / voom_normalized_logcpm.csv / log_expression_used.csv
+# from older pipeline versions also work) and optionally a DEG_*.csv for symbol mapping.
 #
 # Usage:
 #   Rscript gene_expression.R <norm_matrix.csv> <metadata.csv> --genes TP53,GAPDH \
@@ -51,6 +52,7 @@ query_genes <- trimws(strsplit(genes_arg, ",", fixed = TRUE)[[1]])
 
 norm_file <- norm_path
 ylabel <- switch(basename(norm_file),
+                 normalized_expression.csv = "Normalized expression",
                  vst_normalized_counts.csv = "Normalized expression (vst)",
                  voom_normalized_logcpm.csv = "Normalized expression (voom logCPM)",
                  log_expression_used.csv = "Log expression",

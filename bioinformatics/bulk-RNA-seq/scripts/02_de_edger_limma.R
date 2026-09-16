@@ -46,7 +46,7 @@ if (mode == "trend") {
   norm_mat <- x
   fit <- lmFit(x, design)
   write.csv(data.frame(gene = rownames(x), x, check.names = FALSE),
-            file.path(outdir, "log_expression_used.csv"), row.names = FALSE)
+            file.path(outdir, "normalized_expression.csv"), row.names = FALSE)
 } else {
   # ---- edgeR TMM + limma-voom: integer counts ----
   filtered_path <- file.path(outdir, "filtered_counts.csv")
@@ -65,7 +65,7 @@ if (mode == "trend") {
   norm_mat <- v$E
   fit <- lmFit(v, design)
   write.csv(data.frame(gene = rownames(norm_mat), norm_mat, check.names = FALSE),
-            file.path(outdir, "voom_normalized_logcpm.csv"), row.names = FALSE)
+            file.path(outdir, "normalized_expression.csv"), row.names = FALSE)
 }
 
 # contrasts
@@ -90,6 +90,7 @@ for (i in seq_along(pairs)) {
   df <- add_symbols(df, ORGANISM)   # gene ID conversion: Ensembl -> Symbol
   name <- save_deg(df, treat, ref, outdir)
   make_volcano(df, treat, ref, outdir)
+  make_ma(df, treat, ref, outdir, x_is_log = TRUE)   # AveExpr is log-scale
   deg_tables[[name]] <- df
 }
 

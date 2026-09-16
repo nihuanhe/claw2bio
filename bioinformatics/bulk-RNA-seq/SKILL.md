@@ -117,10 +117,12 @@ when Bioconductor/CRAN is slow or unreachable. Also mirrored on COS at launch.
 | File | Content |
 |---|---|
 | `QC_PCA_plot.png/pdf`, `QC_sample_correlation_heatmap.png/pdf`, `QC_summary.txt` | QC |
-| `filtered_counts.csv`, `library_sizes.csv`, `vst_normalized_counts.csv` (DESeq2 branch) / `voom_normalized_logcpm.csv` (voom branch) / `log_expression_used.csv` (trend branch) | preprocessing artefacts consumed by follow-up skills |
+| `filtered_counts.csv`, `library_sizes.csv`, `normalized_expression.csv` | preprocessing artefacts consumed by follow-up skills (one canonical normalized-matrix name across all engines) |
 | `DEG_<treat>_vs_<ref>.csv` | full DEG table per contrast (common schema across engines) |
 | `Volcano_<treat>_vs_<ref>.png/pdf` | volcano with top-10 gene labels |
+| `MA_<treat>_vs_<ref>.png/pdf` | MA plot per contrast — checks normalization success and logFC-vs-expression independence |
 | `DEG_heatmap.png/pdf` | top DEGs, z-scored |
+| `run_metadata.json` | machine-readable run record: engine, parameters, input stats, software versions, timestamp |
 | `REPORT.md` | auto-written into the output dir every run: which stage produced each file and what it is for / 产出文件说明（自动写入输出目录） |
 
 ## Parameters
@@ -151,6 +153,8 @@ when Bioconductor/CRAN is slow or unreachable. Also mirrored on COS at launch.
 
 - Never modifies input files; all outputs go to the output directory.
 - Contrasts: every group vs control; when ≤4 groups, all pairwise contrasts are added.
+- Group names inside output **file names** are sanitised (spaces/special/non-ASCII
+  characters → `_`), so odd group names never produce odd file names.
 - DEG tables map Ensembl (version suffix stripped) or Symbol IDs to Entrez/Symbol
   via the OrgDb; tables and figures use converted gene symbols wherever a mapping exists.
 
