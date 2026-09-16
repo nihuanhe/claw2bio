@@ -9,4 +9,4 @@ __pycache__/
 resources/*.zip
 resources/*.tar.gz
 resources/r-deps/bin/
-resources/pathway_cache/
+

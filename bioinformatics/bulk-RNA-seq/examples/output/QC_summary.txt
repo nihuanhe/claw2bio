@@ -1,4 +1,4 @@
-Claw2Bio bulk-rnaseq QC summary
+Claw2Bio bulk-RNA-seq QC summary
 ==============================
 Input: examples/input/counts_matrix.csv
 Genes: 18975 before / 18971 after filtering

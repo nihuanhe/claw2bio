@@ -1,0 +1,2 @@
+resources/gmt/*.gmt
+!resources/gmt/reactome_demo_mmu.gmt

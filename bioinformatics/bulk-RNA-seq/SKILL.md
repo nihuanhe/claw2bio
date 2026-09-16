@@ -1,17 +1,19 @@
 ---
 name: bulk-RNA-seq
-description: Bulk RNA-seq differential expression and enrichment from a count matrix. Data-driven engine fork — non-integer/normalized input → limma-trend, integer counts with small n → DESeq2, integer counts with large n → edgeR+limma-voom — always printing WHY the engine was chosen. Outputs QC (PCA/correlation), DEG tables, volcano plots, DEG heatmap, and GO/KEGG enrichment.（中文摘要：bulk RNA-seq 从 counts 矩阵到差异表达与富集分析的全流程。按数据自动选择引擎（非整数→limma-trend；整数小样本→DESeq2；整数大样本→edgeR+limma-voom），并强制打印选择理由。输出 QC、DEG 表、火山图、热图、GO/KEGG 富集。）
+description: Bulk RNA-seq differential expression from a count matrix (regular pipeline — stops at DEG tables). Data-driven engine fork — non-integer/normalized input → limma-trend, integer counts with small n → DESeq2, integer counts with large n → edgeR+limma-voom — always printing WHY the engine was chosen. Outputs QC (PCA/correlation), DEG tables, volcano plots, DEG heatmap. Follow-up personalized skills consume its outputs — rnaseq-enrichment (GO/KEGG/Reactome), rnaseq-gene-plot (gene-of-interest bar charts), rnaseq-gsea (GSEA).（中文摘要：bulk RNA-seq 从 counts 矩阵到差异表达的常规流程（到 DEG 为止）。按数据自动选择引擎并强制打印理由。富集、指定基因柱状图、GSEA 是三个独立的后续个性化 skill，都吃本流程的产出。）
 ---
 
-# Skill: bulk-RNA-seq
+# Skill: bulk-RNA-seq (regular pipeline: counts → DEG)
 
 ## Trigger phrases
 
 - bulk RNA-seq analysis
 - differential expression / DEG
 - volcano plot from counts
-- GO / KEGG enrichment
-- bulk RNA-seq 差异分析 / 火山图 / 富集分析
+- bulk RNA-seq 差异分析 / 火山图
+
+(Follow-ups — enrichment / gene plots / GSEA — are separate skills:
+`rnaseq-enrichment`, `rnaseq-gene-plot`, `rnaseq-gsea`.)
 
 ## What it does
 
@@ -19,10 +21,12 @@ Stage 00 first verifies all R package dependencies and reports anything missing
 (you choose: let the agent install via `--install-deps`, or install manually via
 miniconda/BiocManager) — the pipeline never starts on a broken environment.
 
-Input: a gene-by-sample count matrix CSV + a sample metadata CSV. Output: full
-differential-expression report — QC (PCA, sample correlation), DEG tables per
+Input: a gene-by-sample count matrix CSV + a sample metadata CSV. Output: the
+differential-expression result set — QC (PCA, sample correlation), DEG tables per
 contrast (with **gene-symbol columns — Ensembl IDs are converted up front**),
-volcano plots labelled with gene symbols, DEG heatmap, GO/KEGG enrichment.
+volcano plots labelled with gene symbols, DEG heatmap. **The regular pipeline
+stops at DEG**; personalized analyses (enrichment, gene-of-interest plots, GSEA)
+are separate skills that consume these outputs.
 
 **Engine fork (automatic, data-driven; the rationale is ALWAYS printed):**
 
@@ -49,23 +53,16 @@ python scripts/run_rnaseq.py \
   examples/input/counts_matrix.csv \
   examples/input/sample_metadata.csv \
   examples/output \
-  --control Control --organism mouse --genes Trp53,Gapdh --overwrite
+  --control Control --organism mouse --overwrite
 ```
 
-## Gene-of-interest plots (stage 04)
+## Personalized follow-ups (separate skills, all consume this pipeline's outputs)
 
-Pass `--genes GENE1[,GENE2,...]` and, after the DE stage, the pipeline adds:
-
-- **Per gene**: abundance across groups — bar + SD error bars + jittered points,
-  with t-test (2 groups) or ANOVA + Tukey (≥3 groups) annotated
-  (`GeneExpr_<GENE>_by_group.png/pdf` + values CSV).
-- **Two or more genes**: within-group comparison for each gene pair — dodged bars
-  + SD + points, with a **paired** t-test per group
-  (`GeneExpr_compare_<G1>_vs_<G2>_within_group.png/pdf` + values CSV).
-
-Gene queries accept Ensembl IDs or symbols (case-insensitive, matched against the
-DEG symbol map — use the **target species'** symbols, e.g. `TP53` for human,
-`Trp53` for mouse).
+| Skill | Input from this pipeline | What it adds |
+|---|---|---|
+| `../rnaseq-enrichment` | `DEG_*.csv` | GO / KEGG / Reactome enrichment (offline-capable) |
+| `../rnaseq-gene-plot` | normalized matrix + metadata (+ DEG for symbols) | gene-of-interest bar charts (cross-group; within-group two-gene) |
+| `../rnaseq-gsea` | `DEG_*.csv` | GSEA (fgsea + MSigDB GMT) |
 
 ## Input format
 
@@ -107,9 +104,11 @@ packages — treat them as part of the skill's input assets:
 Install a downloaded archive (same R major.minor version, Windows):
 `install.packages("org.Mm.eg.db.zip", repos = NULL, type = "win.binary")`.
 Stage 00 verifies the package matching `--organism` before anything runs.
+(The same OrgDb install also serves the rnaseq-enrichment and rnaseq-gsea skills.)
 
 **Fully offline route**: `resources/r-deps/` is a Windows-binary mini-repo of the
-entire R dependency closure (139 packages, exact tested versions, R 4.5) — point
+entire R dependency closure (139 packages incl. the enrichment/GSEA skills'
+packages, exact tested versions, R 4.5) — point
 `install.packages(..., repos = "file:///<path>/r-deps", type = "win.binary")` at it
 when Bioconductor/CRAN is slow or unreachable. Also mirrored on COS at launch.
 
@@ -118,11 +117,10 @@ when Bioconductor/CRAN is slow or unreachable. Also mirrored on COS at launch.
 | File | Content |
 |---|---|
 | `QC_PCA_plot.png/pdf`, `QC_sample_correlation_heatmap.png/pdf`, `QC_summary.txt` | QC |
-| `filtered_counts.csv`, `library_sizes.csv` | preprocessing artefacts |
+| `filtered_counts.csv`, `library_sizes.csv`, `vst_normalized_counts.csv` (DESeq2 branch) / `voom_normalized_logcpm.csv` (voom branch) / `log_expression_used.csv` (trend branch) | preprocessing artefacts consumed by follow-up skills |
 | `DEG_<treat>_vs_<ref>.csv` | full DEG table per contrast (common schema across engines) |
 | `Volcano_<treat>_vs_<ref>.png/pdf` | volcano with top-10 gene labels |
 | `DEG_heatmap.png/pdf` | top DEGs, z-scored |
-| `GO_DEG_*_{up,down}_{BP,MF,CC}.csv` + dotplots, `KEGG_*.csv` + dotplots | enrichment |
 
 ## Parameters
 
@@ -131,11 +129,9 @@ when Bioconductor/CRAN is slow or unreachable. Also mirrored on COS at launch.
 | `--control` | first group in metadata | control group name |
 | `--engine` | `auto` | force `deseq2` / `edger-limma` / `limma` |
 | `--voom-min-n` | 8 | min group size for the voom branch |
-| `--organism` | `mouse` | `mouse` (org.Mm.eg.db, mmu) or `human` (org.Hs.eg.db, hsa) |
+| `--organism` | `mouse` | `mouse` (org.Mm.eg.db) or `human` (org.Hs.eg.db) |
 | `--padj` | 0.05 | adjusted-p significance cutoff |
-| `--log2fc` | 1 | |log2FC| cutoff |
-| `--skip-enrich` | off | stop after stage 02 |
-| `--genes` | — | genes of interest for stage-04 expression plots (comma-separated) |
+| `--log2fc` | 1 | \|log2FC\| cutoff |
 | `--install-deps` | off | auto-install missing R packages (BiocManager/CRAN) |
 | `--rscript` | auto-detect | path to Rscript |
 | `--overwrite` | off | allow non-empty output dir |
@@ -143,23 +139,18 @@ when Bioconductor/CRAN is slow or unreachable. Also mirrored on COS at launch.
 ## Dependencies
 
 - Python 3.10+: `pip install pandas numpy`
-- R (≥4.3) with: `DESeq2 edgeR limma clusterProfiler DOSE org.Mm.eg.db org.Hs.eg.db pheatmap ggplot2 ggrepel enrichplot`
+- R (≥4.3) with: `DESeq2 edgeR limma org.Mm.eg.db org.Hs.eg.db pheatmap ggplot2 ggrepel`
+  (clusterProfiler/fgsea belong to the follow-up skills' own dependency gates).
 - Stage 00 checks these before anything runs; missing packages can be installed by
   the agent (`--install-deps`) or manually (miniconda / BiocManager). The OrgDb
   annotation packages (used for gene-ID conversion) are also mirrored as archives
   on the Download page (COS) for fast domestic installation.
-- KEGG enrichment tries rest.kegg.jp first and falls back to a **local pathway
-  cache** (`resources/pathway_cache/`, built once by `scripts/build_pathway_cache.R`);
-  GO is always offline (OrgDb), and **Reactome is always offline** via cached
-  open-license tables — so enrichment works without any network.
-- KEGG cache files are for local use only (KEGG license forbids redistribution);
-  Reactome tables are open-license and are mirrored on COS at launch.
 
 ## Notes
 
 - Never modifies input files; all outputs go to the output directory.
 - Contrasts: every group vs control; when ≤4 groups, all pairwise contrasts are added.
-- Enrichment maps Ensembl (version suffix stripped) or Symbol IDs to Entrez via the OrgDb.
-- DEG tables and figures use converted gene symbols wherever a mapping exists.
+- DEG tables map Ensembl (version suffix stripped) or Symbol IDs to Entrez/Symbol
+  via the OrgDb; tables and figures use converted gene symbols wherever a mapping exists.
 
-> 中文提示：KEGG 优先联网跑、失败自动回落本地缓存（`build_pathway_cache.R` 一次性下载）；Reactome 与 GO 永远离线可跑（缓存表已在 resources/pathway_cache/）；KEGG 缓存因版权仅限本地使用、不上 COS，Reactome 表可随 COS 分发；`--genes` 指定关注基因（如 TP53,GAPDH；物种符号要对，鼠用 Trp53/Gapdh），自动出“单基因跨组丰度柱状图（带 SD 误差线+散点+统计）”和“同组内两基因表达对比柱状图（配对 t 检验）”；输入可以是 csv/tsv/txt 及 .gz 压缩（自动识别分隔符与压缩；zip/tar 需先解压）；GEO 数据获取见 docs/downloading-from-GEO.md；基因 ID 转换包（org.Mm.eg.db / org.Hs.eg.db）属于本技能输入资源，体积大故随 COS 分发（见 Download 页）；开跑前自动检查 R 依赖，缺包时可选手动安装（miniconda/BiocManager）或加 `--install-deps` 让 agent 代装，装好后还会复检；DEG 表和图默认用转换后的基因名（Symbol）；不改输入文件。
+> 中文提示：本 skill 只跑到 DEG（常规步骤）；富集（GO/KEGG/Reactome）、指定基因柱状图、GSEA 是三个独立 skill（rnaseq-enrichment / rnaseq-gene-plot / rnaseq-gsea），都用本流程的产出作为输入。输入可以是 csv/tsv/txt 及 .gz 压缩（自动识别分隔符与压缩；zip/tar 需先解压）；GEO 数据获取见 docs/downloading-from-GEO.md；基因 ID 转换包（org.Mm.eg.db / org.Hs.eg.db）属于本技能输入资源，体积大故随 COS 分发（见 Download 页）；开跑前自动检查 R 依赖，缺包时可选手动安装（miniconda/BiocManager）或加 `--install-deps` 让 agent 代装，装好后还会复检；DEG 表和图默认用转换后的基因名（Symbol）；不改输入文件。

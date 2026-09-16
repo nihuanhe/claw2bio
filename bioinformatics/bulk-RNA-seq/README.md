@@ -1,9 +1,13 @@
 # bulk-RNA-seq
 
-Bulk RNA-seq differential expression + enrichment pipeline with a data-driven
-engine fork. Refactored from lab-validated R scripts.
+Bulk RNA-seq differential expression pipeline with a data-driven engine fork —
+the **regular** stage (counts → QC → DEG). Refactored from lab-validated R scripts.
+Personalized follow-ups are separate skills that consume this pipeline's outputs:
+[rnaseq-enrichment](../rnaseq-enrichment) (GO/KEGG/Reactome),
+[rnaseq-gene-plot](../rnaseq-gene-plot) (gene-of-interest bar charts),
+[rnaseq-gsea](../rnaseq-gsea) (GSEA).
 
-bulk RNA-seq 差异表达与富集分析流程，引擎按数据自动分叉；由实验室实战脚本重构而来。
+bulk RNA-seq 差异表达常规流程（到 DEG 为止），引擎按数据自动分叉；富集 / 指定基因柱状图 / GSEA 是三个独立的后续个性化 skill。
 
 ## Features
 
@@ -14,10 +18,10 @@ bulk RNA-seq 差异表达与富集分析流程，引擎按数据自动分叉；�
    - integer counts, min group n < 8 → **DESeq2**
    - integer counts, min group n ≥ 8 → **edgeR + limma-voom**
 3. **Visualization** — volcano plots (top-10 labels), z-scored DEG heatmap.
-4. **Gene-of-interest plots** (`--genes Trp53,Gapdh`) — per-gene group abundance
-   bars (SD + jitter + t-test/ANOVA) and within-group two-gene comparison bars
-   (paired t-test per group).
-5. **Enrichment** — clusterProfiler GO (BP/MF/CC) + KEGG, up/down separately per contrast.
+
+The pipeline **stops at DEG tables**. Personalized follow-ups (separate skills):
+`rnaseq-enrichment` (GO/KEGG/Reactome), `rnaseq-gene-plot` (gene-of-interest
+bar charts), `rnaseq-gsea` (GSEA).
 
 **Gene ID conversion is built into the DEG step**: Ensembl IDs (version-stripped)
 or Symbols are mapped to gene Symbols via the OrgDb; DEG tables gain a `symbol`
@@ -32,8 +36,7 @@ pip install pandas numpy
 ```r
 # in R (>= 4.3):
 if (!require("BiocManager", quietly = TRUE)) install.packages("BiocManager")
-BiocManager::install(c("DESeq2", "edgeR", "limma", "clusterProfiler", "DOSE",
-                       "org.Mm.eg.db", "org.Hs.eg.db", "enrichplot"))
+BiocManager::install(c("DESeq2", "edgeR", "limma", "org.Mm.eg.db", "org.Hs.eg.db"))
 install.packages(c("pheatmap", "ggplot2", "ggrepel"))
 ```
 
@@ -98,8 +101,6 @@ bulk-RNA-seq/
 │   ├── 01_qc.R              # filtering, logCPM, PCA, correlation heatmap
 │   ├── 02_de_deseq2.R       # DESeq2 branch
 │   ├── 02_de_edger_limma.R  # edgeR+limma-voom branch / limma-trend (--mode trend)
-│   ├── 03_enrich.R          # clusterProfiler GO/KEGG
-│   ├── 04_gene_expression.R # gene-of-interest abundance / comparison bars
 │   └── rnaseq_utils.R       # shared helpers (smart reader, contrasts, volcano, heatmap)
 └── examples/
     ├── input/               # GSE270189: mouse prostate basal, Control/Mutant/Mutant_Rap (n=2 each)
@@ -112,11 +113,7 @@ bulk-RNA-seq/
 - voom branch: TMM normalization → `voom` precision weights → `lmFit` → `eBayes(robust=TRUE)`.
 - trend branch: log-transform if max > 50, then `lmFit` + `eBayes(trend=TRUE, robust=TRUE)`.
 - Multiple testing: BH adjusted p values everywhere.
-- Enrichment: Ensembl IDs (version-stripped) or Symbols → Entrez via OrgDb; GO with
-  `readable=TRUE`; KEGG via KEGG REST with **offline fallback** to a local cache
-  (`resources/pathway_cache/`, see `scripts/build_pathway_cache.R`); Reactome always
-  offline via cached open-license tables. KEGG cache stays local (license); Reactome
-  tables are redistributable and ship on COS.
+- Gene IDs: Ensembl (version-stripped) or Symbols → Entrez/Symbol via OrgDb.
 
 ## Notes
 

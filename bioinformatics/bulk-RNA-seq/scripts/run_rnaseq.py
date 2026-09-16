@@ -5,7 +5,12 @@ Diagnoses the input matrix, selects the differential-expression engine
 (limma-trend / DESeq2 / edgeR+limma-voom), PRINTS THE RATIONALE (mandatory),
 then drives the staged R scripts via subprocess:
 
-    01_qc.R  ->  02_de_<engine>.R  ->  03_enrich.R
+    01_qc.R  ->  02_de_<engine>.R     (regular pipeline stops at DEG tables)
+
+Personalized follow-ups live in separate skills (consume this pipeline's outputs):
+    ../rnaseq-enrichment   GO / KEGG / Reactome enrichment from DEG tables
+    ../rnaseq-gene-plot    gene-of-interest abundance / comparison bar plots
+    ../rnaseq-gsea         GSEA from DEG tables (fgsea + MSigDB GMT)
 """
 
 import argparse
@@ -21,7 +26,6 @@ import pandas as pd
 sys.stdout.reconfigure(line_buffering=True)
 
 STAGE_QC = "01_qc.R"
-STAGE_ENRICH = "03_enrich.R"
 ENGINE_SCRIPTS = {
     "deseq2": "02_de_deseq2.R",
     "edger-limma": "02_de_edger_limma.R",
@@ -141,12 +145,8 @@ def main():
     ap.add_argument("--organism", choices=["mouse", "human"], default="mouse")
     ap.add_argument("--padj", type=float, default=0.05)
     ap.add_argument("--log2fc", type=float, default=1.0)
-    ap.add_argument("--skip-enrich", action="store_true")
     ap.add_argument("--install-deps", action="store_true",
                     help="let the pipeline install missing R packages itself (BiocManager/CRAN)")
-    ap.add_argument("--genes", default=None,
-                    help="comma-separated genes of interest (e.g. TP53,GAPDH): per-gene group "
-                         "abundance plots, plus within-group comparison when ≥2 genes given")
     ap.add_argument("--rscript", default=None, help="path to Rscript executable")
     ap.add_argument("--overwrite", action="store_true")
     args = ap.parse_args()
@@ -177,7 +177,7 @@ def main():
             "\n"
             "  B) Install manually (e.g. via miniconda or R), then re-run:\n"
             "       conda install -c bioconda bioconductor-deseq2 bioconductor-edger \\\n"
-            "         bioconductor-limma bioconductor-clusterprofiler\n"
+            "         bioconductor-limma\n"
             "     or in R:  BiocManager::install(c('DESeq2','edgeR','limma', ...))\n"
             "\n"
             "缺少 R 依赖包。请选择：A) 让 AI agent 自动安装（重跑时加 --install-deps）；\n"
@@ -199,17 +199,8 @@ def main():
     else:
         de_args += ["--mode", "voom"] if engine == "edger-limma" else []
     run_stage(rscript, ENGINE_SCRIPTS[engine], de_args, f"02_de ({engine})")
-    if args.genes:
-        run_stage(rscript, "04_gene_expression.R",
-                  [args.output, args.metadata,
-                   "--genes", args.genes, "--control", control],
-                  "04_gene_expression")
-    if not args.skip_enrich:
-        run_stage(rscript, STAGE_ENRICH,
-                  [args.output, args.output, "--organism", args.organism,
-                   "--padj", str(args.padj), "--log2fc", str(args.log2fc)],
-                  "03_enrich")
-    print("\nAll stages finished. Outputs in:", os.path.abspath(args.output))
+    print("\nRegular pipeline finished (QC + DEG). Outputs in:", os.path.abspath(args.output))
+    print("Next personalized steps: ../rnaseq-enrichment, ../rnaseq-gene-plot, ../rnaseq-gsea")
 
 
 if __name__ == "__main__":

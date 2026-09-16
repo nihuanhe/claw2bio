@@ -16,7 +16,7 @@ parse_args <- function(args) {
 opt <- parse_args(commandArgs(trailingOnly = TRUE))
 organism <- if (!is.null(opt$organism)) opt$organism else "mouse"
 
-bioc_pkgs <- c("DESeq2", "edgeR", "limma", "clusterProfiler", "DOSE", "enrichplot")
+bioc_pkgs <- c("DESeq2", "edgeR", "limma")
 orgdb <- if (organism == "human") "org.Hs.eg.db" else "org.Mm.eg.db"
 bioc_pkgs <- c(bioc_pkgs, orgdb)
 cran_pkgs <- c("pheatmap", "ggplot2", "ggrepel")

@@ -70,7 +70,7 @@ dev.off()
 
 # QC summary
 sink(file.path(outdir, "QC_summary.txt"))
-cat("Claw2Bio bulk-rnaseq QC summary\n")
+cat("Claw2Bio bulk-RNA-seq QC summary\n")
 cat("==============================\n")
 cat(sprintf("Input: %s\n", counts_path))
 cat(sprintf("Genes: %d before / %d after filtering\n", n_before, nrow(counts_f)))

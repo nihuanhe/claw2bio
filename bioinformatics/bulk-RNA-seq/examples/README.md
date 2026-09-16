@@ -19,7 +19,7 @@ python scripts/run_rnaseq.py \
   examples/input/counts_matrix.csv \
   examples/input/sample_metadata.csv \
   examples/output \
-  --control Control --organism mouse --genes Trp53,Gapdh --overwrite
+  --control Control --organism mouse --overwrite
 ```
 
 ## What you should see
@@ -32,16 +32,14 @@ python scripts/run_rnaseq.py \
    - Mutant_Rap vs Control: **517 up / 763 down**
    - Mutant vs Mutant_Rap: **855 up / 578 down**
 4. **Volcano plots** per contrast (symbol-labelled) + `DEG_heatmap.png`.
-5. **Gene-of-interest plots**: `GeneExpr_Trp53_by_group.png` (ANOVA p = 0.02),
-   `GeneExpr_Gapdh_by_group.png`, and `GeneExpr_compare_Trp53_vs_Gapdh_within_group.png`
-   (paired test per group: Control ns / Mutant * / Mutant_Rap **).
-6. **GO enrichment** tables + dotplots per contrast (up/down × BP/MF/CC) and
-   **KEGG enrichment** (e.g. `mmu04820 Cytoskeleton in muscle cells` for the
-   Mutant-down set). KEGG needs network access to rest.kegg.jp and is skipped
-   gracefully offline.
+
+The regular pipeline stops here. Personalized follow-ups on these outputs:
+`../../rnaseq-enrichment` (GO/KEGG/Reactome), `../../rnaseq-gene-plot`
+(Trp53/Gapdh bar charts), `../../rnaseq-gsea` (GSEA).
 
 ## Output committed here
 
-The complete real output of the command above (~23 MB): QC, all DEG tables and
-volcano plots, DEG heatmap, gene-of-interest plots + value CSVs, and all GO/KEGG
-enrichment tables + dotplots.
+The complete real output of the command above: QC plots + summary, all DEG
+tables (with symbol columns), volcano plots, DEG heatmap, and the preprocessing
+artefacts (`filtered_counts.csv`, `vst_normalized_counts.csv`,
+`library_sizes.csv`) consumed by the follow-up skills.
