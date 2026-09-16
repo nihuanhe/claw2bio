@@ -1,5 +1,5 @@
 ---
-name: RNA-seq-gsea
+name: RNA-seq-GSEA
 description: GSEA (gene set enrichment analysis) on bulk RNA-seq DEG tables using fgsea and MSigDB-format GMT gene sets. Use after the bulk-RNA-seq pipeline — when the user asks for GSEA, 基因集富集分析, pathway enrichment of the full ranked gene list (not just significant DEGs), NES plots, enrichment curves. Fully offline once GMT files are in place.
 ---
 
@@ -17,7 +17,7 @@ consumes a `DEG_*.csv` table (`gene`, `log2fc`/`log2FoldChange`/`logFC`,
 ## Quick start
 
 ```bash
-cd bioinformatics/RNA-seq-gsea
+cd bioinformatics/RNA-seq-GSEA
 Rscript scripts/00_check_deps.R --organism mouse
 Rscript scripts/gsea.R examples/input/DEG_Mutant_vs_Control.csv \
   --gmt resources/gmt/reactome_demo_mmu.gmt --organism mouse \

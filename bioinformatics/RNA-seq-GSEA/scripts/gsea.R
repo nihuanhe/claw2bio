@@ -47,7 +47,7 @@ if (length(gmt_files) == 0) stop("no GMT files found — put MSigDB .gmt files i
 
 orgdb_name <- if (organism == "human") "org.Hs.eg.db" else "org.Mm.eg.db"
 
-cat("=== Claw2Bio RNA-seq-gsea ===\n")
+cat("=== Claw2Bio RNA-seq-GSEA ===\n")
 cat("DEG table:", basename(deg_file), "\n")
 cat("GMT files:", paste(basename(gmt_files), collapse = ", "), "\n")
 
@@ -156,17 +156,17 @@ for (gf in gmt_files) {
 # ---- auto report: file -> purpose ----
 report_rules <- list(
   c("^GSEA_.*_dotplot\\.png$", "gsea.R (fgsea)",
-    "Top-15 gene sets by padj; x = NES (up=red/down=blue), size = -log10(padj) / NES 气泡图"),
+    "Top-15 gene sets by padj; x = NES (up=red/down=blue), size = -log10(padj)"),
   c("^GSEA_.*_top_curve\\.png$", "gsea.R (fgsea)",
-    "Classic enrichment-running-score curve of the top significant set / 顶部通路的经典 GSEA 富集曲线"),
+    "Classic enrichment-running-score curve of the top significant set"),
   c("^GSEA_.*\\.csv$", "gsea.R (fgsea)",
-    "GSEA result table per GMT (pathway, NES, pvalue, padj, leadingEdge) / GSEA 结果全表")
+    "GSEA result table per GMT (pathway, NES, pvalue, padj, leadingEdge)")
 )
 report_files <- setdiff(list.files(outdir), "REPORT.md")
-rl <- c("# Analysis Report — RNA-seq-gsea (fgsea + MSigDB GMT)", "",
+rl <- c("# Analysis Report — RNA-seq-GSEA (fgsea + MSigDB GMT)", "",
         sprintf("- DEG table: `%s` (produced by the bulk-RNA-seq regular pipeline)", basename(deg_file)),
         sprintf("- GMT gene sets: %s", paste(basename(gmt_files), collapse = ", ")),
-        "- Ranking metric: sign(log2FC) x -log10(pvalue), all genes (no threshold) / 全基因排序，不设阈值",
+        "- Ranking metric: sign(log2FC) x -log10(pvalue), all genes (no threshold)",
         "",
         "| File | Produced by | What it is / use |", "|---|---|---|")
 for (f in sort(report_files)) {

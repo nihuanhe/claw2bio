@@ -3,9 +3,9 @@
 - Input counts: `counts_matrix.csv` (18975 genes × 6 samples)
 - Metadata: `sample_metadata.csv` (control group: `Control`)
 - Engine: **deseq2** (rationale was printed at run time)
-- Personalized follow-ups on these outputs: `../RNA-seq-enrichment` (GO/KEGG/Reactome), `../RNA-seq-gene-plot` (gene bar charts), `../RNA-seq-gsea` (GSEA)
+- Personalized follow-ups on these outputs: `../RNA-seq-enrichment` (GO/KEGG/Reactome), `../RNA-seq-gene-plot` (gene bar charts), `../RNA-seq-GSEA` (GSEA)
 
-## Input grouping / 输入分组结构
+## Input grouping
 
 - **Control** (n=2): CJI1.A.CD1.ET1.1, CJI2.B.CD1.ET2.1
 - **Mutant** (n=2): CJI3.I.K5PP3W.ET1.1, CJI4.J.K5PP3W.ET2.1
@@ -13,24 +13,24 @@
 
 | File | Produced by | What it is / use |
 |---|---|---|
-| `DEG_Mutant_Rap_vs_Control.csv` | 02_de (deseq2) | Full differential-expression table for one contrast (log2FC, p, padj, symbol) — input for RNA-seq-enrichment / RNA-seq-gsea / 差异表达全表（富集与 GSEA 的输入） |
-| `DEG_Mutant_vs_Control.csv` | 02_de (deseq2) | Full differential-expression table for one contrast (log2FC, p, padj, symbol) — input for RNA-seq-enrichment / RNA-seq-gsea / 差异表达全表（富集与 GSEA 的输入） |
-| `DEG_Mutant_vs_Mutant_Rap.csv` | 02_de (deseq2) | Full differential-expression table for one contrast (log2FC, p, padj, symbol) — input for RNA-seq-enrichment / RNA-seq-gsea / 差异表达全表（富集与 GSEA 的输入） |
-| `DEG_heatmap.pdf` | 02_de (deseq2) | Z-scored heatmap of the union of significant DEGs / 显著差异基因热图 |
-| `DEG_heatmap.png` | 02_de (deseq2) | Z-scored heatmap of the union of significant DEGs / 显著差异基因热图 |
-| `QC_PCA_plot.pdf` | 01_qc.R | PCA of logCPM expression — check group separation and outlier/batch samples / PCA 图：看组间分离与异常样本 |
-| `QC_PCA_plot.png` | 01_qc.R | PCA of logCPM expression — check group separation and outlier/batch samples / PCA 图：看组间分离与异常样本 |
-| `QC_sample_correlation_heatmap.pdf` | 01_qc.R | Sample-sample correlation heatmap — replicates should cluster together / 样本相关性热图：重复应聚在一起 |
-| `QC_sample_correlation_heatmap.png` | 01_qc.R | Sample-sample correlation heatmap — replicates should cluster together / 样本相关性热图：重复应聚在一起 |
-| `QC_summary.txt` | 01_qc.R | Filtering stats (genes kept, library sizes) / 过滤统计 |
-| `Volcano_Mutant_Rap_vs_Control.pdf` | 02_de (deseq2) | Volcano plot of one contrast, top-10 gene labels / 火山图 |
-| `Volcano_Mutant_Rap_vs_Control.png` | 02_de (deseq2) | Volcano plot of one contrast, top-10 gene labels / 火山图 |
-| `Volcano_Mutant_vs_Control.pdf` | 02_de (deseq2) | Volcano plot of one contrast, top-10 gene labels / 火山图 |
-| `Volcano_Mutant_vs_Control.png` | 02_de (deseq2) | Volcano plot of one contrast, top-10 gene labels / 火山图 |
-| `Volcano_Mutant_vs_Mutant_Rap.pdf` | 02_de (deseq2) | Volcano plot of one contrast, top-10 gene labels / 火山图 |
-| `Volcano_Mutant_vs_Mutant_Rap.png` | 02_de (deseq2) | Volcano plot of one contrast, top-10 gene labels / 火山图 |
-| `filtered_counts.csv` | 01_qc.R | Count matrix after filterByExpr — input to the DE stage / 过滤后 counts（差异分析输入） |
-| `library_sizes.csv` | 01_qc.R | Per-sample library sizes before/after filtering / 文库大小 |
-| `vst_normalized_counts.csv` | 02_de (DESeq2) | VST-normalized expression matrix — input for RNA-seq-gene-plot / vst 归一化矩阵（后续个性化画图输入） |
+| `DEG_Mutant_Rap_vs_Control.csv` | 02_de (deseq2) | Full differential-expression table for one contrast (log2FC, p, padj, symbol) — input for the RNA-seq-enrichment and RNA-seq-GSEA skills |
+| `DEG_Mutant_vs_Control.csv` | 02_de (deseq2) | Full differential-expression table for one contrast (log2FC, p, padj, symbol) — input for the RNA-seq-enrichment and RNA-seq-GSEA skills |
+| `DEG_Mutant_vs_Mutant_Rap.csv` | 02_de (deseq2) | Full differential-expression table for one contrast (log2FC, p, padj, symbol) — input for the RNA-seq-enrichment and RNA-seq-GSEA skills |
+| `DEG_heatmap.pdf` | 02_de (deseq2) | Z-scored heatmap of the union of significant DEGs |
+| `DEG_heatmap.png` | 02_de (deseq2) | Z-scored heatmap of the union of significant DEGs |
+| `QC_PCA_plot.pdf` | 01_qc.R | PCA of logCPM expression — check group separation and outlier/batch samples |
+| `QC_PCA_plot.png` | 01_qc.R | PCA of logCPM expression — check group separation and outlier/batch samples |
+| `QC_sample_correlation_heatmap.pdf` | 01_qc.R | Sample-sample correlation heatmap — replicates should cluster together |
+| `QC_sample_correlation_heatmap.png` | 01_qc.R | Sample-sample correlation heatmap — replicates should cluster together |
+| `QC_summary.txt` | 01_qc.R | Filtering stats (genes kept, library sizes) |
+| `Volcano_Mutant_Rap_vs_Control.pdf` | 02_de (deseq2) | Volcano plot of one contrast, top-10 gene labels |
+| `Volcano_Mutant_Rap_vs_Control.png` | 02_de (deseq2) | Volcano plot of one contrast, top-10 gene labels |
+| `Volcano_Mutant_vs_Control.pdf` | 02_de (deseq2) | Volcano plot of one contrast, top-10 gene labels |
+| `Volcano_Mutant_vs_Control.png` | 02_de (deseq2) | Volcano plot of one contrast, top-10 gene labels |
+| `Volcano_Mutant_vs_Mutant_Rap.pdf` | 02_de (deseq2) | Volcano plot of one contrast, top-10 gene labels |
+| `Volcano_Mutant_vs_Mutant_Rap.png` | 02_de (deseq2) | Volcano plot of one contrast, top-10 gene labels |
+| `filtered_counts.csv` | 01_qc.R | Count matrix after filterByExpr — input to the DE stage |
+| `library_sizes.csv` | 01_qc.R | Per-sample library sizes before/after filtering |
+| `vst_normalized_counts.csv` | 02_de (DESeq2) | VST-normalized expression matrix — input for RNA-seq-gene-plot |
 
 _This file is auto-generated by `run_rnaseq.py` at the end of every run._

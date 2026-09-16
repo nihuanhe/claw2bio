@@ -1,4 +1,4 @@
-# RNA-seq-gsea
+# RNA-seq-GSEA
 
 GSEA on bulk RNA-seq DEG tables (fgsea + MSigDB GMT) — a personalized follow-up
 skill for [bulk-RNA-seq](../bulk-RNA-seq).
@@ -7,7 +7,7 @@ skill for [bulk-RNA-seq](../bulk-RNA-seq).
 (`counts → QC → DEG`); this skill consumes a `DEG_*.csv` table.
 
 ```
-RNA-seq-gsea/
+RNA-seq-GSEA/
 ├── SKILL.md
 ├── scripts/
 │   ├── 00_check_deps.R   # dependency gate (fgsea/OrgDb/ggplot2)

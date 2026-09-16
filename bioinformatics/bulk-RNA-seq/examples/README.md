@@ -35,7 +35,7 @@ python scripts/run_rnaseq.py \
 
 The regular pipeline stops here. Personalized follow-ups on these outputs:
 `../../RNA-seq-enrichment` (GO/KEGG/Reactome), `../../RNA-seq-gene-plot`
-(Trp53/Gapdh bar charts), `../../RNA-seq-gsea` (GSEA).
+(Trp53/Gapdh bar charts), `../../RNA-seq-GSEA` (GSEA).
 
 ## Output committed here
 

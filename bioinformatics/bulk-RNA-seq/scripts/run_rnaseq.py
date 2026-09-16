@@ -10,7 +10,7 @@ then drives the staged R scripts via subprocess:
 Personalized follow-ups live in separate skills (consume this pipeline's outputs):
     ../RNA-seq-enrichment   GO / KEGG / Reactome enrichment from DEG tables
     ../RNA-seq-gene-plot    gene-of-interest abundance / comparison bar plots
-    ../RNA-seq-gsea         GSEA from DEG tables (fgsea + MSigDB GMT)
+    ../RNA-seq-GSEA         GSEA from DEG tables (fgsea + MSigDB GMT)
 """
 
 import argparse
@@ -200,9 +200,9 @@ def main():
         de_args += ["--mode", "voom"] if engine == "edger-limma" else []
     run_stage(rscript, ENGINE_SCRIPTS[engine], de_args, f"02_de ({engine})")
     print("\nRegular pipeline finished (QC + DEG). Outputs in:", os.path.abspath(args.output))
-    print("Next personalized steps: ../RNA-seq-enrichment, ../RNA-seq-gene-plot, ../RNA-seq-gsea")
+    print("Next personalized steps: ../RNA-seq-enrichment, ../RNA-seq-gene-plot, ../RNA-seq-GSEA")
     write_report(args.output, engine, control, args.counts, args.metadata, meta, df)
-    print("REPORT.md written to the output directory (file guide / 文件说明).")
+    print("REPORT.md written to the output directory (guide to every output file).")
 
 
 def write_report(outdir, engine, control, counts_path, meta_path, meta, counts_df):
@@ -210,29 +210,29 @@ def write_report(outdir, engine, control, counts_path, meta_path, meta, counts_d
     import re
     rules = [
         (r"^QC_PCA_plot\.", "01_qc.R",
-         "PCA of logCPM expression — check group separation and outlier/batch samples / PCA 图：看组间分离与异常样本"),
+         "PCA of logCPM expression — check group separation and outlier/batch samples"),
         (r"^QC_sample_correlation_heatmap\.", "01_qc.R",
-         "Sample-sample correlation heatmap — replicates should cluster together / 样本相关性热图：重复应聚在一起"),
+         "Sample-sample correlation heatmap — replicates should cluster together"),
         (r"^QC_summary\.txt$", "01_qc.R",
-         "Filtering stats (genes kept, library sizes) / 过滤统计"),
+         "Filtering stats (genes kept, library sizes)"),
         (r"^filtered_counts\.csv$", "01_qc.R",
-         "Count matrix after filterByExpr — input to the DE stage / 过滤后 counts（差异分析输入）"),
+         "Count matrix after filterByExpr — input to the DE stage"),
         (r"^library_sizes\.csv$", "01_qc.R",
-         "Per-sample library sizes before/after filtering / 文库大小"),
+         "Per-sample library sizes before/after filtering"),
         (r"^vst_normalized_counts\.csv$", "02_de (DESeq2)",
-         "VST-normalized expression matrix — input for RNA-seq-gene-plot / vst 归一化矩阵（后续个性化画图输入）"),
+         "VST-normalized expression matrix — input for RNA-seq-gene-plot"),
         (r"^voom_normalized_logcpm\.csv$", "02_de (edgeR+limma-voom)",
-         "voom-normalized logCPM matrix — input for RNA-seq-gene-plot / voom 归一化矩阵"),
+         "voom-normalized logCPM matrix — input for RNA-seq-gene-plot"),
         (r"^log_expression_used\.csv$", "02_de (limma-trend)",
-         "Log-expression matrix as used by limma-trend — input for RNA-seq-gene-plot / limma-trend 实际使用的 log 矩阵"),
+         "Log-expression matrix as used by limma-trend — input for RNA-seq-gene-plot"),
         (r"^DEG_.*\.csv$", "02_de (" + engine + ")",
-         "Full differential-expression table for one contrast (log2FC, p, padj, symbol) — input for RNA-seq-enrichment / RNA-seq-gsea / 差异表达全表（富集与 GSEA 的输入）"),
+         "Full differential-expression table for one contrast (log2FC, p, padj, symbol) — input for the RNA-seq-enrichment and RNA-seq-GSEA skills"),
         (r"^Volcano_.*\.(png|pdf)$", "02_de (" + engine + ")",
-         "Volcano plot of one contrast, top-10 gene labels / 火山图"),
+         "Volcano plot of one contrast, top-10 gene labels"),
         (r"^DEG_heatmap\.", "02_de (" + engine + ")",
-         "Z-scored heatmap of the union of significant DEGs / 显著差异基因热图"),
+         "Z-scored heatmap of the union of significant DEGs"),
     ]
-    # group structure of the input matrix / 输入矩阵的分组结构
+    # group structure of the input matrix
     group_lines = []
     for g, sub in meta.groupby("group", sort=False):
         samples = list(sub["sample"])
@@ -246,9 +246,9 @@ def write_report(outdir, engine, control, counts_path, meta_path, meta, counts_d
         f"- Input counts: `{os.path.basename(counts_path)}` ({counts_df.shape[0]} genes × {counts_df.shape[1]} samples)",
         f"- Metadata: `{os.path.basename(meta_path)}` (control group: `{control}`)",
         f"- Engine: **{engine}** (rationale was printed at run time)",
-        "- Personalized follow-ups on these outputs: `../RNA-seq-enrichment` (GO/KEGG/Reactome), `../RNA-seq-gene-plot` (gene bar charts), `../RNA-seq-gsea` (GSEA)",
+        "- Personalized follow-ups on these outputs: `../RNA-seq-enrichment` (GO/KEGG/Reactome), `../RNA-seq-gene-plot` (gene bar charts), `../RNA-seq-GSEA` (GSEA)",
         "",
-        "## Input grouping / 输入分组结构",
+        "## Input grouping",
         "",
         group_block,
         "",

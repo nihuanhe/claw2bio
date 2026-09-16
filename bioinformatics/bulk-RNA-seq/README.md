@@ -5,7 +5,7 @@ the **regular** stage (counts → QC → DEG). Refactored from lab-validated R s
 Personalized follow-ups are separate skills that consume this pipeline's outputs:
 [RNA-seq-enrichment](../RNA-seq-enrichment) (GO/KEGG/Reactome),
 [RNA-seq-gene-plot](../RNA-seq-gene-plot) (gene-of-interest bar charts),
-[RNA-seq-gsea](../RNA-seq-gsea) (GSEA).
+[RNA-seq-GSEA](../RNA-seq-GSEA) (GSEA).
 
 bulk RNA-seq 差异表达常规流程（到 DEG 为止），引擎按数据自动分叉；富集 / 指定基因柱状图 / GSEA 是三个独立的后续个性化 skill。
 
@@ -21,7 +21,7 @@ bulk RNA-seq 差异表达常规流程（到 DEG 为止），引擎按数据自�
 
 The pipeline **stops at DEG tables**. Personalized follow-ups (separate skills):
 `RNA-seq-enrichment` (GO/KEGG/Reactome), `RNA-seq-gene-plot` (gene-of-interest
-bar charts), `RNA-seq-gsea` (GSEA).
+bar charts), `RNA-seq-GSEA` (GSEA).
 
 **Gene ID conversion is built into the DEG step**: Ensembl IDs (version-stripped)
 or Symbols are mapped to gene Symbols via the OrgDb; DEG tables gain a `symbol`

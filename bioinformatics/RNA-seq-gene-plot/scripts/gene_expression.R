@@ -205,11 +205,11 @@ if (length(resolved) >= 2) {
 # ---- auto report: file -> purpose ----
 report_rules <- list(
   c("^GeneExpr_.*_by_group\\.(png|pdf)$", "gene_expression.R (A: per-gene across groups)",
-    "Gene abundance across groups: bar + SD error bars + jittered points + t-test/ANOVA / 单基因跨组丰度柱状图（带误差线与统计）"),
+    "Gene abundance across groups: bar + SD error bars + jittered points + t-test/ANOVA"),
   c("^GeneExpr_.*_values\\.csv$", "gene_expression.R",
-    "Underlying per-sample values + stats for the plot of the same name / 对应图的原始数值与统计结果"),
+    "Underlying per-sample values + stats for the plot of the same name"),
   c("^GeneExpr_compare_.*_within_group\\.(png|pdf)$", "gene_expression.R (B: two genes within group)",
-    "Two genes compared within each group: dodged bars + SD + points + paired t-test / 同组内两基因对比柱状图（配对 t 检验）")
+    "Two genes compared within each group: dodged bars + SD + points + paired t-test")
 )
 report_files <- setdiff(list.files(outdir), "REPORT.md")
 rl <- c("# Analysis Report — RNA-seq-gene-plot (gene-of-interest expression bars)", "",

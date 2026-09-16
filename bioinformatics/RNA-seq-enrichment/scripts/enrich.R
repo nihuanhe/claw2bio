@@ -147,23 +147,23 @@ for (f in deg_files) {
 # ---- auto report: file -> purpose ----
 report_rules <- list(
   c("^GO_.*_dotplot\\.png$", "enrich.R (GO, clusterProfiler, offline via OrgDb)",
-    "GO enrichment dotplot (top terms, one ontology per file) / GO 富集气泡图"),
+    "GO enrichment dotplot (top terms, one ontology per file)"),
   c("^GO_.*\\.csv$", "enrich.R (GO, clusterProfiler, offline via OrgDb)",
-    "GO enrichment table for one contrast x direction x ontology (BP/MF/CC) / GO 富集结果表"),
+    "GO enrichment table for one contrast x direction x ontology (BP/MF/CC)"),
   c("^KEGG_.*_dotplot\\.png$", "enrich.R (KEGG, online REST or local cache)",
-    "KEGG pathway dotplot / KEGG 气泡图"),
+    "KEGG pathway dotplot"),
   c("^KEGG_.*\\.csv$", "enrich.R (KEGG, online REST or local cache)",
-    "KEGG pathway enrichment table / KEGG 富集结果表"),
+    "KEGG pathway enrichment table"),
   c("^Reactome_.*_dotplot\\.png$", "enrich.R (Reactome, offline cache)",
-    "Reactome pathway dotplot / Reactome 气泡图"),
+    "Reactome pathway dotplot"),
   c("^Reactome_.*\\.csv$", "enrich.R (Reactome, offline cache)",
-    "Reactome pathway enrichment table / Reactome 富集结果表")
+    "Reactome pathway enrichment table")
 )
 report_files <- setdiff(list.files(outdir), "REPORT.md")
 rl <- c("# Analysis Report — RNA-seq-enrichment (GO / KEGG / Reactome)", "",
         sprintf("- Input: DEG tables in `%s` (produced by the bulk-RNA-seq regular pipeline)", basename(deg_dir)),
         sprintf("- Organism: %s; cutoffs: padj < %g, |log2FC| > %g", organism, padj_cut, lfc_cut),
-        "- Gene sets: up/down per contrast, analyzed separately / 每个对比的上下调分开做",
+        "- Gene sets: up/down per contrast, analyzed separately",
         "",
         "| File | Produced by | What it is / use |", "|---|---|---|")
 for (f in sort(report_files)) {
