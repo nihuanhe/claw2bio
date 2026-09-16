@@ -1,9 +1,12 @@
 {
   "pipeline": "bulk-RNA-seq",
-  "skill_commit": "d8e4062",
-  "timestamp": "2026-09-16T13:36:18+08:00",
+  "skill_commit": "ab94ccc",
+  "timestamp": "2026-09-16T14:04:35+08:00",
   "engine": "deseq2",
   "engine_forced": false,
+  "exploratory_no_replicates": false,
+  "input_repairs": [],
+  "input_warnings": [],
   "parameters": {
     "control": "Control",
     "organism": "mouse",

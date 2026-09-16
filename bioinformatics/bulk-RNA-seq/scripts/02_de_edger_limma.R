@@ -71,6 +71,38 @@ if (mode == "trend") {
 # contrasts
 contr_str <- sapply(pairs, function(p) paste0(p[1], " - ", p[2]))
 contr_mat <- makeContrasts(contrasts = contr_str, levels = design)
+
+resid_df <- ncol(norm_mat) - qr(design)$rank
+if (resid_df < 1) {
+  # ---- exploratory mode: no residual degrees of freedom (n = 1 per group) ----
+  # A linear model cannot estimate variance here; report fold change only,
+  # with p values set to NA. The driver prints/REPORTs the loud warning.
+  cat("No residual degrees of freedom (n = 1 per group):\n")
+  cat("  EXPLORATORY output: fold change only, p values are NA. Do not use for conclusions.\n")
+  deg_tables <- list()
+  for (pr in pairs) {
+    treat <- pr[1]; ref <- pr[2]
+    logfc <- rowMeans(norm_mat[, group == treat, drop = FALSE]) -
+             rowMeans(norm_mat[, group == ref,   drop = FALSE])
+    df <- data.frame(
+      gene           = rownames(norm_mat),
+      baseMean       = as.numeric(rowMeans(norm_mat)),
+      log2FoldChange = as.numeric(logfc),
+      stat           = NA_real_,
+      pvalue         = NA_real_,
+      padj           = NA_real_,
+      stringsAsFactors = FALSE
+    )
+    df <- add_symbols(df, ORGANISM)
+    name <- save_deg(df, treat, ref, outdir)
+    deg_tables[[name]] <- df
+  }
+  cat("  (volcano/MA/heatmap skipped: no p values in exploratory mode)\n")
+  cat(sprintf("02_de (%s, mode=%s, exploratory) done.\n",
+              ifelse(mode == "trend", "limma-trend", "edgeR+limma-voom"), mode))
+  quit(save = "no", status = 0)
+}
+
 fit2 <- contrasts.fit(fit, contr_mat)
 fit2 <- eBayes(fit2, trend = (mode == "trend"), robust = TRUE)
 

@@ -47,8 +47,15 @@ dds <- DESeqDataSetFromMatrix(countData = counts, colData = col_data, design = ~
 dds <- DESeq(dds)
 cat("DESeq2 model fitted.\n")
 
-# vst-normalized values for heatmap / downstream skills (canonical name)
-vsd <- vst(dds, blind = FALSE)
+# vst-normalized values for heatmap / downstream skills (canonical name).
+# vst() needs >= nsub (1000) genes for its dispersion fit; small/targeted
+# matrices fall back to rlog (fine at that scale).
+vsd <- tryCatch(
+  vst(dds, blind = FALSE),
+  error = function(e) {
+    cat(sprintf("  vst failed (%s) — falling back to rlog\n", conditionMessage(e)))
+    rlog(dds, blind = FALSE)
+  })
 write.csv(data.frame(gene = rownames(assay(vsd)), assay(vsd), check.names = FALSE),
           file.path(outdir, "normalized_expression.csv"), row.names = FALSE)
 
