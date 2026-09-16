@@ -23,14 +23,30 @@ mode          <- if (!is.null(opt$mode)) opt$mode else "voom"   # voom | trend
 PADJ_CUTOFF   <<- as.numeric(if (!is.null(opt$padj)) opt$padj else 0.05)
 LFC_CUTOFF    <<- as.numeric(if (!is.null(opt$log2fc)) opt$log2fc else 1)
 ORGANISM      <- if (!is.null(opt$organism)) opt$organism else "mouse"
+PAIRWISE_MAX  <- as.integer(if (!is.null(opt$`pairwise-max`)) opt$`pairwise-max` else 4)
+CONTRASTS     <- opt$contrasts
 
 dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
 inp <- read_inputs(counts_path, metadata_path, control)
 group <- inp$group
-design <- model.matrix(~ 0 + group)
-colnames(design) <- levels(group)
+batch   <- get_covariate(inp$meta, opt$batch, group, "Batch")
+subject <- get_covariate(inp$meta, opt[["paired-by"]], group, "Paired-by (subject)")
+design <- if (!is.null(batch)) model.matrix(~ 0 + group + batch) else model.matrix(~ 0 + group)
+colnames(design)[seq_along(levels(group))] <- levels(group)
+cat("Design columns:", paste(colnames(design), collapse = ", "), "\n")
 
-pairs <- build_contrasts(group, control)
+# Fit wrapper: paired / repeated-measures designs go through duplicateCorrelation.
+fit_model <- function(mat, design) {
+  if (!is.null(subject)) {
+    corfit <- duplicateCorrelation(mat, design, block = subject)
+    cat(sprintf("  duplicateCorrelation consensus correlation: %.3f\n", corfit$consensus))
+    lmFit(mat, design, block = subject, correlation = corfit$consensus)
+  } else {
+    lmFit(mat, design)
+  }
+}
+
+pairs <- build_contrasts(group, control, PAIRWISE_MAX, CONTRASTS)
 cat("Contrasts:", paste(sapply(pairs, function(p) paste0(p[1], "_vs_", p[2])), collapse = ", "), "\n")
 
 if (mode == "trend") {
@@ -44,7 +60,7 @@ if (mode == "trend") {
   x <- x[keep, ]
   cat(sprintf("limma-trend on %d genes\n", nrow(x)))
   norm_mat <- x
-  fit <- lmFit(x, design)
+  fit <- fit_model(x, design)
   write.csv(data.frame(gene = rownames(x), x, check.names = FALSE),
             file.path(outdir, "normalized_expression.csv"), row.names = FALSE)
 } else {
@@ -63,7 +79,7 @@ if (mode == "trend") {
   dge <- calcNormFactors(dge, method = "TMM")
   v <- voom(dge, design, plot = FALSE)
   norm_mat <- v$E
-  fit <- lmFit(v, design)
+  fit <- fit_model(v, design)
   write.csv(data.frame(gene = rownames(norm_mat), norm_mat, check.names = FALSE),
             file.path(outdir, "normalized_expression.csv"), row.names = FALSE)
 }

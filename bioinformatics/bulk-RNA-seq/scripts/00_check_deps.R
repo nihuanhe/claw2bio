@@ -19,7 +19,7 @@ organism <- if (!is.null(opt$organism)) opt$organism else "mouse"
 bioc_pkgs <- c("DESeq2", "edgeR", "limma")
 orgdb <- if (organism == "human") "org.Hs.eg.db" else "org.Mm.eg.db"
 bioc_pkgs <- c(bioc_pkgs, orgdb)
-cran_pkgs <- c("pheatmap", "ggplot2", "ggrepel")
+cran_pkgs <- c("pheatmap", "ggplot2", "ggrepel", "statmod")  # statmod: duplicateCorrelation (paired designs)
 
 check <- function(pkgs) pkgs[!vapply(pkgs, requireNamespace, logical(1), quietly = TRUE)]
 

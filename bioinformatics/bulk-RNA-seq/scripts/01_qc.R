@@ -24,6 +24,7 @@ inp <- read_inputs(counts_path, metadata_path, control)
 counts <- inp$counts
 meta  <- inp$meta
 group <- inp$group
+batch <- get_covariate(meta, opt$batch, group, "Batch")
 cat("Groups:", paste(levels(group), collapse = ", "), "\n")
 cat("Samples per group:\n"); print(table(group))
 
@@ -50,8 +51,9 @@ pca <- prcomp(t(logcpm), scale. = FALSE)
 pct <- round(100 * (pca$sdev^2 / sum(pca$sdev^2)), 1)
 pca_df <- data.frame(PC1 = pca$x[, 1], PC2 = pca$x[, 2],
                      sample = rownames(pca$x), group = group)
+if (!is.null(batch)) pca_df$batch <- batch
 p <- ggplot(pca_df, aes(PC1, PC2, color = group, label = sample)) +
-  geom_point(size = 4) +
+  {if (!is.null(batch)) geom_point(aes(shape = batch), size = 4) else geom_point(size = 4)} +
   xlab(paste0("PC1: ", pct[1], "% variance")) +
   ylab(paste0("PC2: ", pct[2], "% variance")) +
   theme_bw() + theme(legend.position = "top")
@@ -60,13 +62,34 @@ ggsave(file.path(outdir, "QC_PCA_plot.pdf"), p, width = 8, height = 7)
 
 # Sample correlation heatmap
 cor_mat <- cor(logcpm)
-ann <- data.frame(Group = group); rownames(ann) <- colnames(logcpm)
+ann <- data.frame(Group = group)
+if (!is.null(batch)) ann$Batch <- batch
+rownames(ann) <- colnames(logcpm)
 png(file.path(outdir, "QC_sample_correlation_heatmap.png"), width = 1800, height = 1600, res = 300)
 pheatmap(cor_mat, annotation_col = ann, main = "Sample correlation (logCPM)")
 dev.off()
 pdf(file.path(outdir, "QC_sample_correlation_heatmap.pdf"), width = 8, height = 7)
 pheatmap(cor_mat, annotation_col = ann, main = "Sample correlation (logCPM)")
 dev.off()
+
+# Suspected-outlier flagging: mean within-group correlation. REPORT ONLY —
+# the pipeline never excludes samples on its own (use --exclude-samples).
+outlier_flags <- c()
+for (g in levels(group)) {
+  idx <- which(group == g)
+  if (length(idx) < 3) next
+  sub <- cor_mat[idx, idx, drop = FALSE]
+  for (i in seq_along(idx)) {
+    r <- mean(sub[i, -i])
+    if (r < 0.8) outlier_flags <- c(outlier_flags, sprintf("%s (group %s, mean within-group r = %.2f)",
+                                                           colnames(cor_mat)[idx[i]], g, r))
+  }
+}
+if (length(outlier_flags)) {
+  cat("Suspected outlier samples (REPORT ONLY -- nothing was excluded):\n")
+  cat(paste0("  - ", outlier_flags, collapse = "\n"), "\n")
+  cat("  If you judge a sample bad by eye, rerun with --exclude-samples.\n")
+}
 
 # QC summary
 sink(file.path(outdir, "QC_summary.txt"))
@@ -76,8 +99,13 @@ cat(sprintf("Input: %s\n", counts_path))
 cat(sprintf("Genes: %d before / %d after filtering\n", n_before, nrow(counts_f)))
 cat(sprintf("Samples: %d\n", ncol(counts_f)))
 cat("Groups:\n"); print(table(group))
+if (!is.null(batch)) { cat("\nBatch:\n"); print(table(batch, group)) }
 cat("\nLibrary sizes:\n"); print(lib)
 cat(sprintf("\nPCA variance explained: PC1 %.1f%%, PC2 %.1f%%\n", pct[1], pct[2]))
+if (length(outlier_flags)) {
+  cat("\nSuspected outlier samples (REPORT ONLY -- nothing was excluded):\n")
+  cat(paste0("  - ", outlier_flags, collapse = "\n"), "\n")
+}
 sink()
 
 cat("01_qc done. Outputs in", outdir, "\n")

@@ -337,6 +337,20 @@ def main():
     ap.add_argument("--organism", choices=["mouse", "human"], default="mouse")
     ap.add_argument("--padj", type=float, default=0.05)
     ap.add_argument("--log2fc", type=float, default=1.0)
+    ap.add_argument("--batch", default=None,
+                    help="metadata column with batch information; added to the design formula "
+                         "and used to colour/shape QC plots")
+    ap.add_argument("--paired-by", default=None, dest="paired_by",
+                    help="metadata column identifying the subject/patient/animal for paired or "
+                         "repeated-measures designs (forces limma + duplicateCorrelation)")
+    ap.add_argument("--pairwise-max", type=int, default=4,
+                    help="add all pairwise contrasts when group count <= this (default 4)")
+    ap.add_argument("--contrasts", default=None,
+                    help="explicit contrasts, e.g. 'TreatA vs Control, TreatB vs Control'; "
+                         "overrides automatic contrast generation")
+    ap.add_argument("--exclude-samples", default=None,
+                    help="comma-separated sample names to exclude explicitly (e.g. outliers "
+                         "you have judged by eye; the pipeline never excludes on its own)")
     ap.add_argument("--install-deps", action="store_true",
                     help="let the pipeline install missing R packages itself (BiocManager/CRAN)")
     ap.add_argument("--rscript", default=None, help="path to Rscript executable")
@@ -350,9 +364,49 @@ def main():
     rscript = find_rscript(args.rscript)
     counts2, meta2, df, meta, is_integer, sizes, min_n, control, fixes, warns = \
         inspect_and_repair(args.counts, args.metadata, args.control, args.output)
+
+    # ---- explicit sample exclusion (never automatic) ----
+    if args.exclude_samples:
+        excl = [s.strip() for s in args.exclude_samples.split(",") if s.strip()]
+        unknown = [s for s in excl if s not in set(meta["sample"])]
+        if unknown:
+            sys.exit(f"ERROR: --exclude-samples not found in metadata: {unknown}")
+        meta = meta[~meta["sample"].isin(excl)]
+        df = df[[c for c in df.columns if c not in set(excl)]]
+        counts2 = os.path.join(args.output, "cleaned_counts.csv")
+        meta2 = os.path.join(args.output, "cleaned_metadata.csv")
+        df.to_csv(counts2, index_label="gene")
+        meta.to_csv(meta2, index=False)
+        fixes.append(f"user-excluded {len(excl)} sample(s) via --exclude-samples: {excl}")
+        sizes = meta["group"].value_counts()
+        min_n = int(sizes.min())
+
+    # ---- design columns declared on the command line must exist in metadata ----
+    for flag, col in (("--batch", args.batch), ("--paired-by", args.paired_by)):
+        if col and col not in meta.columns:
+            sys.exit(f"ERROR: {flag} column '{col}' not in metadata columns {list(meta.columns)}.")
+
+    # ---- explicit contrasts, validated against the actual groups ----
+    explicit = None
+    if args.contrasts:
+        groups = set(meta["group"])
+        pairs = []
+        for item in args.contrasts.split(","):
+            m = re.split(r"\s+vs\.?\s+", item.strip(), flags=re.I)
+            if len(m) != 2:
+                sys.exit(f"ERROR: cannot parse contrast '{item}'. Use 'Treat vs Ref', comma-separated.")
+            if m[0] not in groups or m[1] not in groups:
+                sys.exit(f"ERROR: contrast '{item}' references group(s) not in metadata {sorted(groups)}.")
+            pairs.append((m[0], m[1]))
+        explicit = ";".join(f"{t}|{r}" for t, r in pairs)
+
     print(f"Counts: {df.shape[0]} genes x {df.shape[1]} samples")
     print("Group sizes:\n" + sizes.to_string())
     print(f"Control group: {control}")
+    if args.batch:
+        print(f"Batch column: {args.batch} (levels: {', '.join(sorted(set(meta[args.batch])))})")
+    if args.paired_by:
+        print(f"Paired by: {args.paired_by} ({meta[args.paired_by].nunique()} subjects)")
 
     # ---- Stage 00: dependency check BEFORE anything else ----
     here = os.path.dirname(os.path.abspath(__file__))
@@ -379,6 +433,7 @@ def main():
         sys.exit(3)
 
     forced = None if args.engine == "auto" else args.engine
+    forced_reason = None
     exploratory = min_n == 1
     if exploratory and not forced:
         print("\n" + "!" * 64)
@@ -388,13 +443,23 @@ def main():
         print("!! Treat all p values as descriptive only -- NOT usable for conclusions.")
         print("!! 无生物学重复：降级为 limma-trend 探索模式，REPORT 中会显著标记。")
         print("!" * 64 + "\n")
-        forced = "limma"
-    engine = select_engine(is_integer, min_n, args.voom_min_n, forced,
-                           forced_reason="no biological replicates (exploratory mode)" if exploratory else None)
+        forced, forced_reason = "limma", "no biological replicates (exploratory mode)"
+    elif args.paired_by and not forced:
+        forced = "edger-limma" if is_integer else "limma"
+        forced_reason = (f"paired/repeated-measures design (--paired-by {args.paired_by}): "
+                         "limma duplicateCorrelation is the standard approach for repeated measures")
+    engine = select_engine(is_integer, min_n, args.voom_min_n, forced, forced_reason=forced_reason)
 
     common = [counts2, meta2, args.output,
               "--control", control, "--organism", args.organism,
-              "--padj", str(args.padj), "--log2fc", str(args.log2fc)]
+              "--padj", str(args.padj), "--log2fc", str(args.log2fc),
+              "--pairwise-max", str(args.pairwise_max)]
+    if args.batch:
+        common += ["--batch", args.batch]
+    if args.paired_by:
+        common += ["--paired-by", args.paired_by]
+    if explicit:
+        common += ["--contrasts", explicit]
 
     run_stage(rscript, STAGE_QC, common, "01_qc")
     de_args = list(common)
@@ -541,6 +606,11 @@ def write_run_metadata(outdir, engine, forced, args, control, meta, counts_df, i
             "padj": args.padj,
             "log2fc": args.log2fc,
             "voom_min_n": args.voom_min_n,
+            "batch": args.batch,
+            "paired_by": args.paired_by,
+            "pairwise_max": args.pairwise_max,
+            "contrasts": args.contrasts,
+            "exclude_samples": args.exclude_samples,
         },
         "input": {
             "counts": os.path.basename(args.counts),

@@ -1,7 +1,7 @@
 {
   "pipeline": "bulk-RNA-seq",
-  "skill_commit": "ab94ccc",
-  "timestamp": "2026-09-16T14:04:35+08:00",
+  "skill_commit": "78feb20",
+  "timestamp": "2026-09-16T14:18:25+08:00",
   "engine": "deseq2",
   "engine_forced": false,
   "exploratory_no_replicates": false,
@@ -12,7 +12,12 @@
     "organism": "mouse",
     "padj": 0.05,
     "log2fc": 1.0,
-    "voom_min_n": 8
+    "voom_min_n": 8,
+    "batch": null,
+    "paired_by": null,
+    "pairwise_max": 4,
+    "contrasts": null,
+    "exclude_samples": null
   },
   "input": {
     "counts": "counts_matrix.csv",

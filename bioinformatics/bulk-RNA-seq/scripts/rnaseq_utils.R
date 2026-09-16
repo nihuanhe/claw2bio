@@ -47,17 +47,36 @@ read_inputs <- function(counts_path, metadata_path, control = NULL) {
   list(counts = counts, meta = meta, group = group)
 }
 
-# Contrast list: every group vs control; if <= 4 groups, all pairwise.
-build_contrasts <- function(group, control) {
+# Contrast list: every group vs control; if <= pairwise_max groups, all pairwise.
+# `explicit` (e.g. "treat|ref;treat2|ref2") overrides automatic generation.
+build_contrasts <- function(group, control, pairwise_max = 4, explicit = NULL) {
+  if (!is.null(explicit) && nzchar(explicit)) {
+    items <- strsplit(explicit, ";", fixed = TRUE)[[1]]
+    prs <- strsplit(items, "|", fixed = TRUE)
+    return(lapply(prs, function(p) c(p[1], p[2])))
+  }
   lv <- levels(group)
   ctrl <- if (!is.null(control) && control %in% lv) control else lv[1]
   others <- setdiff(lv, ctrl)
   pairs <- lapply(others, function(g) c(g, ctrl))
-  if (length(lv) <= 4 && length(others) > 1) {
+  if (length(lv) <= pairwise_max && length(others) > 1) {
     extra <- combn(others, 2, simplify = FALSE)
     pairs <- c(pairs, extra)
   }
   pairs  # each element c(treat, ref) -> "treat_vs_ref"
+}
+
+# Pull an optional design covariate (batch / subject) out of the metadata,
+# aligned to the sample order. Returns NULL when not requested or absent.
+get_covariate <- function(meta, col, group, label) {
+  if (is.null(col)) return(NULL)
+  if (!col %in% colnames(meta)) {
+    cat(sprintf("  WARNING: %s column '%s' not in metadata -- ignored\n", label, col))
+    return(NULL)
+  }
+  v <- factor(meta[[col]])
+  cat(sprintf("  %s: %d levels (%s)\n", label, nlevels(v), paste(levels(v), collapse = ", ")))
+  v
 }
 
 # Map Ensembl/Symbol IDs to gene Symbols and add as a `symbol` column.
