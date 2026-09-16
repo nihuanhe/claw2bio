@@ -11,7 +11,7 @@ read_table_smart <- function(path, row_names = TRUE) {
     df <- read.table(path, header = TRUE, sep = "", row.names = rn, check.names = FALSE)
   } else {
     df <- read.table(path, header = TRUE, sep = delim, row.names = rn,
-                     check.names = FALSE, quote = "")
+                     check.names = FALSE)
   }
   df
 }

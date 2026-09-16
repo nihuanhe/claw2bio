@@ -144,6 +144,9 @@ def main():
     ap.add_argument("--skip-enrich", action="store_true")
     ap.add_argument("--install-deps", action="store_true",
                     help="let the pipeline install missing R packages itself (BiocManager/CRAN)")
+    ap.add_argument("--genes", default=None,
+                    help="comma-separated genes of interest (e.g. TP53,GAPDH): per-gene group "
+                         "abundance plots, plus within-group comparison when ≥2 genes given")
     ap.add_argument("--rscript", default=None, help="path to Rscript executable")
     ap.add_argument("--overwrite", action="store_true")
     args = ap.parse_args()
@@ -196,6 +199,11 @@ def main():
     else:
         de_args += ["--mode", "voom"] if engine == "edger-limma" else []
     run_stage(rscript, ENGINE_SCRIPTS[engine], de_args, f"02_de ({engine})")
+    if args.genes:
+        run_stage(rscript, "04_gene_expression.R",
+                  [args.output, args.metadata,
+                   "--genes", args.genes, "--control", control],
+                  "04_gene_expression")
     if not args.skip_enrich:
         run_stage(rscript, STAGE_ENRICH,
                   [args.output, args.output, "--organism", args.organism,

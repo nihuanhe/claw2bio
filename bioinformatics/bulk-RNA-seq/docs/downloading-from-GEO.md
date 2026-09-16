@@ -53,7 +53,7 @@ very often gzipped (`.gz`) or as tar/zip bundles:
 - This skill's own reader (`read_table_smart` in `scripts/rnaseq_utils.R` and the
   Python driver) already auto-detects delimiter and gzip for the final matrix.
 
-## Step 3 — shape it for bulk-rnaseq
+## Step 3 — shape it for bulk-RNA-seq
 
 The skill needs two files:
 

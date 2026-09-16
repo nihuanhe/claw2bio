@@ -1,4 +1,4 @@
-# bulk-rnaseq
+# bulk-RNA-seq
 
 Bulk RNA-seq differential expression + enrichment pipeline with a data-driven
 engine fork. Refactored from lab-validated R scripts.
@@ -14,7 +14,10 @@ bulk RNA-seq 差异表达与富集分析流程，引擎按数据自动分叉；�
    - integer counts, min group n < 8 → **DESeq2**
    - integer counts, min group n ≥ 8 → **edgeR + limma-voom**
 3. **Visualization** — volcano plots (top-10 labels), z-scored DEG heatmap.
-4. **Enrichment** — clusterProfiler GO (BP/MF/CC) + KEGG, up/down separately per contrast.
+4. **Gene-of-interest plots** (`--genes Trp53,Gapdh`) — per-gene group abundance
+   bars (SD + jitter + t-test/ANOVA) and within-group two-gene comparison bars
+   (paired t-test per group).
+5. **Enrichment** — clusterProfiler GO (BP/MF/CC) + KEGG, up/down separately per contrast.
 
 **Gene ID conversion is built into the DEG step**: Ensembl IDs (version-stripped)
 or Symbols are mapped to gene Symbols via the OrgDb; DEG tables gain a `symbol`
@@ -43,7 +46,7 @@ Download page (COS) for fast domestic installation.
 ## Quick start
 
 ```bash
-cd bioinformatics/bulk-rnaseq
+cd bioinformatics/bulk-RNA-seq
 python scripts/run_rnaseq.py \
   examples/input/counts_matrix.csv \
   examples/input/sample_metadata.csv \
@@ -86,16 +89,18 @@ Force with `--engine`, tune the switch point with `--voom-min-n`.
 ## File structure
 
 ```
-bulk-rnaseq/
+bulk-RNA-seq/
 ├── SKILL.md
 ├── README.md
 ├── scripts/
 │   ├── run_rnaseq.py        # diagnosis + engine fork + stage driver
+│   ├── 00_check_deps.R      # dependency gate (install / verify)
 │   ├── 01_qc.R              # filtering, logCPM, PCA, correlation heatmap
 │   ├── 02_de_deseq2.R       # DESeq2 branch
 │   ├── 02_de_edger_limma.R  # edgeR+limma-voom branch / limma-trend (--mode trend)
 │   ├── 03_enrich.R          # clusterProfiler GO/KEGG
-│   └── rnaseq_utils.R       # shared helpers (contrasts, volcano, heatmap)
+│   ├── 04_gene_expression.R # gene-of-interest abundance / comparison bars
+│   └── rnaseq_utils.R       # shared helpers (smart reader, contrasts, volcano, heatmap)
 └── examples/
     ├── input/               # GSE270189: mouse prostate basal, Control/Mutant/Mutant_Rap (n=2 each)
     └── output/              # real pipeline output for the bundled example

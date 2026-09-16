@@ -1,9 +1,9 @@
 ---
-name: bulk-rnaseq
+name: bulk-RNA-seq
 description: Bulk RNA-seq differential expression and enrichment from a count matrix. Data-driven engine fork — non-integer/normalized input → limma-trend, integer counts with small n → DESeq2, integer counts with large n → edgeR+limma-voom — always printing WHY the engine was chosen. Outputs QC (PCA/correlation), DEG tables, volcano plots, DEG heatmap, and GO/KEGG enrichment.（中文摘要：bulk RNA-seq 从 counts 矩阵到差异表达与富集分析的全流程。按数据自动选择引擎（非整数→limma-trend；整数小样本→DESeq2；整数大样本→edgeR+limma-voom），并强制打印选择理由。输出 QC、DEG 表、火山图、热图、GO/KEGG 富集。）
 ---
 
-# Skill: bulk-rnaseq
+# Skill: bulk-RNA-seq
 
 ## Trigger phrases
 
@@ -44,13 +44,28 @@ python scripts/run_rnaseq.py <counts.csv> <metadata.csv> <output_dir> \
 Example (bundled GSE270189, mouse prostate basal cells, 3 groups × 2 replicates):
 
 ```bash
-cd bioinformatics/bulk-rnaseq
+cd bioinformatics/bulk-RNA-seq
 python scripts/run_rnaseq.py \
   examples/input/counts_matrix.csv \
   examples/input/sample_metadata.csv \
   examples/output \
-  --control Control --organism mouse --overwrite
+  --control Control --organism mouse --genes Trp53,Gapdh --overwrite
 ```
+
+## Gene-of-interest plots (stage 04)
+
+Pass `--genes GENE1[,GENE2,...]` and, after the DE stage, the pipeline adds:
+
+- **Per gene**: abundance across groups — bar + SD error bars + jittered points,
+  with t-test (2 groups) or ANOVA + Tukey (≥3 groups) annotated
+  (`GeneExpr_<GENE>_by_group.png/pdf` + values CSV).
+- **Two or more genes**: within-group comparison for each gene pair — dodged bars
+  + SD + points, with a **paired** t-test per group
+  (`GeneExpr_compare_<G1>_vs_<G2>_within_group.png/pdf` + values CSV).
+
+Gene queries accept Ensembl IDs or symbols (case-insensitive, matched against the
+DEG symbol map — use the **target species'** symbols, e.g. `TP53` for human,
+`Trp53` for mouse).
 
 ## Input format
 
@@ -120,6 +135,7 @@ when Bioconductor/CRAN is slow or unreachable. Also mirrored on COS at launch.
 | `--padj` | 0.05 | adjusted-p significance cutoff |
 | `--log2fc` | 1 | |log2FC| cutoff |
 | `--skip-enrich` | off | stop after stage 02 |
+| `--genes` | — | genes of interest for stage-04 expression plots (comma-separated) |
 | `--install-deps` | off | auto-install missing R packages (BiocManager/CRAN) |
 | `--rscript` | auto-detect | path to Rscript |
 | `--overwrite` | off | allow non-empty output dir |
@@ -141,4 +157,4 @@ when Bioconductor/CRAN is slow or unreachable. Also mirrored on COS at launch.
 - Enrichment maps Ensembl (version suffix stripped) or Symbol IDs to Entrez via the OrgDb.
 - DEG tables and figures use converted gene symbols wherever a mapping exists.
 
-> 中文提示：输入可以是 csv/tsv/txt 及 .gz 压缩（自动识别分隔符与压缩；zip/tar 需先解压）；GEO 数据获取见 docs/downloading-from-GEO.md；基因 ID 转换包（org.Mm.eg.db / org.Hs.eg.db）属于本技能输入资源，体积大故随 COS 分发（见 Download 页）；开跑前自动检查 R 依赖，缺包时可选手动安装（miniconda/BiocManager）或加 `--install-deps` 让 agent 代装，装好后还会复检；DEG 表和图默认用转换后的基因名（Symbol）；KEGG 富集需联网，离线自动跳过；不改输入文件。
+> 中文提示：`--genes` 指定关注基因（如 TP53,GAPDH；物种符号要对，鼠用 Trp53/Gapdh），自动出“单基因跨组丰度柱状图（带 SD 误差线+散点+统计）”和“同组内两基因表达对比柱状图（配对 t 检验）”；输入可以是 csv/tsv/txt 及 .gz 压缩（自动识别分隔符与压缩；zip/tar 需先解压）；GEO 数据获取见 docs/downloading-from-GEO.md；基因 ID 转换包（org.Mm.eg.db / org.Hs.eg.db）属于本技能输入资源，体积大故随 COS 分发（见 Download 页）；开跑前自动检查 R 依赖，缺包时可选手动安装（miniconda/BiocManager）或加 `--install-deps` 让 agent 代装，装好后还会复检；DEG 表和图默认用转换后的基因名（Symbol）；KEGG 富集需联网，离线自动跳过；不改输入文件。
