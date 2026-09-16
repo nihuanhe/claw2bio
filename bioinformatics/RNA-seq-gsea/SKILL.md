@@ -42,6 +42,8 @@ Rscript scripts/gsea.R <DEG_table.csv>
   (registration/download terms).
 - Outputs per GMT: `GSEA_<label>_<gmt>.csv` (NES/padj/leadingEdge), a top-15
   NES dotplot, and the classic enrichment curve of the top significant set.
+- Every run also writes **`REPORT.md`** into the output dir — a file-by-file guide
+  (which step produced it, what it is for / 产出文件说明).
 
 ## Dependencies
 

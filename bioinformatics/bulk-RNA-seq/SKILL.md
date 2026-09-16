@@ -121,6 +121,7 @@ when Bioconductor/CRAN is slow or unreachable. Also mirrored on COS at launch.
 | `DEG_<treat>_vs_<ref>.csv` | full DEG table per contrast (common schema across engines) |
 | `Volcano_<treat>_vs_<ref>.png/pdf` | volcano with top-10 gene labels |
 | `DEG_heatmap.png/pdf` | top DEGs, z-scored |
+| `REPORT.md` | auto-written into the output dir every run: which stage produced each file and what it is for / 产出文件说明（自动写入输出目录） |
 
 ## Parameters
 

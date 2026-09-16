@@ -43,6 +43,8 @@ Rscript scripts/gene_expression.R <norm_matrix.csv> <metadata.csv>
   `Trp53` for mouse.
 - Outputs: `GeneExpr_<GENE>_by_group.png/pdf` + values CSV per gene; with ≥2
   genes also `GeneExpr_compare_<G1>_vs_<G2>_within_group.png/pdf` + values CSV.
+- Every run also writes **`REPORT.md`** into the output dir — a file-by-file guide
+  (which step produced it, what it is for / 产出文件说明).
 
 ## Dependencies
 

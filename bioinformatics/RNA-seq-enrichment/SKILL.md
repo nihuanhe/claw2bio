@@ -32,6 +32,8 @@ Rscript scripts/enrich.R <deg_dir> <outdir> [--organism mouse|human]
 - Every `DEG_<A>_vs_<B>.csv` in `<deg_dir>` yields up/down gene sets → per-set
   GO tables + dotplots, KEGG table + dotplot, Reactome table + dotplot.
 - `--offline`: skip the KEGG online attempt, use the local cache directly.
+- Every run also writes **`REPORT.md`** into the output dir — a file-by-file guide
+  (which step produced it, what it is for / 产出文件说明).
 
 ## Pathway caches (offline mode)
 
