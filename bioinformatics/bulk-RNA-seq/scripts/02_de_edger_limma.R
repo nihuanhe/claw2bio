@@ -109,7 +109,7 @@ if (resid_df < 1) {
       padj           = NA_real_,
       stringsAsFactors = FALSE
     )
-    df <- add_symbols(df, ORGANISM)
+    df <- add_symbols(df, ORGANISM, opt$orgdb, opt$`gene-map`)
     name <- save_deg(df, treat, ref, outdir)
     deg_tables[[name]] <- df
   }
@@ -135,7 +135,7 @@ for (i in seq_along(pairs)) {
     padj           = tt$adj.P.Val,
     stringsAsFactors = FALSE
   )
-  df <- add_symbols(df, ORGANISM)   # gene ID conversion: Ensembl -> Symbol
+  df <- add_symbols(df, ORGANISM, opt$orgdb, opt$`gene-map`)   # gene ID conversion
   name <- save_deg(df, treat, ref, outdir)
   make_volcano(df, treat, ref, outdir)
   make_ma(df, treat, ref, outdir, x_is_log = TRUE)   # AveExpr is log-scale

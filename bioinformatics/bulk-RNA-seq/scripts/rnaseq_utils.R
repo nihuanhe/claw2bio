@@ -79,18 +79,41 @@ get_covariate <- function(meta, col, group, label) {
   v
 }
 
-# Map Ensembl/Symbol IDs to gene Symbols and add as a `symbol` column.
-# Used so that every downstream figure/table speaks in gene symbols.
-add_symbols <- function(df, organism = "mouse") {
-  orgdb_name <- if (organism == "human") "org.Hs.eg.db" else "org.Mm.eg.db"
+# Map gene IDs to gene Symbols and add as a `symbol` column.
+# Routes (priority): --gene-map CSV > --orgdb package > organism shortcut.
+# ID type auto-detected: Ensembl (version-stripped) / Entrez / Symbol.
+add_symbols <- function(df, organism = "mouse", orgdb = NULL, gene_map = NULL) {
+  genes <- df$gene
+
+  # ---- route 1: user-supplied two-column map (non-model organisms, GEO annotation) ----
+  if (!is.null(gene_map)) {
+    gm <- tryCatch(read.csv(gene_map, stringsAsFactors = FALSE), error = function(e) NULL)
+    if (is.null(gm) || ncol(gm) < 2) {
+      cat("  (could not read --gene-map as two-column CSV — keeping raw IDs)\n")
+      return(df)
+    }
+    map <- setNames(as.character(gm[[2]]), tolower(trimws(as.character(gm[[1]]))))
+    ids <- gsub("\\..*", "", genes)   # tolerate Ensembl version suffixes in the matrix
+    sym <- unname(map[tolower(ids)])
+    sym <- ifelse(is.na(sym) | sym == "", genes, sym)
+    df$symbol <- sym
+    df <- df[, c("gene", "symbol", setdiff(colnames(df), c("gene", "symbol")))]
+    cat(sprintf("  gene-map conversion: %d/%d genes mapped\n",
+                sum(sym != genes), length(genes)))
+    return(df)
+  }
+
+  # ---- route 2/3: OrgDb package ----
+  orgdb_name <- if (!is.null(orgdb)) orgdb else switch(organism,
+                 human = "org.Hs.eg.db", rat = "org.Rn.eg.db", "org.Mm.eg.db")
   if (!requireNamespace(orgdb_name, quietly = TRUE)) {
     cat(sprintf("  (%s not installed — keeping raw IDs in outputs)\n", orgdb_name))
     return(df)
   }
-  genes <- df$gene
   is_ens <- mean(grepl("^ENS", genes)) > 0.5
+  is_entrez <- mean(grepl("^[0-9]+$", genes)) > 0.9
   ids <- if (is_ens) gsub("\\..*", "", genes) else genes   # strip Ensembl versions
-  keytype <- if (is_ens) "ENSEMBL" else "SYMBOL"
+  keytype <- if (is_ens) "ENSEMBL" else if (is_entrez) "ENTREZID" else "SYMBOL"
   conv <- tryCatch(
     clusterProfiler::bitr(ids, fromType = keytype, toType = "SYMBOL", OrgDb = orgdb_name),
     error = function(e) NULL)
@@ -99,8 +122,8 @@ add_symbols <- function(df, organism = "mouse") {
   sym <- conv$SYMBOL[match(ids, conv[[1]])]
   df$symbol <- ifelse(is.na(sym), genes, sym)
   df <- df[, c("gene", "symbol", setdiff(colnames(df), c("gene", "symbol")))]
-  cat(sprintf("  ID conversion: %d/%d genes mapped to symbols\n",
-              sum(!is.na(sym)), length(genes)))
+  cat(sprintf("  ID conversion (%s, %s): %d/%d genes mapped to symbols\n",
+              orgdb_name, keytype, sum(!is.na(sym)), length(genes)))
   df
 }
 

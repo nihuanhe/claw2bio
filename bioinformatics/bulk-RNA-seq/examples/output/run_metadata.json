@@ -1,7 +1,7 @@
 {
   "pipeline": "bulk-RNA-seq",
-  "skill_commit": "78feb20",
-  "timestamp": "2026-09-16T14:18:25+08:00",
+  "skill_commit": "ac3de29",
+  "timestamp": "2026-09-16T14:24:25+08:00",
   "engine": "deseq2",
   "engine_forced": false,
   "exploratory_no_replicates": false,

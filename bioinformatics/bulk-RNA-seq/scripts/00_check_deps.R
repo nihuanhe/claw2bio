@@ -17,8 +17,13 @@ opt <- parse_args(commandArgs(trailingOnly = TRUE))
 organism <- if (!is.null(opt$organism)) opt$organism else "mouse"
 
 bioc_pkgs <- c("DESeq2", "edgeR", "limma")
-orgdb <- if (organism == "human") "org.Hs.eg.db" else "org.Mm.eg.db"
-bioc_pkgs <- c(bioc_pkgs, orgdb)
+orgdb <- if (!is.null(opt$orgdb)) opt$orgdb else switch(organism,
+         human = "org.Hs.eg.db", rat = "org.Rn.eg.db", "org.Mm.eg.db")
+if (!is.null(opt$`gene-map`)) {
+  cat("--gene-map supplied: OrgDb package not required.\n")
+} else {
+  bioc_pkgs <- c(bioc_pkgs, orgdb)
+}
 cran_pkgs <- c("pheatmap", "ggplot2", "ggrepel", "statmod")  # statmod: duplicateCorrelation (paired designs)
 
 check <- function(pkgs) pkgs[!vapply(pkgs, requireNamespace, logical(1), quietly = TRUE)]

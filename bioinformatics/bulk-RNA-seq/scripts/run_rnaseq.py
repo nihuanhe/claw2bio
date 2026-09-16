@@ -334,7 +334,15 @@ def main():
                     help="force DE engine; default 'auto' = data-driven selection")
     ap.add_argument("--voom-min-n", type=int, default=8,
                     help="min group size at which edgeR+limma-voom is preferred over DESeq2 (default 8)")
-    ap.add_argument("--organism", choices=["mouse", "human"], default="mouse")
+    ap.add_argument("--organism", choices=["mouse", "human", "rat"], default="mouse",
+                    help="OrgDb shortcut: mouse=org.Mm.eg.db, human=org.Hs.eg.db, rat=org.Rn.eg.db")
+    ap.add_argument("--orgdb", default=None,
+                    help="any Bioconductor OrgDb package name (e.g. org.Dm.eg.db for fly); "
+                         "overrides the --organism shortcut")
+    ap.add_argument("--gene-map", default=None, dest="gene_map",
+                    help="two-column CSV (id,symbol) for ID conversion without an OrgDb "
+                         "(e.g. non-model organisms, or the gene_annotation.csv split off "
+                         "a mixed input matrix); overrides OrgDb conversion")
     ap.add_argument("--padj", type=float, default=0.05)
     ap.add_argument("--log2fc", type=float, default=1.0)
     ap.add_argument("--batch", default=None,
@@ -411,6 +419,12 @@ def main():
     # ---- Stage 00: dependency check BEFORE anything else ----
     here = os.path.dirname(os.path.abspath(__file__))
     dep_cmd = [rscript, os.path.join(here, "00_check_deps.R"), "--organism", args.organism]
+    if args.orgdb:
+        dep_cmd += ["--orgdb", args.orgdb]
+    if args.gene_map:
+        if not os.path.exists(args.gene_map):
+            sys.exit(f"ERROR: --gene-map file not found: {args.gene_map}")
+        dep_cmd += ["--gene-map", args.gene_map]
     if args.install_deps:
         dep_cmd.append("--install")
     dep = subprocess.run(dep_cmd)
@@ -454,6 +468,10 @@ def main():
               "--control", control, "--organism", args.organism,
               "--padj", str(args.padj), "--log2fc", str(args.log2fc),
               "--pairwise-max", str(args.pairwise_max)]
+    if args.orgdb:
+        common += ["--orgdb", args.orgdb]
+    if args.gene_map:
+        common += ["--gene-map", args.gene_map]
     if args.batch:
         common += ["--batch", args.batch]
     if args.paired_by:

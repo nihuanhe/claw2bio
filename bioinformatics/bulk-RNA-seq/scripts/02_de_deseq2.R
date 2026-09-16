@@ -79,7 +79,7 @@ for (pr in pairs) {
   df <- as.data.frame(res)
   df$gene <- rownames(df)
   df <- df[, c("gene", "baseMean", "log2FoldChange", "lfcSE", "stat", "pvalue", "padj")]
-  df <- add_symbols(df, ORGANISM)   # gene ID conversion: Ensembl -> Symbol
+  df <- add_symbols(df, ORGANISM, opt$orgdb, opt$`gene-map`)   # gene ID conversion
   name <- save_deg(df, treat, ref, outdir)
   make_volcano(df, treat, ref, outdir)
   make_ma(df, treat, ref, outdir, x_is_log = FALSE)   # baseMean = raw-count scale
