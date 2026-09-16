@@ -8,9 +8,9 @@ then drives the staged R scripts via subprocess:
     01_qc.R  ->  02_de_<engine>.R     (regular pipeline stops at DEG tables)
 
 Personalized follow-ups live in separate skills (consume this pipeline's outputs):
-    ../rnaseq-enrichment   GO / KEGG / Reactome enrichment from DEG tables
-    ../rnaseq-gene-plot    gene-of-interest abundance / comparison bar plots
-    ../rnaseq-gsea         GSEA from DEG tables (fgsea + MSigDB GMT)
+    ../RNA-seq-enrichment   GO / KEGG / Reactome enrichment from DEG tables
+    ../RNA-seq-gene-plot    gene-of-interest abundance / comparison bar plots
+    ../RNA-seq-gsea         GSEA from DEG tables (fgsea + MSigDB GMT)
 """
 
 import argparse
@@ -200,7 +200,7 @@ def main():
         de_args += ["--mode", "voom"] if engine == "edger-limma" else []
     run_stage(rscript, ENGINE_SCRIPTS[engine], de_args, f"02_de ({engine})")
     print("\nRegular pipeline finished (QC + DEG). Outputs in:", os.path.abspath(args.output))
-    print("Next personalized steps: ../rnaseq-enrichment, ../rnaseq-gene-plot, ../rnaseq-gsea")
+    print("Next personalized steps: ../RNA-seq-enrichment, ../RNA-seq-gene-plot, ../RNA-seq-gsea")
 
 
 if __name__ == "__main__":

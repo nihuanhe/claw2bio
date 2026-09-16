@@ -1,4 +1,4 @@
-# Examples — rnaseq-enrichment
+# Examples — RNA-seq-enrichment
 
 `input/` holds the three `DEG_*.csv` tables produced by the **bulk-RNA-seq**
 skill's example run (GSE270189, mouse prostate basal cells, DESeq2 branch).

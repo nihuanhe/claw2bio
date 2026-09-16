@@ -1,4 +1,4 @@
-# Examples — rnaseq-gsea
+# Examples — RNA-seq-gsea
 
 `input/` holds one `DEG_*.csv` table from the **bulk-RNA-seq** skill's example
 run (GSE270189, Mutant vs Control, DESeq2 branch). `output/` is the real result

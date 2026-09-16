@@ -1,4 +1,4 @@
-# rnaseq-enrichment
+# RNA-seq-enrichment
 
 GO / KEGG / Reactome enrichment from bulk RNA-seq DEG tables — a personalized
 follow-up skill for [bulk-RNA-seq](../bulk-RNA-seq).
@@ -7,7 +7,7 @@ follow-up skill for [bulk-RNA-seq](../bulk-RNA-seq).
 (`counts → QC → DEG`); this skill consumes its `DEG_*.csv` outputs.
 
 ```
-rnaseq-enrichment/
+RNA-seq-enrichment/
 ├── SKILL.md
 ├── scripts/
 │   ├── 00_check_deps.R        # dependency gate (clusterProfiler/DOSE/enrichplot/OrgDb)

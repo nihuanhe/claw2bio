@@ -1,4 +1,4 @@
-# Examples — rnaseq-gene-plot
+# Examples — RNA-seq-gene-plot
 
 `input/` holds products of the **bulk-RNA-seq** skill's example run (GSE270189,
 DESeq2 branch): the vst-normalized matrix, the sample metadata, and one DEG

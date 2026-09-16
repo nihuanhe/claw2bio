@@ -1,6 +1,6 @@
 ---
 name: bulk-RNA-seq
-description: Bulk RNA-seq differential expression from a count matrix (regular pipeline — stops at DEG tables). Data-driven engine fork — non-integer/normalized input → limma-trend, integer counts with small n → DESeq2, integer counts with large n → edgeR+limma-voom — always printing WHY the engine was chosen. Outputs QC (PCA/correlation), DEG tables, volcano plots, DEG heatmap. Follow-up personalized skills consume its outputs — rnaseq-enrichment (GO/KEGG/Reactome), rnaseq-gene-plot (gene-of-interest bar charts), rnaseq-gsea (GSEA).（中文摘要：bulk RNA-seq 从 counts 矩阵到差异表达的常规流程（到 DEG 为止）。按数据自动选择引擎并强制打印理由。富集、指定基因柱状图、GSEA 是三个独立的后续个性化 skill，都吃本流程的产出。）
+description: Bulk RNA-seq differential expression from a count matrix (regular pipeline — stops at DEG tables). Data-driven engine fork — non-integer/normalized input → limma-trend, integer counts with small n → DESeq2, integer counts with large n → edgeR+limma-voom — always printing WHY the engine was chosen. Outputs QC (PCA/correlation), DEG tables, volcano plots, DEG heatmap. Follow-up personalized skills consume its outputs — RNA-seq-enrichment (GO/KEGG/Reactome), RNA-seq-gene-plot (gene-of-interest bar charts), RNA-seq-gsea (GSEA).（中文摘要：bulk RNA-seq 从 counts 矩阵到差异表达的常规流程（到 DEG 为止）。按数据自动选择引擎并强制打印理由。富集、指定基因柱状图、GSEA 是三个独立的后续个性化 skill，都吃本流程的产出。）
 ---
 
 # Skill: bulk-RNA-seq (regular pipeline: counts → DEG)
@@ -13,7 +13,7 @@ description: Bulk RNA-seq differential expression from a count matrix (regular p
 - bulk RNA-seq 差异分析 / 火山图
 
 (Follow-ups — enrichment / gene plots / GSEA — are separate skills:
-`rnaseq-enrichment`, `rnaseq-gene-plot`, `rnaseq-gsea`.)
+`RNA-seq-enrichment`, `RNA-seq-gene-plot`, `RNA-seq-gsea`.)
 
 ## What it does
 
@@ -60,9 +60,9 @@ python scripts/run_rnaseq.py \
 
 | Skill | Input from this pipeline | What it adds |
 |---|---|---|
-| `../rnaseq-enrichment` | `DEG_*.csv` | GO / KEGG / Reactome enrichment (offline-capable) |
-| `../rnaseq-gene-plot` | normalized matrix + metadata (+ DEG for symbols) | gene-of-interest bar charts (cross-group; within-group two-gene) |
-| `../rnaseq-gsea` | `DEG_*.csv` | GSEA (fgsea + MSigDB GMT) |
+| `../RNA-seq-enrichment` | `DEG_*.csv` | GO / KEGG / Reactome enrichment (offline-capable) |
+| `../RNA-seq-gene-plot` | normalized matrix + metadata (+ DEG for symbols) | gene-of-interest bar charts (cross-group; within-group two-gene) |
+| `../RNA-seq-gsea` | `DEG_*.csv` | GSEA (fgsea + MSigDB GMT) |
 
 ## Input format
 
@@ -104,7 +104,7 @@ packages — treat them as part of the skill's input assets:
 Install a downloaded archive (same R major.minor version, Windows):
 `install.packages("org.Mm.eg.db.zip", repos = NULL, type = "win.binary")`.
 Stage 00 verifies the package matching `--organism` before anything runs.
-(The same OrgDb install also serves the rnaseq-enrichment and rnaseq-gsea skills.)
+(The same OrgDb install also serves the RNA-seq-enrichment and RNA-seq-gsea skills.)
 
 **Fully offline route**: `resources/r-deps/` is a Windows-binary mini-repo of the
 entire R dependency closure (139 packages incl. the enrichment/GSEA skills'
@@ -153,4 +153,4 @@ when Bioconductor/CRAN is slow or unreachable. Also mirrored on COS at launch.
 - DEG tables map Ensembl (version suffix stripped) or Symbol IDs to Entrez/Symbol
   via the OrgDb; tables and figures use converted gene symbols wherever a mapping exists.
 
-> 中文提示：本 skill 只跑到 DEG（常规步骤）；富集（GO/KEGG/Reactome）、指定基因柱状图、GSEA 是三个独立 skill（rnaseq-enrichment / rnaseq-gene-plot / rnaseq-gsea），都用本流程的产出作为输入。输入可以是 csv/tsv/txt 及 .gz 压缩（自动识别分隔符与压缩；zip/tar 需先解压）；GEO 数据获取见 docs/downloading-from-GEO.md；基因 ID 转换包（org.Mm.eg.db / org.Hs.eg.db）属于本技能输入资源，体积大故随 COS 分发（见 Download 页）；开跑前自动检查 R 依赖，缺包时可选手动安装（miniconda/BiocManager）或加 `--install-deps` 让 agent 代装，装好后还会复检；DEG 表和图默认用转换后的基因名（Symbol）；不改输入文件。
+> 中文提示：本 skill 只跑到 DEG（常规步骤）；富集（GO/KEGG/Reactome）、指定基因柱状图、GSEA 是三个独立 skill（RNA-seq-enrichment / RNA-seq-gene-plot / RNA-seq-gsea），都用本流程的产出作为输入。输入可以是 csv/tsv/txt 及 .gz 压缩（自动识别分隔符与压缩；zip/tar 需先解压）；GEO 数据获取见 docs/downloading-from-GEO.md；基因 ID 转换包（org.Mm.eg.db / org.Hs.eg.db）属于本技能输入资源，体积大故随 COS 分发（见 Download 页）；开跑前自动检查 R 依赖，缺包时可选手动安装（miniconda/BiocManager）或加 `--install-deps` 让 agent 代装，装好后还会复检；DEG 表和图默认用转换后的基因名（Symbol）；不改输入文件。

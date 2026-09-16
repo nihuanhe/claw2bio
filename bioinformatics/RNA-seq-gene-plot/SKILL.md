@@ -1,5 +1,5 @@
 ---
-name: rnaseq-gene-plot
+name: RNA-seq-gene-plot
 description: Gene-of-interest expression plots from bulk RNA-seq results — per-gene abundance across groups and within-group two-gene comparison, as bar charts with SD error bars, jittered points, and statistics (t-test / ANOVA+Tukey / paired t-test). Use after the bulk-RNA-seq pipeline — when the user asks 某基因在不同分组的表达柱状图, 比较同组内两个基因表达量, e.g. TP53 abundance, TP53 vs GAPDH.
 ---
 
@@ -22,7 +22,7 @@ skill its `vst_normalized_counts.csv` (or `voom_normalized_logcpm.csv` /
 ## Quick start
 
 ```bash
-cd bioinformatics/rnaseq-gene-plot
+cd bioinformatics/RNA-seq-gene-plot
 Rscript scripts/gene_expression.R \
   examples/input/vst_normalized_counts.csv \
   examples/input/sample_metadata.csv \

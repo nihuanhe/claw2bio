@@ -1,5 +1,5 @@
 ---
-name: rnaseq-enrichment
+name: RNA-seq-enrichment
 description: GO / KEGG / Reactome enrichment analysis from bulk RNA-seq DEG tables (clusterProfiler, offline-capable). Use after the bulk-RNA-seq regular pipeline has produced DEG_*.csv files — when the user asks for 富集分析, GO/KEGG pathway analysis, dotplots of enriched terms. Works fully offline via local pathway caches.
 ---
 
@@ -17,7 +17,7 @@ Point this skill at the pipeline's output directory (or any folder containing
 ## Quick start
 
 ```bash
-cd bioinformatics/rnaseq-enrichment
+cd bioinformatics/RNA-seq-enrichment
 Rscript scripts/00_check_deps.R --organism mouse        # dependency gate
 Rscript scripts/enrich.R examples/input examples/output --organism mouse
 ```

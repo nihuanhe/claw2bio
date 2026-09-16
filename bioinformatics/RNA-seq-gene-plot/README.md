@@ -1,4 +1,4 @@
-# rnaseq-gene-plot
+# RNA-seq-gene-plot
 
 Gene-of-interest expression bar charts from bulk RNA-seq results — a personalized
 follow-up skill for [bulk-RNA-seq](../bulk-RNA-seq).
@@ -9,7 +9,7 @@ follow-up skill for [bulk-RNA-seq](../bulk-RNA-seq).
 the sample metadata, and optionally a `DEG_*.csv` for symbol mapping.
 
 ```
-rnaseq-gene-plot/
+RNA-seq-gene-plot/
 ├── SKILL.md
 ├── scripts/
 │   └── gene_expression.R   # per-gene group bars + within-group two-gene comparison

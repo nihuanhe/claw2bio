@@ -47,7 +47,7 @@ if (length(gmt_files) == 0) stop("no GMT files found — put MSigDB .gmt files i
 
 orgdb_name <- if (organism == "human") "org.Hs.eg.db" else "org.Mm.eg.db"
 
-cat("=== Claw2Bio rnaseq-gsea ===\n")
+cat("=== Claw2Bio RNA-seq-gsea ===\n")
 cat("DEG table:", basename(deg_file), "\n")
 cat("GMT files:", paste(basename(gmt_files), collapse = ", "), "\n")
 

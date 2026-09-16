@@ -34,8 +34,8 @@ python scripts/run_rnaseq.py \
 4. **Volcano plots** per contrast (symbol-labelled) + `DEG_heatmap.png`.
 
 The regular pipeline stops here. Personalized follow-ups on these outputs:
-`../../rnaseq-enrichment` (GO/KEGG/Reactome), `../../rnaseq-gene-plot`
-(Trp53/Gapdh bar charts), `../../rnaseq-gsea` (GSEA).
+`../../RNA-seq-enrichment` (GO/KEGG/Reactome), `../../RNA-seq-gene-plot`
+(Trp53/Gapdh bar charts), `../../RNA-seq-gsea` (GSEA).
 
 ## Output committed here
 

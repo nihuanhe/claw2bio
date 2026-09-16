@@ -1,12 +1,12 @@
 ---
-name: rnaseq-gsea
+name: RNA-seq-gsea
 description: GSEA (gene set enrichment analysis) on bulk RNA-seq DEG tables using fgsea and MSigDB-format GMT gene sets. Use after the bulk-RNA-seq pipeline — when the user asks for GSEA, 基因集富集分析, pathway enrichment of the full ranked gene list (not just significant DEGs), NES plots, enrichment curves. Fully offline once GMT files are in place.
 ---
 
 # RNA-seq GSEA (fgsea + MSigDB GMT)
 
 Personalized follow-up to the **bulk-RNA-seq** skill. Unlike the threshold-based
-enrichment in `rnaseq-enrichment`, GSEA uses the **entire ranked gene list** (all
+enrichment in `RNA-seq-enrichment`, GSEA uses the **entire ranked gene list** (all
 genes by signed metric: `sign(log2FC) × -log10(pvalue)`), which detects
 subtle but coordinated pathway shifts.
 
@@ -17,7 +17,7 @@ consumes a `DEG_*.csv` table (`gene`, `log2fc`/`log2FoldChange`/`logFC`,
 ## Quick start
 
 ```bash
-cd bioinformatics/rnaseq-gsea
+cd bioinformatics/RNA-seq-gsea
 Rscript scripts/00_check_deps.R --organism mouse
 Rscript scripts/gsea.R examples/input/DEG_Mutant_vs_Control.csv \
   --gmt resources/gmt/reactome_demo_mmu.gmt --organism mouse \
@@ -51,7 +51,7 @@ Rscript scripts/gsea.R <DEG_table.csv>
 ## Notes
 
 - MSigDB mouse C2 (m2.all) contains Reactome/BioCarta/WikiPathways + curated
-  published sets, but **no KEGG** (licensing) — for KEGG use rnaseq-enrichment.
+  published sets, but **no KEGG** (licensing) — for KEGG use RNA-seq-enrichment.
 - 中文提示：必须先跑 bulk-RNA-seq 常规管线拿到 DEG 表；GSEA 用全部基因的
   排序列表，不是只用显著基因；MSigDB 的 .gmt 文件拷进 resources/gmt/ 即可
   （Entrez/symbol 自动识别，可混用）；fgsea 强制串行（并行 socket 在部分
