@@ -93,6 +93,11 @@ Install a downloaded archive (same R major.minor version, Windows):
 `install.packages("org.Mm.eg.db.zip", repos = NULL, type = "win.binary")`.
 Stage 00 verifies the package matching `--organism` before anything runs.
 
+**Fully offline route**: `resources/r-deps/` is a Windows-binary mini-repo of the
+entire R dependency closure (139 packages, exact tested versions, R 4.5) — point
+`install.packages(..., repos = "file:///<path>/r-deps", type = "win.binary")` at it
+when Bioconductor/CRAN is slow or unreachable. Also mirrored on COS at launch.
+
 ## Output files
 
 | File | Content |
