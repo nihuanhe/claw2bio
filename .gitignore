@@ -38,6 +38,8 @@ cos-staging/
 **/examples/**/output/*.rds
 **/examples/**/output/**/*.rds
 **/examples/**/output/**/*.log
+# full per-cluster DE dumps: 35-95 MB each and regenerable by rerunning the example
+**/examples/**/output/markers_all.csv
 
 # ---- OpenCLI web-read downloads (articles fetched for reference) ----
 web-articles/

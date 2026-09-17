@@ -1,7 +1,7 @@
 {
   "skill": "scRNA-seq",
   "version": "0.1.0",
-  "timestamp": "2026-09-17T17:32:40.701316",
+  "timestamp": "2026-09-17T20:16:55.615669",
   "platform": "Windows-11-10.0.26200-SP0",
   "r_version": "Rscript (R) version 4.5.2 (2025-10-31)",
   "r_packages": {
@@ -40,7 +40,7 @@
     "marker_file": null,
     "no_annotation": false,
     "install_deps": false,
-    "export_slim": true,
+    "export_slim": false,
     "rscript": "D:\\myfile\\R_2025\\R-4.5.2\\bin\\x64\\Rscript.exe",
     "resume": true,
     "overwrite": false

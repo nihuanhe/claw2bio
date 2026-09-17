@@ -101,8 +101,17 @@ def write_report(out_dir, plan_path, params):
 
     L.append("\n## Stage 04 — annotation\n")
     if ann.get("mode") == "SingleR":
-        L.append(f"- SingleR references: {', '.join(ann.get('references', []))}")
+        # stage04 writes annotation_summary.json with auto_unbox=TRUE, so a
+        # single-element JSON array arrives here as a plain str/int. Wrap it
+        # back, otherwise join() iterates the characters ("MouseRNAseqData"
+        # -> "M, o, u, s, e, ...") and a lone cluster 12 -> "1, 2".
+        refs = ann.get("references", [])
+        if isinstance(refs, str):
+            refs = [refs]
+        L.append(f"- SingleR references: {', '.join(refs)}")
         dis = ann.get("refs_disagree_clusters") or []
+        if isinstance(dis, (str, int, float)):
+            dis = [dis]
         if dis:
             L.append(f"- **clusters where the two references disagree "
                      f"(manual review advised)**: {', '.join(map(str, dis))}")

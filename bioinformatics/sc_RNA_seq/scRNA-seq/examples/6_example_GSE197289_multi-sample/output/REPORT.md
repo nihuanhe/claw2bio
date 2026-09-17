@@ -1,6 +1,6 @@
 # scRNA-seq pipeline REPORT
 
-- date: 2026-09-17T19:57:24.735196
+- date: 2026-09-17T20:16:55.779788
 - mode: **single** (exploratory, no group info)
 - samples: 1 | cells after QC: 63470 | clusters: 28
 
@@ -29,7 +29,7 @@
 
 ## Stage 04 — annotation
 
-- SingleR references: M, o, u, s, e, R, N, A, s, e, q, D, a, t, a
+- SingleR references: MouseRNAseqData
 
 ## Manual annotation / 手动注释
 
