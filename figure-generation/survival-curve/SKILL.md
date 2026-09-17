@@ -1,0 +1,96 @@
+---
+name: survival-curve
+description: "Kaplan-Meier 生存曲线 + 单因素 Cox：从随访表（事件 0/1、时间、连续 marker）自动 surv_cutpoint 找最佳截点（minprop=0.30）→ KM 曲线+风险表 → Cox HR+森林图 → 600dpi PNG/PDF + CSV。改自'小云科研'公开教程脚本（min-p 已换成 maxstat）。触发词：生存分析、KM 曲线、survival curve、log-rank、Cox、截点/cutoff。"
+---
+
+# survival-curve — KM 生存曲线 + Cox（含最优截点）
+
+## 中文摘要
+
+输入一张随访表（至少 3 列：**事件 0/1、随访时间、连续 marker**），输出发表级
+Kaplan-Meier 生存曲线（含 Number-at-risk 风险表）、log-rank p、单因素 Cox
+HR 森林图、以及分组/风险/统计 CSV。截点用 `survminer::surv_cutpoint`
+（maxstat 法，`minprop = 0.30`，即每组 ≥30% 样本）。换数据**只改
+[survival_curve_template.R](scripts/survival_curve_template.R) 顶部的
+CONFIG 块**（文件路径、列名映射、配色、X 轴单位）。
+
+## When to use
+
+- "画生存曲线 / KM curve / Kaplan-Meier / 生存分析"
+- "按 IHC 评分（或任何连续 marker）分高低组看预后"
+- "要 log-rank p 值 + Cox HR + 森林图"
+- Input: xlsx/csv with columns for event (0/1), follow-up time, continuous marker
+
+## Not for
+
+- 多因素 Cox / 列线图 → 属 clinical-table skill 的范畴扩展
+- 竞争风险 / 时间依赖协变量（本模板未覆盖）
+
+## Pipeline (5 steps)
+
+1. **Read & clean** — xlsx/csv；`'?'`/空 → NA；三列强制数值化；打印
+   `ANCHOR: input rows` / `clean rows | events`。
+2. **Cutpoint** — `surv_cutpoint(time, event, variables, minprop=0.30)` →
+   `ANCHOR: cutpoint` + 两组人数锚点。
+3. **KM + log-rank** — `survfit` + `survdiff`；曲线蓝=Low 红=High
+   （教程配色 `#00B0F0`/`#FF0000`），带风险表；600dpi PNG + cairo PDF。
+4. **Univariate Cox** — 分组 HR（High vs Low）+ 95%CI + p；附连续 marker
+   每单位 HR；`ggforest` 森林图 600dpi PNG/PDF。
+5. **Tables** — `group_summary.csv` / `risk_table.csv` / `stats_summary.csv`。
+
+## Environment
+
+- R ≥ 4.2（本机 R 4.5.2 实测）；`survival`（base 自带）、`survminer`
+  （≥0.5，**注意其 `surv_categorize` 返回字符列不是因子**——模板已处理）、
+  `readxl`、`dplyr`。
+- Windows 直接跑；无 WSL 依赖。
+
+## Adapt to user's data
+
+1. 让用户的数据凑齐 3 列（事件 0/1、时间、marker）；其余列（如患者 ID）自动忽略。
+2. 改 CONFIG 块 6 个变量：`INPUT_FILE` / `INPUT_SHEET` / `COL_EVENT` /
+   `COL_TIME` / `COL_MARKER` /（可选）`MIN_PROP`、`PALETTE`、`TIME_UNIT`。
+3. 跑模板，对照 ANCHOR 行是否合理（cutpoint 在 marker 值域内、两组均 ≥30%）。
+4. **必须向用户口头警示**：数据驱动截点会高估组间差异（ optimism bias ），
+   论文中应声明截点确定方法，最好有独立队列验证。
+
+## Smoke test (已实测 2026-09-16)
+
+```r
+cd figure-generation/survival-curve
+Rscript scripts/survival_curve_template.R
+```
+
+Expected anchors（示例数据 = 教程公开教学数据，52 例）:
+
+```
+ANCHOR: input rows = 52
+ANCHOR: clean rows = 52 | events = 9
+ANCHOR: cutpoint = 39.49
+ANCHOR: n_low = 36 | n_high = 16
+ANCHOR: logrank p = 0.06897
+ANCHOR: Cox HR (High vs Low) = 3.47 | 95%CI = 0.853 - 14.114 | p = 0.08216
+ANCHOR: Cox HR (marker per unit) = 1.0422
+DONE: outputs written to ...
+```
+
+（cutpoint/人数/p 与教程文章公布值完全一致。）
+
+## Provenance & method notes
+
+- 改自公众号"小云科研"《零基础——R语言生存分析出图》配套脚本
+  （[Survival_original.R](scripts/Survival_original.R) 原样保留对照）。
+- **与原脚本的关键差异**：原脚本遍历所有候选截点取 log-rank p 最小值
+  （min-p，p-hacking 争议）；本模板改用 `surv_cutpoint`（maxstat 标准化
+  统计量选点），示例数据上两者给出同一截点 39.49。
+- 文章正文写"每组 ≥1/4"，其配套脚本实为 0.30；以脚本为准（模板
+  `MIN_PROP = 0.30`）。
+
+## Troubleshooting
+
+| 症状 | 原因与处理 |
+|---|---|
+| `未找到满足条件的阈值`/组人数为 0 | survminer ≥0.5 的 `surv_categorize` 返回字符列；模板已显式转 factor，勿回退成 `levels(x) <-`（对字符向量静默失效） |
+| `ggforest ... 选择了未定义的列` | 公式里用了 `df[[col]]` 内联列；建模列必须有稳定列名（模板用 `expression_group`） |
+| 图中中文乱码 | cairo_pdf 已嵌字体；若仍乱码改 `family="sans"` 或输出纯英文标签 |
+| 事件数过少（<10）Cox 不可靠 | 模板仍会算但需在 REPORT 注明；考虑合并分组或只做 KM |

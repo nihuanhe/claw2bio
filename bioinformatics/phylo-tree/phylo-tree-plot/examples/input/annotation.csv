@@ -1,0 +1,13 @@
+SampleID,Genus,SpeciesGrp,ContigBand
+Ckoseri_ATCC_BAA-895,Others,C. koseri,3-5
+Ecloacae_ATCC13047,Enterobacter,E. cloacae complex,3-5
+Ecoli_CFT073,Escherichia,E. coli,1-2
+Ecoli_K12_MG1655,Escherichia,E. coli,1-2
+Ecoli_O157H7_Sakai,Escherichia,E. coli,3-5
+Ecoli_UMN026,Escherichia,E. coli,3-5
+Enterobacter_sp638,Enterobacter,Enterobacter sp.,1-2
+Kaerogenes_KCTC2190,Klebsiella,K. aerogenes,1-2
+Kpneumoniae_HS11286,Klebsiella,K. pneumoniae,6+
+Kpneumoniae_MGH78578,Klebsiella,K. pneumoniae,6+
+Kpneumoniae_NTUH-K2044,Klebsiella,K. pneumoniae,1-2
+Smarcescens_Db11,Others,S. marcescens,1-2

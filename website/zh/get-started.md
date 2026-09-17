@@ -30,7 +30,7 @@ DeepSeek harness），直接跳到第二步——Claw2Bio 仓库根部带 `AGENT
 ```
 我是编程零基础新手。请帮我安装 Claw2Bio 技能库：
 
-1. 把 GitHub 仓库 https://github.com/claw2bio/claw2bio 用 sparse checkout 的方式
+1. 把 GitHub 仓库 https://github.com/nihuanhe/claw2bio 用 sparse checkout 的方式
    拉取到当前工作区下名为 "claw2bio" 的文件夹，不要克隆完整历史。
    如果 GitHub 连不上或很慢，停下来告诉我，我会给你一个国内镜像下载链接。
 2. 阅读仓库根部的 AGENTS.md，注册里面列出的所有技能。
@@ -57,4 +57,4 @@ Agent 会只拉取需要的部分、注册全部技能，并通过复现一张�
 - **我的数据会离开电脑吗？** 不会。所有脚本都在本地运行，这是 Claw2Bio 的核心
   设计原则。
 - **我要自己装 Python 吗？** 不用——交给 agent 处理。
-- **GitHub 太慢怎么办？** 用各教程页上的 COS 独立 zip 直链（打包中，即将上线）。
+- **GitHub 太慢怎么办？** 用各教程页上的独立 zip 包下载链接（COS 或本站）。

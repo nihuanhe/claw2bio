@@ -1,0 +1,61 @@
+{
+  "skill": "scRNA-seq",
+  "version": "0.1.0",
+  "timestamp": "2026-09-16T17:21:39.555671",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "r_version": "unknown",
+  "r_packages": {
+    "Seurat": true,
+    "harmony": true,
+    "SingleR": true,
+    "celldex": true,
+    "scDblFinder": false,
+    "clustree": false,
+    "presto": true,
+    "hdf5r": true,
+    "Matrix": true,
+    "ggplot2": true,
+    "dplyr": true,
+    "patchwork": true,
+    "data.table": true,
+    "jsonlite": true
+  },
+  "parameters": {
+    "metadata": null,
+    "organism": "human",
+    "mt_pattern": null,
+    "min_cells": 3,
+    "min_features": 5,
+    "mt_max": 50.0,
+    "max_features_qc": 50,
+    "no_doublets": false,
+    "integrate": "harmony",
+    "sct": false,
+    "resolution": 0.5,
+    "no_tsne": true,
+    "downsample": 0,
+    "reference": null,
+    "custom_ref": null,
+    "marker_file": null,
+    "no_annotation": false,
+    "install_deps": false,
+    "rscript": null,
+    "resume": true,
+    "overwrite": false
+  },
+  "input": "E:\\工作\\博士后阶段\\课题\\课题-AI-Openclaw\\内容整理\\bioinformatics\\sc_RNA_seq\\scRNA-seq\\examples\\4_example_synthetic-BGI\\input",
+  "mode": "single",
+  "samples": [
+    {
+      "name": "BGI_sampleA",
+      "type": "10x_mtx",
+      "group": null,
+      "fixes": [
+        "no Ensembl IDs detected in feature file; assuming col1=symbol (gene.column=1) (features.tsv.gz)",
+        "mitochondrial prefix looks like ^MT\\. (6 genes); will auto-select unless --mt-pattern overrides"
+      ]
+    }
+  ],
+  "cells_after_qc": 34,
+  "n_clusters": 1
+}

@@ -1,0 +1,8 @@
+{
+  "gene": "ADIRF",
+  "n_cells": 1820,
+  "n_genes": 500,
+  "nc_nnet": 3,
+  "n_significant": 14,
+  "gene_expr_rank": 60
+}

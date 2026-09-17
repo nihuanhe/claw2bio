@@ -76,9 +76,10 @@
 .task-card img {
   width: 100%;
   aspect-ratio: 16 / 10;
-  object-fit: cover;
-  object-position: top;
+  object-fit: contain;   /* show the WHOLE figure (letterboxed), never crop */
   background: #fff;
+  padding: 8px;
+  box-sizing: border-box;
   border-bottom: 1px solid var(--vp-c-border);
 }
 
@@ -149,4 +150,73 @@
 
 .get-skill-box p:last-child {
   margin-bottom: 0;
+}
+
+/* ---------- Multi-table picker (pure CSS, no JS) ---------- */
+.table-picker {
+  margin: 16px 0 28px;
+}
+.table-picker > input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.table-picker > label {
+  display: inline-block;
+  margin: 0 8px 10px 0;
+  padding: 5px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--vp-c-border);
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--vp-c-text-2);
+  background: var(--vp-c-bg-soft);
+  transition: all 0.15s ease;
+}
+.table-picker > label:hover {
+  border-color: var(--vp-c-brand-2);
+  color: var(--vp-c-brand-1);
+}
+#ct-t1:checked ~ label[for="ct-t1"],
+#ct-t2:checked ~ label[for="ct-t2"],
+#ct-t3:checked ~ label[for="ct-t3"],
+#ct-t4:checked ~ label[for="ct-t4"],
+#ct-t5:checked ~ label[for="ct-t5"],
+#ct-t6:checked ~ label[for="ct-t6"],
+#ct-t7:checked ~ label[for="ct-t7"],
+#ct-t8:checked ~ label[for="ct-t8"],
+#ct-t9:checked ~ label[for="ct-t9"],
+#ct-t10:checked ~ label[for="ct-t10"] {
+  background: var(--vp-c-brand-1);
+  border-color: var(--vp-c-brand-1);
+  color: #fff;
+}
+.table-picker .ct-panel {
+  display: none;
+  border: 1px solid var(--vp-c-border);
+  border-radius: 12px;
+  padding: 14px;
+  background: #fff;
+}
+.table-picker .ct-panel img {
+  width: 100%;
+  margin: 0;
+}
+.table-picker .ct-cap {
+  margin: 8px 4px 0;
+  font-size: 12.5px;
+  color: var(--vp-c-text-2);
+}
+#ct-t1:checked ~ .ct-p1,
+#ct-t2:checked ~ .ct-p2,
+#ct-t3:checked ~ .ct-p3,
+#ct-t4:checked ~ .ct-p4,
+#ct-t5:checked ~ .ct-p5,
+#ct-t6:checked ~ .ct-p6,
+#ct-t7:checked ~ .ct-p7,
+#ct-t8:checked ~ .ct-p8,
+#ct-t9:checked ~ .ct-p9,
+#ct-t10:checked ~ .ct-p10 {
+  display: block;
 }

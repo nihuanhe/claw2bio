@@ -7,15 +7,15 @@
 
 ```
 请帮我安装 Claw2Bio 技能库中的 "barplot" 技能：
-1. 从 GitHub 仓库 https://github.com/claw2bio/claw2bio 只拉取 figure-generation/barplot
+1. 从 GitHub 仓库 https://github.com/nihuanhe/claw2bio 只拉取 figure-generation/barplot
    这一个文件夹（用 sparse checkout，不要克隆整库）。
 2. 阅读其中的 SKILL.md 并注册该技能。
 3. 运行 examples/ 里的示例验证环境，把输出的图给我看。
 ```
 
-**方式 B —— 独立 zip 包**（几 MB，腾讯 COS 直链）：*打包中，即将上线*。
+**方式 B —— 独立 zip 包**（约 0.6 MB，本站下载）：<https://claw2bio.site/downloads/barplot.zip>
 
-**方式 C —— 全量示例数据**（COS 按 skill 分目录）：*打包中，即将上线*。
+**方式 C —— 全量示例数据**：已包含在方式 B 包内（同一个压缩包）。
 :::
 
 ## 它能做什么
@@ -72,5 +72,5 @@ bar_colors  = [...]   # 默认 Wong 2011 色盲友好配色
 
 ## 相关链接
 
-- [GitHub 源码与 SKILL.md](https://github.com/claw2bio/claw2bio/tree/main/figure-generation/barplot)
+- [GitHub 源码与 SKILL.md](https://github.com/nihuanhe/claw2bio/tree/main/figure-generation/barplot)
 - 相关技能：[qPCR mRNA](/zh/skills/qpcr-mrna) · [临床统计表](/zh/skills/clinical-table)

@@ -30,7 +30,7 @@ Open a new conversation in your IDE, copy the block below, and paste it in:
 ```
 I'm new to coding. Please set up the Claw2Bio skill library for me:
 
-1. Sparse-checkout the repository https://github.com/claw2bio/claw2bio into a folder
+1. Sparse-checkout the repository https://github.com/nihuanhe/claw2bio into a folder
    named "claw2bio" in my current workspace. Do NOT clone the whole repo history.
    If GitHub is unreachable or very slow, stop and tell me — I will give you a
    download link from a domestic mirror instead.
@@ -59,5 +59,5 @@ need one skill instead of the whole library.
 - **Does my data leave my computer?** No. All scripts run locally; that is a core
   design principle of Claw2Bio.
 - **Which Python do I need?** None that you manage yourself — let the agent set it up.
-- **GitHub is slow in my region.** Use the per-skill COS zip links on each tutorial
-  page (coming soon — being packaged).
+- **GitHub is slow in my region.** Use the per-skill zip download link on each
+  tutorial page (COS or this site).

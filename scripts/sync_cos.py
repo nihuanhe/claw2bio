@@ -19,7 +19,7 @@ Optional env / args:
 
 Usage:
   python scripts/sync_cos.py            # from anywhere; repo root auto-detected
-  python scripts/sync_cos.py --dry-run  # verify manifests + report, upload nothing
+  python scripts/sync_cos.py --dry-run  # verify manifests + report (no credentials needed)
 """
 
 import csv
@@ -34,7 +34,7 @@ STAGING = REPO_ROOT / "cos-staging"
 BUCKET = os.environ.get("COS_BUCKET", "my-website-1358159656")
 REGION = os.environ.get("COS_REGION", "ap-guangzhou")
 
-MAX_SIMPLE_UPLOAD = 100 * 1024 * 1024  # well above our largest object (~30 MB)
+MAX_SIMPLE_UPLOAD = 5 * 1024 * 1024 * 1024  # COS simple-upload ceiling; keeps ETag == md5
 
 
 def die(msg: str) -> None:
@@ -76,12 +76,6 @@ def main() -> None:
     if len(sys.argv) > 1 and not dry:
         die(f"unknown args: {sys.argv[1:]}")
 
-    from qcloud_cos import CosConfig, CosS3Client, CosServiceError  # noqa: E402
-
-    client = CosS3Client(
-        CosConfig(Region=REGION, SecretId=secret_id, SecretKey=secret_key, Scheme="https")
-    )
-
     manifests = load_manifests()
     plan = []  # (skill, rel_file, expected_md5, expected_size, local_path)
     for skill, mpath, rows in manifests:
@@ -109,8 +103,15 @@ def main() -> None:
     print(f"[plan] all {len(plan)} files match manifests; total {total_bytes:,} bytes")
 
     if dry:
-        print("[dry-run] nothing uploaded.")
+        print("[dry-run] manifests and local files agree; nothing uploaded "
+              "(no credentials needed for this check).")
         return
+
+    from qcloud_cos import CosConfig, CosS3Client, CosServiceError  # noqa: E402
+
+    client = CosS3Client(
+        CosConfig(Region=REGION, SecretId=secret_id, SecretKey=secret_key, Scheme="https")
+    )
 
     uploaded, skipped, failed = [], [], []
     for skill, rel, expect_md5, expect_size, local in plan:

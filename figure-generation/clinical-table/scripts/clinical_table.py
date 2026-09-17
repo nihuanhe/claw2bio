@@ -2,7 +2,8 @@
 Clinical statistical table generator.
 
 Reads a patient-level CSV and produces publication-ready Markdown tables:
-1. Baseline characteristics by HAMA / NOXA / FOXP3 high/low status
+1. Two-cohort baseline characteristics (categorical chi-square/Fisher +
+   continuous mean±SD / Student's t; legacy marker high/low layout supported)
 2. Correlation matrix (Pearson + Spearman) for continuous variables
 3. Univariable / multivariable Cox regression tables (if survival columns present)
 4. Odds ratio summary for Fisher's exact 2x2 tests
@@ -36,79 +37,77 @@ from stats_utils import (
 
 
 # ---------------------------------------------------------------------------
-# Default configuration for the prospective cohort
+# Default configuration: two-cohort baseline comparison (CRE vs CSE example)
+# Variable coding follows the de-identified examples/input/clinical_cohorts.csv
+# produced by scripts/prepare_cohorts_example.py.
 # ---------------------------------------------------------------------------
 
+_BINARY_YES_NO = {"0": "No", "1": "Yes"}
+
 DEFAULT_CONFIG: Dict = {
-    "group_cols": ["HAMA--", "NOXA--", "FOXP3--"],
-    "group_labels": {
-        "HAMA--": "HAMA",
-        "NOXA--": "NOXA",
-        "FOXP3--": "FOXP3",
-    },
+    "group_cols": ["cohort"],
+    "group_labels": {"cohort": "Cohort"},
     "clinical_vars": [
-        "Age_cat",
-        "Sex",
-        "BMI_cat",
-        "Tumor differentiation",
-        "Cancer_stage_cat",
+        "Gender", "Smoking", "Surgery", "Urinary_catheterization",
+        "Endotracheal_intubation", "Puncture_drainage", "Tracheotomy",
+        "Hemodialysis", "Gastric_tube", "Diabetes", "Hypertension",
+        "Coronary_artery_disease", "Cerebrovascular_disease",
+        "Renal_insufficiency", "Pulmonary_disease",
+        "Antibiotic_multiple_therapy", "Albumin_gt35", "Prealbumin_gt280",
+        "Hospital_stay_gt7d",
     ],
     "var_labels": {
-        "Age_cat": "Age (years)",
-        "Sex": "Sex",
-        "BMI_cat": "BMI (kg/m²)",
-        "Tumor differentiation": "Tumor differentiation",
-        "Cancer_stage_cat": "Cancer stage",
+        "cohort": "Cohort (CRE vs CSE)",
+        "Gender": "Gender (male)",
+        "Smoking": "Smoking",
+        "Surgery": "Surgery",
+        "Urinary_catheterization": "Urinary catheterization",
+        "Endotracheal_intubation": "Endotracheal intubation",
+        "Puncture_drainage": "Puncture drainage",
+        "Tracheotomy": "Tracheotomy",
+        "Hemodialysis": "Hemodialysis",
+        "Gastric_tube": "Gastric tube",
+        "Diabetes": "Diabetes",
+        "Hypertension": "Hypertension",
+        "Coronary_artery_disease": "Coronary artery disease",
+        "Cerebrovascular_disease": "Cerebrovascular disease",
+        "Renal_insufficiency": "Renal insufficiency",
+        "Pulmonary_disease": "Pulmonary disease",
+        "Antibiotic_multiple_therapy": "Antibiotic multiple therapy",
+        "Albumin_gt35": "Albumin ≤35 g/L",
+        "Prealbumin_gt280": "Prealbumin ≤280 mg/L",
+        "Hospital_stay_gt7d": "Hospital stay >7 days",
     },
     "level_maps": {
-        "Age": {
-            "≥60 years": "≥ 60 years",
-            "＜60 years": "< 60 years",
-            "< 60 years": "< 60 years",
-        },
-        "Sex": {
-            "Female": "Female",
-            "Male": "Male",
-            "女": "Female",
-            "男": "Male",
-        },
-        "BMI": {
-            "≥24": "≥ 24",
-            "＜24": "< 24",
-            "< 24": "< 24",
-        },
-        "Tumor differentiation": {
-            "G2": "G2",
-            "G3": "G3",
-            "Miss": "Missing",
-        },
-        "Cancer stage": {
-            "I - II": "I–II",
-            "III - IV": "III–IV",
-        },
+        "Gender": {"0": "Male", "1": "Female"},
+        "Smoking": _BINARY_YES_NO,
+        "Surgery": _BINARY_YES_NO,
+        "Urinary_catheterization": _BINARY_YES_NO,
+        "Endotracheal_intubation": _BINARY_YES_NO,
+        "Puncture_drainage": _BINARY_YES_NO,
+        "Tracheotomy": _BINARY_YES_NO,
+        "Hemodialysis": _BINARY_YES_NO,
+        "Gastric_tube": _BINARY_YES_NO,
+        "Diabetes": _BINARY_YES_NO,
+        "Hypertension": _BINARY_YES_NO,
+        "Coronary_artery_disease": _BINARY_YES_NO,
+        "Cerebrovascular_disease": _BINARY_YES_NO,
+        "Renal_insufficiency": _BINARY_YES_NO,
+        "Pulmonary_disease": _BINARY_YES_NO,
+        "Antibiotic_multiple_therapy": _BINARY_YES_NO,
+        # exposure = LOW level (code 0), per the source-study Table-1 coding
+        "Albumin_gt35": {"0": "≤35 g/L", "1": ">35 g/L"},
+        "Prealbumin_gt280": {"0": "≤280 mg/L", "1": ">280 mg/L"},
+        "Hospital_stay_gt7d": {"0": "≤7 days", "1": ">7 days"},
     },
-    "continuous_vars": ["HAMA", "FOXP3", "NOXA"],
-    "continuous_labels": {
-        "HAMA": "HAMA score",
-        "FOXP3": "FOXP3 expression",
-        "NOXA": "NOXA expression",
+    "baseline_continuous_vars": ["Age_years", "Weight_kg"],
+    "baseline_continuous_labels": {
+        "Age_years": "Age (years)",
+        "Weight_kg": "Weight (kg)",
     },
-    "survival": {
-        "time_col": "survival_time",
-        "event_col": "survival_event",
-        "candidate_predictors": [
-            "HAMA--",
-            "NOXA--",
-            "FOXP3--",
-            "Age_cat",
-            "Sex",
-            "BMI_cat",
-            "Tumor differentiation",
-            "Cancer_stage_cat",
-        ],
-        "multivar_predictors": ["Cancer stage"],
-        "alpha": 0.10,
-    },
+    "continuous_vars": [],          # correlation matrix: none in this example
+    "continuous_labels": {},
+    "survival": {},                 # no survival columns in this example
 }
 
 
@@ -259,8 +258,10 @@ def run_pipeline(
     group_cutoffs: Optional[Dict[str, float]] = None,
 ) -> None:
     """Run the full clinical table pipeline."""
-    df = pd.read_csv(input_csv)
-    df = clean_prospective_df(df)
+    df = pd.read_csv(input_csv, dtype=str)  # keep 0/1 codings as strings
+    # legacy HAMA-style cleaning only applies to the old prospective-cohort layout
+    if "cohort" not in df.columns:
+        df = clean_prospective_df(df)
 
     group_cols = config["group_cols"]
     group_labels = config.get("group_labels", {})
@@ -290,13 +291,15 @@ def run_pipeline(
         if col in df.columns:
             df[col] = df[col].astype(str)
 
-    # Baseline tables
+    # Baseline tables (categorical + optional continuous mean±SD / t-test)
     baseline_tables = build_baseline_table(
         df,
         group_cols=group_cols,
         clinical_vars=clinical_vars,
         var_labels=var_labels,
         level_maps=level_maps,
+        continuous_vars=config.get("baseline_continuous_vars", []),
+        continuous_labels=config.get("baseline_continuous_labels", {}),
     )
     baseline_md = render_baseline_markdown(baseline_tables)
 
@@ -339,8 +342,10 @@ def run_pipeline(
     out.append("# Clinical statistical tables")
     out.append("")
     out.append(
-        "*Generated by clinical-table. Continuous variables: HAMA, FOXP3, NOXA. "
-        "Grouping variables: HAMA/NOXA/FOXP3 high vs low. "
+        "*Generated by clinical-table. "
+        "Categorical variables: Pearson chi-square without continuity correction "
+        "(Fisher's exact test when any expected cell < 5). "
+        "Continuous variables: Student's independent t-test. "
         "Significance: * p<0.05, ** p<0.01, *** p<0.001.*"
     )
     out.append("")
@@ -382,7 +387,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument(
         "--group-cutoffs",
         type=str,
-        help='JSON dict of cutoff values for auto-grouping, e.g. {"HAMA":29}',
+        help='JSON dict of cutoff values for auto-grouping, e.g. {"Marker":29}',
     )
     args = parser.parse_args(argv)
 

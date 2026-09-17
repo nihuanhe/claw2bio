@@ -1,0 +1,7 @@
+# per-run artefacts
+examples/*/output/virtual_ko.log
+__pycache__/
+*.pyc
+
+# large binaries stay out of git (COS / regenerate locally) — plan-skill-example-completion.md D5
+examples/*/output/*.rds

@@ -8,14 +8,14 @@
 ```
 Please set up the "barplot" skill from the Claw2Bio library for me:
 1. Fetch only the folder "figure-generation/barplot" from the GitHub repo
-   https://github.com/claw2bio/claw2bio (use sparse checkout; do not clone the whole repo).
+   https://github.com/nihuanhe/claw2bio (use sparse checkout; do not clone the whole repo).
 2. Read its SKILL.md and register the skill.
 3. Run the bundled example in examples/ to verify my environment, and show me the output figure.
 ```
 
-**Option B — standalone zip** (few MB, Tencent COS direct link): *coming soon — being packaged*.
+**Option B — standalone zip** (~0.6 MB, served from this site): <https://claw2bio.site/downloads/barplot.zip>
 
-**Option C — full example dataset** (COS, per-skill folder): *coming soon — being packaged*.
+**Option C — full example dataset**: already included in the Option B package above.
 :::
 
 ## What it does
@@ -72,5 +72,5 @@ Alternative palettes with identical statistics: `barplot_2col_green_pink.py`, `b
 
 ## Links
 
-- [Source & SKILL.md on GitHub](https://github.com/claw2bio/claw2bio/tree/main/figure-generation/barplot)
+- [Source & SKILL.md on GitHub](https://github.com/nihuanhe/claw2bio/tree/main/figure-generation/barplot)
 - Related skills: [qPCR mRNA](/skills/qpcr-mrna) · [Clinical tables](/skills/clinical-table)

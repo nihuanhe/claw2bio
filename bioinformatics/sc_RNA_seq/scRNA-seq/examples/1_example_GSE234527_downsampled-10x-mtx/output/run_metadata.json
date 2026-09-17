@@ -1,0 +1,82 @@
+{
+  "skill": "scRNA-seq",
+  "version": "0.1.0",
+  "timestamp": "2026-09-16T17:56:40.612688",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "r_version": "unknown",
+  "r_packages": {
+    "Seurat": true,
+    "harmony": true,
+    "SingleR": true,
+    "celldex": true,
+    "scDblFinder": true,
+    "clustree": true,
+    "presto": true,
+    "hdf5r": true,
+    "Matrix": true,
+    "ggplot2": true,
+    "dplyr": true,
+    "patchwork": true,
+    "data.table": true,
+    "jsonlite": true
+  },
+  "parameters": {
+    "metadata": "examples/1_example_GSE234527_downsampled-10x-mtx/input/sample_metadata.csv",
+    "organism": "human",
+    "mt_pattern": null,
+    "min_cells": 3,
+    "min_features": 200,
+    "mt_max": 20.0,
+    "max_features_qc": 6000,
+    "no_doublets": false,
+    "integrate": "harmony",
+    "sct": false,
+    "resolution": 0.5,
+    "no_tsne": false,
+    "downsample": 0,
+    "reference": null,
+    "custom_ref": null,
+    "marker_file": null,
+    "no_annotation": false,
+    "install_deps": false,
+    "rscript": null,
+    "resume": true,
+    "overwrite": false
+  },
+  "input": "E:\\工作\\博士后阶段\\课题\\课题-AI-Openclaw\\内容整理\\bioinformatics\\sc_RNA_seq\\scRNA-seq\\examples\\1_example_GSE234527_downsampled-10x-mtx\\input",
+  "mode": "multi",
+  "samples": [
+    {
+      "name": "GSM7470392_352",
+      "type": "10x_mtx",
+      "group": "Control",
+      "fixes": []
+    },
+    {
+      "name": "GSM7470393_354",
+      "type": "10x_mtx",
+      "group": "Control",
+      "fixes": []
+    },
+    {
+      "name": "GSM7470394_356",
+      "type": "10x_mtx",
+      "group": "Treatment",
+      "fixes": []
+    },
+    {
+      "name": "GSM7470395_363",
+      "type": "10x_mtx",
+      "group": "Treatment",
+      "fixes": []
+    },
+    {
+      "name": "GSM7470396_365",
+      "type": "10x_mtx",
+      "group": "Treatment",
+      "fixes": []
+    }
+  ],
+  "cells_after_qc": 1820,
+  "n_clusters": 9
+}

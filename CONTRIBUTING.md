@@ -107,6 +107,21 @@ git commit -m "<英文 imperative 摘要>"
 - 侧边栏：`website/.vitepress/config.ts` 两个 locale 的 sidebar 各加一项。
 - Skills 索引页：`website/skills/index.md` + `website/zh/skills/index.md` 表格加行。
 
+### COS 存储约定（大文件分发）
+
+> 2026-07 随 scRNA-seq skill 项目建立，后续 update 直接改本节。
+
+- **本地暂存区** = 根目录 `cos-staging/`（不进 git）。目录层级与仓库阶段目录一一对应：
+  `cos-staging/<阶段目录>/<skill容器目录>/<skill-name>/{data,zip,manifest.csv}`。
+  详见 `cos-staging/README.md`。
+- **manifest 制度**：每个走 COS 的 skill 必须有 `manifest.csv`（`file,md5,size,example,note`），
+  「哪个数据是哪个」以 manifest 为唯一权威；skill 仓库内的 `examples/manifest.csv` 记录
+  每个 example 对应的数据集/GEO 号/存储位置（repo / geo / cos 链接）/md5。
+- **什么上 COS**：自产数据（GEO 下不到的）、per-skill 独立 zip、大体量 R 依赖包；
+  GEO 能下载的只记链接不重复上传；几 MB 的合成/降采样 fixture 直接进 git。
+- **上传后回填**：COS 直链写回 `website/download.md`、各教程页「获取本技能」区块、
+  以及对应 manifest；bucket 名与域名绑定后更新本节。
+
 ### 阶段 6 · 构建与发布
 
 ```bash

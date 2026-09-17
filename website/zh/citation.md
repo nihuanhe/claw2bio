@@ -1,7 +1,7 @@
 # 引用
 
-Claw2Bio 的论文正在准备投稿 *Briefings in Bioinformatics*。
-在此之前，请引用本仓库：
+Claw2Bio 的论文正在准备中。
+请引用本仓库：
 
 ```bibtex
 @misc{claw2bio,
@@ -11,5 +11,3 @@ Claw2Bio 的论文正在准备投稿 *Briefings in Bioinformatics*。
   url    = {https://claw2bio.site}
 }
 ```
-
-论文的 BibTeX 与 Zenodo DOI 将在发表后更新到本页。

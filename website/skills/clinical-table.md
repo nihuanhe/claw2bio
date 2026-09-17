@@ -8,14 +8,14 @@
 ```
 Please set up the "clinical-table" skill from the Claw2Bio library for me:
 1. Fetch only the folder "figure-generation/clinical-table" from the GitHub repo
-   https://github.com/claw2bio/claw2bio (use sparse checkout; do not clone the whole repo).
+   https://github.com/nihuanhe/claw2bio (use sparse checkout; do not clone the whole repo).
 2. Read its SKILL.md and register the skill.
 3. Run the bundled example in examples/ to verify my environment, and show me the output tables.
 ```
 
-**Option B — standalone zip** (few MB, Tencent COS direct link): *coming soon — being packaged*.
+**Option B — standalone zip** (~0.2 MB, served from this site): <https://claw2bio.site/downloads/clinical-table.zip>
 
-**Option C — full example dataset** (COS, per-skill folder): *coming soon — being packaged*.
+**Option C — full example dataset**: already included in the Option B package above.
 :::
 
 ## What it does
@@ -140,5 +140,5 @@ Each script: read CSV → compute → fill its block in `Table-all.md` → write
 
 ## Links
 
-- [Source & SKILL.md on GitHub](https://github.com/claw2bio/claw2bio/tree/main/figure-generation/clinical-table)
+- [Source & SKILL.md on GitHub](https://github.com/nihuanhe/claw2bio/tree/main/figure-generation/clinical-table)
 - Related skills: [Kaplan-Meier curve](/skills/survival-curve)

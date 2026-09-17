@@ -1,7 +1,7 @@
 # Citation
 
-A paper describing Claw2Bio is in preparation for *Briefings in Bioinformatics*.
-Until then, please cite the repository:
+Claw2Bio is described in a manuscript currently in preparation.
+Please cite the repository:
 
 ```bibtex
 @misc{claw2bio,
@@ -11,5 +11,3 @@ Until then, please cite the repository:
   url    = {https://claw2bio.site}
 }
 ```
-
-The BibTeX entry for the paper and the Zenodo DOI will appear here upon publication.

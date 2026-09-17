@@ -16,6 +16,9 @@ website/node_modules/
 website/.vitepress/dist/
 website/.vitepress/cache/
 
+# ---- Local build outputs (skill zip packages, see plan-skill-packages.md) ----
+.build/
+
 # ---- Batch-2 skills: old structure, pending sanitization + COS data split ----
 # Their full-size example data will be hosted on Tencent COS; only mini
 # examples (a few MB) enter the repo after rework. See plan.md F.
@@ -28,3 +31,13 @@ figure-generation/compress-image/
 # ---- Large raw data types (full datasets live on COS, not in git) ----
 *.tif
 *.tiff
+cos-staging/
+
+# ---- Large per-run artefacts in example outputs (see plan-skill-example-completion.md D5) ----
+# .rds objects are published via site zips / COS, not git
+**/examples/**/output/*.rds
+**/examples/**/output/**/*.rds
+**/examples/**/output/**/*.log
+
+# ---- OpenCLI web-read downloads (articles fetched for reference) ----
+web-articles/

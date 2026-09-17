@@ -1,0 +1,6 @@
+# per-run artefacts
+examples/*/output/.checkpoints/
+examples/*/output/.staging/
+examples/*/output/pipeline.log
+__pycache__/
+*.pyc

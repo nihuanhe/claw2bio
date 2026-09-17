@@ -1,0 +1,7 @@
+example,dataset,accession,input_type,storage,location,md5,note
+1,GSE234527,GSE234527,10x_mtx_gz,repo,examples/1_example_GSE234527_downsampled-10x-mtx/input,,downsampled fixture (400 cells x 2000 genes per sample; full data at GEO GSE234527)
+2,GSE182135,GSE182135,tar_genes_tsv,geo,https://ftp.ncbi.nlm.nih.gov/geo/series/GSE182nnn/GSE182135/suppl/GSE182135_RAW.tar,,10 samples 4 groups; nested mm10 dirs in tars
+3,GSE200874,GSE200874,10x_h5,geo,https://ftp.ncbi.nlm.nih.gov/geo/series/GSE200nnn/GSE200874/suppl/GSE200874_RAW.tar,,4 h5 files (wt/mut x2)
+4,synthetic-BGI,-,bgi_10x,repo,examples/4_example_synthetic-BGI/input,,synthetic fixture: features col1=symbol + MT. mito prefix; real 25057A-C NOT distributed
+5,GSM6923183,GSM6923183,h5ad,geo,https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM6923183,,h5ad via anndata export route
+6,GSE197289,GSE197289,multi_sample,geo,https://ftp.ncbi.nlm.nih.gov/geo/series/GSE197nnn/GSE197289/suppl/,6 groups; SingleR+presto case

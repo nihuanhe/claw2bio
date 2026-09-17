@@ -14,14 +14,25 @@ input and expected output.
 
 ## Stage 2 — Bioinformatics analysis (`bioinformatics/`)
 
-Coming soon: single-cell RNA-seq, bulk RNA-seq, bacterial phylogenetics.
+| Skill | Path | What it does |
+|---|---|---|
+| scRNA-seq | `bioinformatics/sc_RNA_seq/scRNA-seq/SKILL.md` | Single-cell regular pipeline: raw matrices → QC → Harmony → clustering → UMAP → markers → SingleR annotation |
+| scRNA-seq-pseudotime | `bioinformatics/sc_RNA_seq/scRNA-seq-pseudotime/SKILL.md` | monocle3 pseudotime/trajectory on the regular pipeline's annotated_seurat.rds (root cluster/label required) |
+| scRNA-seq-virtual-ko | `bioinformatics/sc_RNA_seq/scRNA-seq-virtual-ko/SKILL.md` | scTenifoldKnk in-silico gene knockout on the regular pipeline's annotated_seurat.rds |
+| bulk-RNA-seq | `bioinformatics/bulk_RNA_seq/bulk-RNA-seq/SKILL.md` | Bulk RNA-seq counts → QC → DEG (auto engine fork: limma-trend / DESeq2 / edgeR+voom; paired/batch/exploratory modes) |
+| RNA-seq-enrichment | `bioinformatics/bulk_RNA_seq/RNA-seq-enrichment/SKILL.md` | GO (offline) / KEGG (online+cache) / Reactome (offline) enrichment |
+| RNA-seq-gene-plot | `bioinformatics/bulk_RNA_seq/RNA-seq-gene-plot/SKILL.md` | Gene-of-interest bar plots across groups (t-test / ANOVA+Tukey) |
+| RNA-seq-GSEA | `bioinformatics/bulk_RNA_seq/RNA-seq-GSEA/SKILL.md` | GSEA via fgsea + MSigDB GMT (auto Entrez/symbol conversion) |
+| phylo-tree-build | `bioinformatics/phylo-tree/phylo-tree-build/SKILL.md` | Genome FASTAs → core-genome ML tree (bcgTree→IQ-TREE2 on WSL2; optional parsnp subtrees) |
+| phylo-tree-plot | `bioinformatics/phylo-tree/phylo-tree-plot/SKILL.md` | Newick treefile + annotation CSV → publication-ready annotated tree figure (ggtree template) |
 
 ## Stage 3 — Figure & table generation (`figure-generation/`)
 
 | Skill | Path | What it does |
 |---|---|---|
 | barplot | `figure-generation/barplot/SKILL.md` | Grouped bar plots from wide-format CSV, auto-selects 2–6 group script |
-| clinical-table | `figure-generation/clinical-table/SKILL.md` | Publication-ready clinical three-line tables (baseline, correlation, Cox, OR) |
+| clinical-table | `figure-generation/clinical-table/SKILL.md` | Clinical three-line tables: generic 2-cohort baseline (χ²/Fisher + t, OR, Cox) + R suite reproducing all 10 tables (Tables 1–10 = manuscript Table 1/2 + S1–S8: Firth, genotype crosses, univariate) — real CRE vs CSE example, cell-reconciled |
+| survival-curve | `figure-generation/survival-curve/SKILL.md` | KM survival curve + univariate Cox (surv_cutpoint cutoff, risk table, HR forest plot, 600 dpi) |
 
 ## Conventions
 

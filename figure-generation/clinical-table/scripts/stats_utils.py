@@ -89,15 +89,16 @@ def test_association(group: pd.Series, var: pd.Series) -> AssocResult:
     """
     Run chi-square test or Fisher's exact test on two categorical variables.
     Returns method, p-value, and OR with 95% CI for 2x2 tables when Fisher is used.
+    Pearson chi-square WITHOUT continuity correction (publication Table-1 convention).
     """
     df = pd.crosstab(group, var)
     # Drop all-NA rows/cols
     df = df.loc[(df.sum(axis=1) > 0), (df.sum(axis=0) > 0)]
     if df.shape != (2, 2):
-        chi2, p, dof, expected = chi2_contingency(df)
+        chi2, p, dof, expected = chi2_contingency(df, correction=False)
         return AssocResult(method="Chi-square test", pvalue=p)
     # 2x2 table: decide Fisher vs chi-square
-    expected = chi2_contingency(df)[3]
+    expected = chi2_contingency(df, correction=False)[3]
     use_fisher = (expected < 5).any()
     if use_fisher:
         a, b = df.iloc[0, 0], df.iloc[0, 1]
@@ -105,7 +106,7 @@ def test_association(group: pd.Series, var: pd.Series) -> AssocResult:
         or_val, ci = fmt_or(a, b, c, d)
         _, p = fisher_exact(df)
         return AssocResult(method="Fisher's exact test", pvalue=p, or_val=or_val, ci=ci)
-    chi2, p, _, _ = chi2_contingency(df)
+    chi2, p, _, _ = chi2_contingency(df, correction=False)
     return AssocResult(method="Chi-square test", pvalue=p)
 
 
@@ -130,15 +131,23 @@ def build_baseline_table(
     clinical_vars: Sequence[str],
     var_labels: Optional[Dict[str, str]] = None,
     level_maps: Optional[Dict[str, Dict[str, str]]] = None,
+    continuous_vars: Optional[Sequence[str]] = None,
+    continuous_labels: Optional[Dict[str, str]] = None,
 ) -> List[Tuple[str, List[BaselineRow], str, str]]:
     """
     Build baseline characteristic table for each grouping variable.
+    Categorical vars -> n (%) per level + chi-square/Fisher.
+    Continuous vars -> mean ± SD per group + Student's independent t-test.
 
     Returns a list of tuples:
         (group_label, rows, overall_n, footer_note)
     """
+    from scipy.stats import ttest_ind
+
     var_labels = var_labels or {}
     level_maps = level_maps or {}
+    continuous_vars = continuous_vars or []
+    continuous_labels = continuous_labels or {}
     tables = []
 
     for grp in group_cols:
@@ -151,7 +160,7 @@ def build_baseline_table(
         n_total = len(sub)
         n_g1 = (sub[grp] == groups[0]).sum()
         n_g2 = (sub[grp] == groups[1]).sum()
-        header = f"{var_labels.get(grp, grp)} high/low"
+        header = f"{var_labels.get(grp, grp)} high/low" if grp.endswith("--") else var_labels.get(grp, grp)
         rows = []
         footer_methods = set()
 
@@ -183,6 +192,34 @@ def build_baseline_table(
                         method=res.method if lvl == levels[0] else "",
                     )
                 )
+
+        # continuous variables: mean ± SD per group + Student's t-test
+        for var in continuous_vars:
+            if var not in sub.columns:
+                continue
+            v = pd.to_numeric(sub[var], errors="coerce")
+            label = continuous_labels.get(var, var)
+            x1 = v[sub[grp] == groups[0]].dropna()
+            x2 = v[sub[grp] == groups[1]].dropna()
+            if len(x1) < 2 or len(x2) < 2:
+                continue
+            t_stat, p_val = ttest_ind(x1, x2, equal_var=True)  # Student, pooled
+            footer_methods.add("Student's t-test")
+            counts = {
+                str(groups[0]): f"{x1.mean():.2f} ± {x1.std(ddof=1):.2f}",
+                str(groups[1]): f"{x2.mean():.2f} ± {x2.std(ddof=1):.2f}",
+                "Total": f"{v.mean():.2f} ± {v.std(ddof=1):.2f}",
+            }
+            rows.append(
+                BaselineRow(
+                    variable="",
+                    level=f"{label}, mean ± SD",
+                    counts=counts,
+                    pvalue=fmt_pvalue(p_val),
+                    stars=stars(p_val),
+                    method="Student's t-test",
+                )
+            )
 
         footer = (
             f"Group sizes: {groups[0]} n={n_g1}, {groups[1]} n={n_g2}; "
@@ -377,7 +414,14 @@ def render_baseline_markdown(
     for header, rows, n_total, footer in tables:
         out.append(f"### {header} ({n_total})")
         out.append("")
-        out.append("| Characteristic | Total | Group 1 | Group 2 | p value |")
+        # group column headers from the actual group names (e.g. CRE / CSE)
+        g_names = ["Group 1", "Group 2"]
+        for row in rows:
+            if not row.is_header and row.counts:
+                keys = [k for k in row.counts.keys() if k != "Total"]
+                g_names = keys + ["Group 2"] if len(keys) == 1 else keys[:2] or g_names
+                break
+        out.append(f"| Characteristic | Total | {g_names[0]} | {g_names[1]} | p value |")
         out.append("|---|---:|---:|---:|---:|")
         for row in rows:
             if row.is_header:

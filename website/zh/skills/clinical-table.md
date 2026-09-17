@@ -7,15 +7,15 @@
 
 ```
 请帮我安装 Claw2Bio 技能库中的 "clinical-table" 技能：
-1. 从 GitHub 仓库 https://github.com/claw2bio/claw2bio 只拉取 figure-generation/clinical-table
+1. 从 GitHub 仓库 https://github.com/nihuanhe/claw2bio 只拉取 figure-generation/clinical-table
    这一个文件夹（用 sparse checkout，不要克隆整库）。
 2. 阅读其中的 SKILL.md 并注册该技能。
 3. 运行 examples/ 里的示例验证环境，把输出的表格给我看。
 ```
 
-**方式 B —— 独立 zip 包**（几 MB，腾讯 COS 直链）：*打包中，即将上线*。
+**方式 B —— 独立 zip 包**（约 0.2 MB，本站下载）：<https://claw2bio.site/downloads/clinical-table.zip>
 
-**方式 C —— 全量示例数据**（COS 按 skill 分目录）：*打包中，即将上线*。
+**方式 C —— 全量示例数据**：已包含在方式 B 包内（同一个压缩包）。
 :::
 
 ## 它能做什么
@@ -140,5 +140,5 @@ python ../../scripts/pipeline/make_table9_sequencing_quality.py   # Table 9 独�
 
 ## 相关链接
 
-- [GitHub 源码与 SKILL.md](https://github.com/claw2bio/claw2bio/tree/main/figure-generation/clinical-table)
+- [GitHub 源码与 SKILL.md](https://github.com/nihuanhe/claw2bio/tree/main/figure-generation/clinical-table)
 - 相关技能：[KM 生存曲线](/zh/skills/survival-curve)

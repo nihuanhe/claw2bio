@@ -1,0 +1,8 @@
+"metric","value"
+"cutpoint",39.49
+"logrank_p",0.0689679737811467
+"cox_HR_high_vs_low",3.47
+"cox_CI_low",0.853
+"cox_CI_high",14.114
+"cox_p",0.08216
+"cox_HR_marker_per_unit",1.0422

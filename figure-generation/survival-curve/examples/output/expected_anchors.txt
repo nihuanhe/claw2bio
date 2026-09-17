@@ -1,0 +1,16 @@
+# Expected smoke-test anchors — survival-curve example (tutorial dataset, 52 patients)
+# Run: cd figure-generation/survival-curve && Rscript scripts/survival_curve_template.R
+# Compare console ANCHOR lines against this file (machine-checkable).
+
+ANCHOR: input rows = 52
+ANCHOR: clean rows = 52 | events = 9
+ANCHOR: cutpoint = 39.49
+ANCHOR: n_low = 36 | n_high = 16
+ANCHOR: logrank p = 0.06897
+ANCHOR: Cox HR (High vs Low) = 3.47 | 95%CI = 0.853 - 14.114 | p = 0.08216
+ANCHOR: Cox HR (marker per unit) = 1.0422
+DONE: outputs written to <examples/output>
+
+# Expected output files:
+# KM_curve.png  KM_curve.pdf  cox_forest.png  cox_forest.pdf
+# group_summary.csv  risk_table.csv  stats_summary.csv

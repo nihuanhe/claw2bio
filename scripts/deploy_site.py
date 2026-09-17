@@ -22,6 +22,7 @@ import stat as statmod
 import sys
 import tarfile
 import tempfile
+from datetime import datetime, timezone
 from pathlib import Path
 
 import paramiko
@@ -142,7 +143,9 @@ def cmd_deploy(cli, dist_dir, remote_root):
     sftp.put(str(tar_path), remote_tar)
     print(f"[put] -> {remote_tar}")
     # 3) backup old root (sudo: /var/www is root-owned), extract new
-    ts = "pre-deploy"
+    # Timestamped backup name: a fixed name made the 2nd deploy silently nest the
+    # old root inside the backup (mv into an existing dir) and the 3rd deploy fail.
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
     backup = f"{remote_root}.bak-{ts}"
     seq = [
         (f"if test -d {remote_root}; then sudo mv {remote_root} {backup} "

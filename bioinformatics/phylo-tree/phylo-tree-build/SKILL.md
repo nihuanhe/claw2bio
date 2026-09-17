@@ -1,0 +1,98 @@
+---
+name: phylo-tree-build
+description: Build a core-genome phylogenetic tree (Newick treefile) from a directory of bacterial genome FASTA assemblies. bcgTree core-gene concatenated alignment → IQ-TREE2 maximum-likelihood backbone (ModelFinder + 1000 UFBoot), optional parsnp per-group subtrees. Runs in WSL2 Ubuntu on Windows (setup guide with screenshots in docs/wsl-setup.md). Battle-tested template scripts from a published 67-isolate CRE study — reuse, edit only the EDIT-THIS header variables. Companion skill phylo-tree-plot turns the treefile + annotation CSV into a publication-ready figure.（中文摘要：从一目录细菌基因组 FASTA 建系统发育树。bcgTree 核心基因拼接比对 → IQ-TREE2 最大似然主树（自动选模+1000 超快自举），可选 parsnp 分组子树。Windows 上走 WSL2（安装截图详解见 docs/wsl-setup.md）。模板脚本来自已发表实战流程，换数据只改脚本头部变量；画树用配套 skill phylo-tree-plot。）
+---
+
+# Skill: phylo-tree-build (FASTA → core-genome ML tree)
+
+## Trigger phrases
+
+- build a phylogenetic tree from genomes / bacterial genomes
+- core genome tree / bcgTree / IQ-TREE
+- 细菌基因组建树 / 进化树构建 / 系统发育树
+
+(Drawing the tree is a separate skill: `phylo-tree-plot`.)
+
+## What it does
+
+Input: one directory of genome assemblies (`*.fasta`, one file per isolate,
+filename stem = sample ID). Output: `main_tree/total_iqtree.treefile`
+(Newick, ML backbone, ModelFinder best-fit model + 1000 ultrafast
+bootstraps) plus the concatenated core-gene alignment, and optionally
+`subtrees/<Group>.treefile` (parsnp + IQ-TREE2 per group).
+
+Pipeline (each step = one template script in `scripts/`):
+
+| Step | Script | What happens |
+|---|---|---|
+| 0 | `00_bootstrap_ubuntu.sh` | One-time WSL env: iqtree2/mafft (apt), conda env `bcgtree` (bioconda) |
+| 0b | `patch_bcgtree_gblocks.py` | One-time fix for the bcgTree↔Gblocks naming bug (run once per env) |
+| 1 | `01_run_bcgtree.sh` | bcgTree → concatenated core-gene alignment |
+| 2 | `02_iqtree_main.sh` | IQ-TREE2 `-m MFP -B 1000` → `total_iqtree.treefile` |
+| 3 | `03_parsnp_subtrees.sh` | OPTIONAL parsnp + IQ-TREE2 subtree per group (needs a 2-col `SampleID,Group` CSV) |
+
+## Environment prerequisite
+
+**WSL2 + Ubuntu 24.04 on Windows** — follow the screenshot walkthrough:
+[docs/wsl-setup.md](docs/wsl-setup.md). Sanity check:
+
+```bash
+source ~/miniconda3/etc/profile.d/conda.sh && conda activate bcgtree
+iqtree2 --version && bcgTree.pl --help | head -3 && parsnp --version
+```
+
+## Usage (golden rules first)
+
+1. **Pure-ASCII scratch dir**: bcgTree/Perl crashes on non-ASCII paths. The
+   scripts copy your genomes into `WORK` (default `~/phylo_work`) and run
+   there; results are copied back next to your genomes dir.
+2. **Paths auto-locate**: each script resolves `SRC_IN`/`SRC_OUT` relative to
+   itself (`scripts/../examples/...`), so the skill works from any folder on
+   any machine. To use your own data, override with environment variables —
+   no script editing needed:
+   `SRC_IN=/path/to/input SRC_OUT=/path/to/output bash 01_run_bcgtree.sh`
+3. Run the steps in order, inside WSL Ubuntu:
+
+```bash
+bash 00_bootstrap_ubuntu.sh        # once
+python3 patch_bcgtree_gblocks.py   # once per conda env
+bash 01_run_bcgtree.sh             # ~10 min per ~12 genomes
+bash 02_iqtree_main.sh
+bash 03_parsnp_subtrees.sh         # optional
+```
+
+## Worked example (bundled, public data only)
+
+`examples/input/genomes/` = 12 public NCBI RefSeq Enterobacterales
+assemblies (4 Escherichia / 4 Klebsiella / 2 Enterobacter / Citrobacter /
+Serratia). Downloaded by `scripts/download_examples.sh` (NCBI `datasets`
+CLI), verified by `scripts/qc_genomes.py` (pure-stdlib: file count, FASTA
+validity, total length, N50; prints an `ANCHOR:` line).
+
+```bash
+# refresh the example genomes (WSL or any Linux):
+bash scripts/download_examples.sh
+# QC them (Windows or Linux):
+python scripts/qc_genomes.py examples/input/genomes --expect 12
+```
+
+`examples/output/` holds the treefile + alignment from a real run of steps
+1–2 on these 12 genomes, plus REPORT.md describing every file.
+
+## Outputs contract (for phylo-tree-plot)
+
+- `main_tree/total_iqtree.treefile` — Newick backbone; tip labels =
+  FASTA filename stems (= SampleID for the annotation CSV).
+- `main_tree/full_alignment.concat.fa` (+ `.partition`) — for custom
+  IQ-TREE re-runs.
+- `subtrees/<Group>.treefile` — optional per-group subtrees.
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| bcgTree dies with `Fasta::Parser ... .aln-gb` | You skipped `patch_bcgtree_gblocks.py` — run it once |
+| bcgTree crashes immediately, weird path errors | Non-ASCII chars in `WORK` — use `~/phylo_work` or `/mnt/d/...` ASCII-only |
+| `parsnp` segfaults | Known with some bioconda builds; subtrees are optional — skip step 3 or pin another parsnp build |
+| IQ-TREE "not enough memory" | Lower `-nt`, or subset genomes; 12 genomes needs <4 GB |
+| apt/conda very slow in China | Switch to a local mirror (see docs/wsl-setup.md §4) |

@@ -18,7 +18,7 @@ export default defineConfig({
           { text: 'Skills', link: '/skills/' },
           { text: 'Download', link: '/download' },
           { text: 'Citation', link: '/citation' },
-          { text: 'GitHub ↗', link: 'https://github.com/claw2bio/claw2bio' }
+          { text: 'GitHub ↗', link: 'https://github.com/nihuanhe/claw2bio' }
         ],
         sidebar: {
           '/skills/': [
@@ -70,7 +70,7 @@ export default defineConfig({
           { text: '技能', link: '/zh/skills/' },
           { text: '下载', link: '/zh/download' },
           { text: '引用', link: '/zh/citation' },
-          { text: 'GitHub ↗', link: 'https://github.com/claw2bio/claw2bio' }
+          { text: 'GitHub ↗', link: 'https://github.com/nihuanhe/claw2bio' }
         ],
         sidebar: {
           '/zh/skills/': [
@@ -131,7 +131,7 @@ export default defineConfig({
   themeConfig: {
     logo: '/logo.svg',
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/claw2bio/claw2bio' }
+      { icon: 'github', link: 'https://github.com/nihuanhe/claw2bio' }
     ],
     footer: {
       message: 'Lab-validated AI agent skills for biomedical research. 实验室实战验证的 AI agent 技能库。',

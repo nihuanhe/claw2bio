@@ -8,14 +8,14 @@
 ```
 Please set up the "qpcr-mtdna" skill from the Claw2Bio library for me:
 1. Fetch only the folder "experiment-data/qpcr-mtdna" from the GitHub repo
-   https://github.com/claw2bio/claw2bio (use sparse checkout; do not clone the whole repo).
+   https://github.com/nihuanhe/claw2bio (use sparse checkout; do not clone the whole repo).
 2. Read its SKILL.md and register the skill.
 3. Run the bundled example in examples/ to verify my environment, and show me the output figure.
 ```
 
-**Option B — standalone zip** (few MB, Tencent COS direct link): *coming soon — being packaged*.
+**Option B — standalone zip** (~0.1 MB, served from this site): <https://claw2bio.site/downloads/qpcr-mtdna.zip>
 
-**Option C — full example dataset** (COS, per-skill folder): *coming soon — being packaged*.
+**Option C — full example dataset**: already included in the Option B package above.
 :::
 
 ## What it does
@@ -81,5 +81,5 @@ Batch mode over a whole experiment folder: `python scripts/batch_mtdna.py <root_
 
 ## Links
 
-- [Source & SKILL.md on GitHub](https://github.com/claw2bio/claw2bio/tree/main/experiment-data/qpcr-mtdna)
+- [Source & SKILL.md on GitHub](https://github.com/nihuanhe/claw2bio/tree/main/experiment-data/qpcr-mtdna)
 - Related skills: [qPCR mRNA](/skills/qpcr-mrna) · [Grouped bar plot](/skills/barplot)
