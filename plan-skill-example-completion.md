@@ -444,7 +444,7 @@ git config user          → nihuanhe / nihuanhe@163.com
 | 文件 | 改动 | 状态 |
 |---|---|---|
 | `scripts/inspect_input.py` | `export_h5ad()` 在 X 不是 counts 时改用 `layers['counts']`（scanpy h5ad 的 X 通常是 log 归一化值，原实现会二次归一化、QC 全错）；并记 `[fixed]` | ✅ 已改，待 ex5 实测 |
-| `scripts/report_writer.py` | `references` / `refs_disagree_clusters` 在 JSON 被 `auto_unbox` 压成标量时先包成 list（现 REPORT 会输出 `M, o, u, s, e, ...`） | ⏸ **Edit 被跳过、未生效**，需你再确认一次 |
+| `scripts/report_writer.py` | `references` / `refs_disagree_clusters` 在 JSON 被 `auto_unbox` 压成标量时先包成 list（原先 REPORT 输出 `M, o, u, s, e, ...`） | ✅ **已改**（首轮 Edit 被系统跳过，第二轮按你确认已生效）→ 见 §14 |
 
 ### 13.6 还没做
 
@@ -452,3 +452,23 @@ git config user          → nihuanhe / nihuanhe@163.com
   需先手动解压；stage01 对**裸稀疏矩阵**会 `as.matrix()` 转稠密 → 大概率爆内存，需先探测）
 - `scRNA-seq-pseudotime` / `virtual-ko` 的 `2_real_GSE234527` example + virtual-ko 计时探路
 - 网站页把 ex3/ex2 的真实数字与图换上；`cos-staging` 的 slim rds 同步
+
+---
+
+## 14. 用户决策落实（2026-09-17 晚，对应你的三条回复）
+
+| 你的决策 | 落实情况 |
+|---|---|
+| **1. `report_writer.py` 改** | ✅ 已改（`references` / `refs_disagree_clusters` 在被 `auto_unbox` 压成标量时先包回 list）；并用 `--resume` **只重跑 stage05** 重生成 ex2/ex3/ex6 的 `REPORT.md`（现在正确显示 `SingleR references: MouseRNAseqData`；ex5 双参考本来就正常）。ex5/ex6 的 README、TODO、HANDOFF 均未受影响 |
+| **2. 允许禁止休眠，但每 30 min 汇报** | ✅ `powercfg /change standby-timeout-ac 0` + `hibernate-timeout-ac 0`（交流电）；**完成后应恢复**（`standby-timeout-ac 30`）。virtual-ko 计时探路 21:01:46 启动：`2000 genes × 3 nets × 500 cells`，`--gene ACTA2`，输入 `D:\single_cell_1\GSE234527_output\annotated_seurat.rds`（63.8 MB / 10,859 细胞），输出到 `scRNA-seq-virtual-ko/examples/2_real_GSE234527/output` |
+| **3. 要瘦身** | ⚠️ **部分完成**：根 `.gitignore` 增加 `**/examples/**/output/markers_all.csv`，并 `git rm --cached` 掉 6 个 example 的该文件（含历史里已有的 ex1/ex4）→ 后续 clone/checkout 不再包含这些 35–95 MB 的转储。**但它们仍留在 `198d967` 的历史里**（共 ~238 MB），要真正减小仓库体积必须改写历史 + `git push --force-with-lease`，这一步**未做**（等你明确同意） |
+
+### 14.1 待办（下一步）
+
+- virtual-ko 探路结果 → 按实测外推 `2000×10` 是否整夜跑（D3）
+- `scRNA-seq-pseudotime` 的 `2_real_GSE234527`：覆盖 `--root-label` / `--subset-labels` /
+  `--no-graph-test` / `--resume` 四条从未真实跑过的分支
+- 网站：pseudotime / virtual-ko 两页换成真实数字与图
+- `cos-staging`：两个下游 skill 的 slim rds 与真数据同步
+- 凭据轮换（仍未做）
+- 收尾 `adversarial-review`
