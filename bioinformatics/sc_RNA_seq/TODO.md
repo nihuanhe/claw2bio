@@ -40,6 +40,81 @@
 - [ ] scTenifoldKnk 1.0.3 二进制 zip 入 COS resources（现为 D:\single_cell_1 本地包）
 - [ ] 两个下游 skill 的 examples/output 上线前用真实数据重跑替换冒烟产出
 
+## 主流程 example 真实跑通（2026-09-17，AI 在本机按 skill 自带脚本执行）
+
+### ex3 GSE200874（✅ 跑通）
+
+- 命令：`run_scrnaseq.py D:\single_cell_1\_run_ex3\input <ex3>/output --metadata ...\sample_metadata.csv
+  --organism mouse --reference MouseRNAseqData --export-slim`
+- 结果：4 h5（wt×2 / mut×2）→ QC 前 7189 → **QC 后 6408 细胞、22 clusters**（Harmony 整合，
+  resolution 0.5）；markers 303,842 行；SingleR 注释 22/22 cluster 全出（Hepatocytes/Monocytes/
+  Granulocytes/Neurons/Cardiomyocytes/…，符合胚胎期混合组织，非纯 PBMC）
+- [x] 跑通；[ ] 待办：cluster 数偏多，可用 `--resolution` 调；`clustree_resolution_scan.png` 仍缺（见下）
+
+**本次发现（都要在文档里如实标注）**
+
+1. **metadata 只写 GSM 号无效**：`inspect_input.norm_sample_key()` 把 `GSM\d+_?` 从两侧都剥掉，
+   于是 `GSM6045825` 被剥成**空串**、永远匹配不上 → 4 个样本静默退化成探索模式
+   （只留一行 `metadata rows with no matching sample: ['']`）。**正解：写完整样本名**。
+   `examples/3_.../README.md` 原来写的"metadata 里写 GSM 号即可匹配"是错的（已改）
+2. **`D:\single_cell_1\GSE200874_RAW` 混着 3 个派生 `.rds`**（combined/ctrl/test_pbmc），
+   直接喂目录会被当成 **7 个样本** → 必须先隔离 4 个 h5 或用 `--exclude`
+3. **Trae 沙箱拦住 celldex 缓存目录**（`C:\Users\A\AppData\Local\ArtifactDB\...`）：
+   `celldex::ImmGenData()` 建 lock 目录失败 → **整个 stage04 硬失败**（markers 都算完了却拿不到注释）。
+   `celldex::MouseRNAseqData()` 已有缓存（17.1 MB，status/LOCK 齐全）→ 用
+   `--reference MouseRNAseqData` 可绕过。**建议改脚本：参考抓取也包 tryCatch**，单参考失败不该拖垮全部
+4. **`REPORT.md` 的 SingleR references 被逐字符拆开**（`SingleR references: M, o, u, s, e, R, N, A, ...`）：
+   `stage04_annotate.R` 用 `write_json(auto_unbox = TRUE)` 把长度 1 的字符向量写成 JSON **字符串**，
+   而 `report_writer.py` 用 `', '.join(...)` 当列表处理。**同一个坑**也会打中
+   `refs_disagree_clusters`（cluster 12 → `"1, 2"`）。→ 待修（改 `report_writer.py` 归一化）
+5. `clustree_resolution_scan.png` 因 clustree 0.5.1 与 ggplot2 4.0 不兼容被 tryCatch 跳过（已知，非本次新增）
+
+### ex2 GSE182135（✅ 跑通：10 样本 / 54,484 细胞 / 21 clusters）
+
+- 命令：`run_scrnaseq.py D:\single_cell_1\GSE182135_RAW <ex2>/output --metadata ...\sample_metadata.csv
+  --exclude combined_pbmc,E9_5_pbmc,E10_5_pbmc,E11_5_pbmc,E12_5_pbmc --organism mouse
+  --reference MouseRNAseqData --export-slim`
+- 输入体检已通过：10 个样本全部按文件名匹配到 4 组（E9.5/E10.5/E11.5/E12.5）✓；
+  旧版**两列 `genes.tsv`** ✓；`^mt-` 线粒体前缀自动识别 ✓；5 个游离 rds 被 `--exclude` 剔除 ✓
+- 实测：10 样本 **57,849 细胞**（19,468 基因）→ QC 后 57,652 → 去双细胞 **54,484**；
+  Harmony → **21 clusters**；markers 48 MB；耗时约 **48 min**（stage03 的 UMAP+t-SNE 约 18 min、
+  stage04 markers+SingleR 约 17 min）；内存峰值约 **5.7 GB**（私有），全程无爆内存
+- QC 保留率 **98–100%**（GEO 给的是 filtered 矩阵）→ 10 个样本全部触发"收紧 `--mt-max`"提示
+- 产物：`annotated_seurat.rds` 998 MB + slim 740 MB（rds 不进 git，按 D5 走 `cos-staging`）
+7. **外层 `D:\single_cell_1\GSE182135_RAW.tar`（2.9 GB）装的是 10 个「三件套目录」**，
+   而 `inspect_input._classify_file()` 在多层三件套时只 `using hits[0]` → **喂这个 tar 会静默只用第 1 个样本**
+   （10 个丢 9 个）；若真是"tar 套 tar"则直接 `unsupported`。
+   → 本次改用**目录输入**（10 个已解包目录 + `--exclude`）。**建议改脚本：tar 内多个三件套应展开成多样本**
+
+### ex5 GSM6923183 h5ad（运行中）
+
+8. **h5ad 的 `X` 若不是 counts（scanpy 产出几乎都如此），原 `export_h5ad()` 会导出 log 归一化值** →
+   R 里二次归一化、QC 的 `nCount_RNA`/`percent.mt` 全是错的。本 example 的 h5ad 正是这种情况
+   （`X` 是 log1p 值、原始 counts 在 `layers['counts']`，`uns` 里有 `log1p`）。
+   → **已修** `inspect_input.export_h5ad()`：优先取 `layers['counts'/'count'/'raw_counts'/'umi_counts']`，
+   并把来源写进 `[fixed]`。实测维度 53,748 细胞 × 20,320 基因（human，HPCA+Blueprint 参考本机已缓存）
+9. h5ad 的 `obs`（Sample/Phenotype/batch/donor_id）**会被导出流程丢弃**（只导 barcodes 三件套）
+   → 多样本 h5ad 会被当成**单样本**跑；要按 donor 分组只能自己先拆分。属已知限制，需写进 README
+
+### ex6 GSE197289（运行中：96,933 细胞 × 29,329 基因）
+
+10. **原始文件是"双层 gzip"**：`GSE197289_snRNA-seq_mouse_raw_counts.RDS.gz` 解开第一层后
+    **里面还是 gzip**（魔数 `1f8b08`），再解一层才是真正的 RDS（2,033 MB，头 `X\n`）。
+    `readRDS(gzfile(p))` 直接报 `unknown input format`。另外 pipeline 的扫描**不认识 `.rds.gz`**
+    （只认 `.rds/.rdata/.rda`）→ 这种文件必须先手动解压（本例解两层）才能喂进去
+11. 真身是 **`dgCMatrix` 稀疏矩阵**（169,068,288 非零、全整数、max 14,939；小鼠基因名、细胞名与
+    `barcode_meta` 完全对得上）→ 原 `stage01_read.R` 的 `as(as.matrix(obj), "CsparseMatrix")` 会**转稠密**
+    （29,329 × 96,933 × 8 B ≈ **22.7 GB**）必然爆内存。**已修**：`inherits(obj, "Matrix")` 时保持稀疏、
+    不 densify（实测 stage01/02 通过）
+12. 规模 **96,933 细胞 × 29,329 基因**；QC 后 94,499（97.5%）；**双细胞率 32.84%** ——
+    把 97k 细胞当成**一个样本**喂 scDblFinder，它会按"单样本回收 97k 细胞"外推 multiplet 率，
+    属于**过度去双细胞**。真实样本标签其实就在 `barcode_meta`（`sample_name` 列，
+    如 `CSD_1.5h_male_rep1`）里，但 **pipeline 只能按"输入样本"分组、吃不了逐细胞标签** →
+    分组与去双细胞同时失真。这是真实 GEO 数据最常见形态（一份 counts + 一份 cell metadata），
+    **建议作为下一步功能**（如 `--cell-metadata` 把逐细胞标签变成 orig.ident/group）
+13. ex6 README 原写的"6 个样本目录、6 组各进 `sample_metadata.csv`"与本地数据形态不符
+    （本地是一份大矩阵 + 逐细胞标签表），需要重写
+
 ## 发布（按 CONTRIBUTING.md SOP）
 
 - [ ] 上线前 6 个 example 全部真实跑通（用户亲跑，可分次；未跑通不上线）

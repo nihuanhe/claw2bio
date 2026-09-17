@@ -1,0 +1,144 @@
+{
+  "skill": "scRNA-seq",
+  "version": "0.1.0",
+  "timestamp": "2026-09-17T18:21:05.339674",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "r_version": "Rscript (R) version 4.5.2 (2025-10-31)",
+  "r_packages": {
+    "Seurat": true,
+    "harmony": true,
+    "SingleR": true,
+    "celldex": true,
+    "scDblFinder": true,
+    "clustree": true,
+    "presto": true,
+    "hdf5r": true,
+    "Matrix": true,
+    "ggplot2": true,
+    "dplyr": true,
+    "patchwork": true,
+    "data.table": true,
+    "jsonlite": true
+  },
+  "parameters": {
+    "metadata": "D:\\single_cell_1\\_run_ex2\\sample_metadata.csv",
+    "exclude": "combined_pbmc,E9_5_pbmc,E10_5_pbmc,E11_5_pbmc,E12_5_pbmc",
+    "organism": "mouse",
+    "mt_pattern": null,
+    "min_cells": 3,
+    "min_features": 200,
+    "mt_max": 20.0,
+    "max_features_qc": 6000,
+    "no_doublets": false,
+    "integrate": "harmony",
+    "sct": false,
+    "resolution": 0.5,
+    "no_tsne": false,
+    "downsample": 0,
+    "reference": "MouseRNAseqData",
+    "custom_ref": null,
+    "marker_file": null,
+    "no_annotation": false,
+    "install_deps": false,
+    "export_slim": true,
+    "rscript": "D:\\myfile\\R_2025\\R-4.5.2\\bin\\x64\\Rscript.exe",
+    "resume": false,
+    "overwrite": true
+  },
+  "input": "D:\\single_cell_1\\GSE182135_RAW",
+  "mode": "multi",
+  "samples": [
+    {
+      "name": "GSM5519136_E9_5_rep1_2018JULY18.tar",
+      "type": "10x_mtx",
+      "group": "E9.5",
+      "fixes": [
+        "mitochondrial prefix looks like ^mt- (13 genes); will auto-select unless --mt-pattern overrides",
+        "metadata sample 'GSM5519136_E9_5_rep1_2018JULY18' matched to 'GSM5519136_E9_5_rep1_2018JULY18.tar'"
+      ]
+    },
+    {
+      "name": "GSM5519137_E9_5_rep2_2018AUG07.tar",
+      "type": "10x_mtx",
+      "group": "E9.5",
+      "fixes": [
+        "mitochondrial prefix looks like ^mt- (13 genes); will auto-select unless --mt-pattern overrides",
+        "metadata sample 'GSM5519137_E9_5_rep2_2018AUG07' matched to 'GSM5519137_E9_5_rep2_2018AUG07.tar'"
+      ]
+    },
+    {
+      "name": "GSM5519138_E10_5_rep5_2018AUG16.tar",
+      "type": "10x_mtx",
+      "group": "E10.5",
+      "fixes": [
+        "mitochondrial prefix looks like ^mt- (13 genes); will auto-select unless --mt-pattern overrides",
+        "metadata sample 'GSM5519138_E10_5_rep5_2018AUG16' matched to 'GSM5519138_E10_5_rep5_2018AUG16.tar'"
+      ]
+    },
+    {
+      "name": "GSM5519139_E10_5_rep6_2018SEP22.tar",
+      "type": "10x_mtx",
+      "group": "E10.5",
+      "fixes": [
+        "mitochondrial prefix looks like ^mt- (13 genes); will auto-select unless --mt-pattern overrides",
+        "metadata sample 'GSM5519139_E10_5_rep6_2018SEP22' matched to 'GSM5519139_E10_5_rep6_2018SEP22.tar'"
+      ]
+    },
+    {
+      "name": "GSM5519140_E10_5_rep7_2018AUG16.tar",
+      "type": "10x_mtx",
+      "group": "E10.5",
+      "fixes": [
+        "mitochondrial prefix looks like ^mt- (13 genes); will auto-select unless --mt-pattern overrides",
+        "metadata sample 'GSM5519140_E10_5_rep7_2018AUG16' matched to 'GSM5519140_E10_5_rep7_2018AUG16.tar'"
+      ]
+    },
+    {
+      "name": "GSM5519141_E11_5_rep2_2018JUNE26.tar",
+      "type": "10x_mtx",
+      "group": "E11.5",
+      "fixes": [
+        "mitochondrial prefix looks like ^mt- (13 genes); will auto-select unless --mt-pattern overrides",
+        "metadata sample 'GSM5519141_E11_5_rep2_2018JUNE26' matched to 'GSM5519141_E11_5_rep2_2018JUNE26.tar'"
+      ]
+    },
+    {
+      "name": "GSM5519142_E11_5_rep2B_2018JULY27.tar",
+      "type": "10x_mtx",
+      "group": "E11.5",
+      "fixes": [
+        "mitochondrial prefix looks like ^mt- (13 genes); will auto-select unless --mt-pattern overrides",
+        "metadata sample 'GSM5519142_E11_5_rep2B_2018JULY27' matched to 'GSM5519142_E11_5_rep2B_2018JULY27.tar'"
+      ]
+    },
+    {
+      "name": "GSM5519143_E11_5_rep3_2018SEP22.tar",
+      "type": "10x_mtx",
+      "group": "E11.5",
+      "fixes": [
+        "mitochondrial prefix looks like ^mt- (13 genes); will auto-select unless --mt-pattern overrides",
+        "metadata sample 'GSM5519143_E11_5_rep3_2018SEP22' matched to 'GSM5519143_E11_5_rep3_2018SEP22.tar'"
+      ]
+    },
+    {
+      "name": "GSM5519144_E12_5_rep1_2018JUNE28.tar",
+      "type": "10x_mtx",
+      "group": "E12.5",
+      "fixes": [
+        "mitochondrial prefix looks like ^mt- (13 genes); will auto-select unless --mt-pattern overrides",
+        "metadata sample 'GSM5519144_E12_5_rep1_2018JUNE28' matched to 'GSM5519144_E12_5_rep1_2018JUNE28.tar'"
+      ]
+    },
+    {
+      "name": "GSM5519145_E12_5_rep2_2018JUNE28.tar",
+      "type": "10x_mtx",
+      "group": "E12.5",
+      "fixes": [
+        "mitochondrial prefix looks like ^mt- (13 genes); will auto-select unless --mt-pattern overrides",
+        "metadata sample 'GSM5519145_E12_5_rep2_2018JUNE28' matched to 'GSM5519145_E12_5_rep2_2018JUNE28.tar'"
+      ]
+    }
+  ],
+  "cells_after_qc": 54484,
+  "n_clusters": 21
+}

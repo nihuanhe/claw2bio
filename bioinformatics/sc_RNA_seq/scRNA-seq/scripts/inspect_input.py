@@ -128,10 +128,10 @@ def unpack_tar(tar_path, staging):
     return dest
 
 
-def export_h5ad(h5ad_path, staging):
+def export_h5ad(h5ad_path, staging, fixes=None):
     """Export h5ad -> 10X-style triplet via anndata. Returns triplet dir."""
     dest = os.path.join(staging, "h5ad_" + strip_sample_ext(os.path.basename(h5ad_path)))
-    done = os.path.join(dest, "matrix.mtx")
+    done = os.path.join(dest, "matrix.mtx.gz")
     if os.path.exists(done):
         return dest
     os.makedirs(dest, exist_ok=True)
@@ -139,14 +139,27 @@ def export_h5ad(h5ad_path, staging):
     import pandas as pd
     import scipy.io
     adata = anndata.read_h5ad(h5ad_path)
-    scipy.io.mmwrite(os.path.join(dest, "matrix.mtx"), adata.X.T)
-    pd.Series(adata.obs.index).to_csv(os.path.join(dest, "barcodes.tsv"),
-                                      index=False, header=False)
+    # scanpy-processed h5ad files usually keep log-normalized values in X and
+    # the raw counts in a layer. Exporting X would make R normalize a second
+    # time and turn QC (nCount_RNA / percent.mt) into nonsense.
+    x, x_from = adata.X, "X"
+    for key in ("counts", "count", "raw_counts", "umi_counts"):
+        if key in adata.layers:
+            x, x_from = adata.layers[key], f"layers['{key}']"
+            break
+    if fixes is not None and x_from != "X":
+        fixes.append(f"h5ad: X was not counts -> exported raw counts from {x_from}")
+    # Seurat 5's Read10X only accepts the *new* 10X layout when it is gzipped
+    # ("Barcode file missing. Expecting barcodes.tsv.gz"), so write .gz.
+    with gzip.open(os.path.join(dest, "matrix.mtx.gz"), "wb") as fh:
+        scipy.io.mmwrite(fh, x.T)
+    pd.Series(adata.obs.index).to_csv(os.path.join(dest, "barcodes.tsv.gz"),
+                                      index=False, header=False, compression="gzip")
     var = adata.var
     gene_id = var["gene_ids"] if "gene_ids" in var.columns else var.index
     feat = pd.DataFrame({"id": gene_id, "symbol": var.index})
-    feat.to_csv(os.path.join(dest, "features.tsv"), sep="\t",
-                index=False, header=False)
+    feat.to_csv(os.path.join(dest, "features.tsv.gz"), sep="\t",
+                index=False, header=False, compression="gzip")
     return dest
 
 
@@ -180,6 +193,14 @@ def sniff_text_matrix(path):
 
 def _classify_10x_dir(dirpath, fixes):
     files = { _base_variant(f): os.path.join(dirpath, f) for f in os.listdir(dirpath) }
+    # a 10X dir is only usable with a matrix AND barcodes; checking just the
+    # feature file let a half-written export pass as valid input and fail much
+    # later inside Read10X with a misleading message
+    missing = [n for n in TRIPLET if n not in files]
+    if missing:
+        raise SystemExit(
+            f"ERROR: {dirpath} is not a usable 10X dir: missing {', '.join(missing)} "
+            f"(partial/failed export? delete the output .staging/ and rerun)")
     feat = next((files[f] for f in FEATURE_FILES if f in files), None)
     if feat is None:
         return None
@@ -229,7 +250,7 @@ def _classify_file(path, staging, fixes):
     if low.endswith(H5_EXT):
         return {"type": "10x_h5", "path": path}
     if low.endswith(H5AD_EXT):
-        dest = export_h5ad(path, staging)
+        dest = export_h5ad(path, staging, fixes)
         fixes.append(f"h5ad exported via anndata -> {dest} "
                      f"(features written WITHOUT index, gene ids kept in col1)")
         info = _classify_10x_dir(dest, fixes)

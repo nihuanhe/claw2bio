@@ -64,6 +64,34 @@ python scripts/run_scrnaseq.py \
 
 需要 R（≥4.5）及 Seurat / harmony / SingleR 等包；stage 00 会先检查依赖，缺包可加 `--install-deps` 让 agent 代装。
 
+## 6 个示例的真实状态（2026-09-17 全部实跑）
+
+| # | 数据集 | 覆盖的格式坑 | 实测结果 | 用时 / 内存峰值 |
+|---|---|---|---|---|
+| 1 | GSE234527（降采样 fixture，随仓库） | 标准 10X mtx 多样本 + Harmony | 约 2k 细胞 → 9 clusters | 分钟级 |
+| 2 | GSE182135（10 样本 / 4 组） | 旧版**两列 `genes.tsv`** + 多样本合并 | 57,849 → 去双细胞 **54,484** 细胞 / **21 clusters** | ~48 min / ~5.7 GB |
+| 3 | GSE200874（4 个 `.h5`） | **10X h5** 多样本 | 7,189 → **6,408** 细胞 / **22 clusters** | ~20 min / ~1.5 GB |
+| 4 | 合成 BGI（随仓库） | features 列序颠倒 + `MT.` 线粒体前缀 | 单样本探索模式 | 分钟级 |
+| 5 | GSM6923183（`.h5ad`，53,748 细胞） | **h5ad → anndata 导出** | 53,748 → 去双细胞 **46,059** 细胞 / **27 clusters** | ~31 min / ~5 GB |
+| 6 | GSE197289（snRNA-seq） | **稀疏 `dgCMatrix` RDS**（96,933 × 29,329） | 96,933 → 去双细胞 **63,470** 细胞 / **28 clusters** | ~1 h / **~11.9 GB** |
+
+> 6 号是这台 16 GB 机器的上限（stage02 的 scDblFinder 一度把可用内存压到 1.8 GB）；
+> 更大的数据请先 `--downsample` 探索，或换内存更大的机器。
+
+**这批实跑暴露并修好的坑**（细节见各 `examples/*/README.md`）：
+
+1. **`metadata` 的 `sample` 列必须写"完整样本名"**（如 `GSM6045825_wt_filtered_gene_bc_matrices_h5_1`）：
+   匹配前会把 `GSM\d+_` 前缀从 metadata 名与样本名**两侧都剥掉**，只写 `GSM6045825` 会被剥成空串、
+   **静默**退化成探索模式（只留一行 `metadata rows with no matching sample: ['']`）。
+2. **h5ad 的 `X` 常常不是 counts**：scanpy 产出的 h5ad 把 log 归一化值放在 `X`、原始 counts 在
+   `layers['counts']`。现在导出时会优先用 counts 层（并在日志里写明来源），否则 R 会二次归一化、QC 全错；
+   导出的三件套也改为 `.gz`（Seurat 5 的 `Read10X` 对"新格式名"要求压缩，旧版 `genes.tsv` 不压缩才行）。
+3. **`.h5ad.gz` / `.RDS.gz` 不会被自动解压**：要先把文件解压成 `.h5ad` / `.rds` 再喂进来。
+   若解压后 R 仍报 `unknown input format`，说明它是**双层 gzip**（本例的 `.RDS.gz` 就是），再解一层即可。
+4. **裸稀疏矩阵（`dgCMatrix`）不再被转成稠密**：原实现走 `as.matrix()`，对 96,933 × 29,329 等于
+   22.7 GB 稠密矩阵 → 必爆内存。现已保持稀疏。
+5. **上游目录里混着的派生 `.rds` 会被当成额外样本**（细胞重复计入）→ 用 `--exclude` 点名剔除。
+
 ## 输入格式
 
 - 单个 10X 目录、一目录的多样本文件，或上述 9 类格式的任意混合；输入永不被修改（解包/导出都进 `<output>/.staging/`）。
@@ -104,7 +132,15 @@ python scripts/run_scrnaseq.py \
 - **UMAP 上批次分层明显** → 确认走了 Harmony（多样本默认开），查看 `UMAP_before/after_integration` 对照图。
 - **percent.mt 全为 0** → 线粒体前缀会被自动嗅探；识别失败时用 `--mt-pattern "^MT-"` 手动指定。
 - **想手动注释** → 把 `top10_markers.csv` 改成两列 `cluster,cell_type` CSV，跑 `Rscript scripts/apply_manual_annotation.R <rds> <csv> <outdir>`（REPORT.md 里有同样指引）。
-- **h5ad 输入报错** → 需要 `pip install anndata`。
+- **h5ad 输入报错** → 需要 `pip install anndata`；另外 `.h5ad.gz` **要先手动解压**成 `.h5ad`（本流程不做自动解压）。
+- **提示 `metadata rows with no matching sample: ['']`** → `sample` 列要写**完整样本名**（文件名去掉扩展名，如
+  `GSM6045825_wt_filtered_gene_bc_matrices_h5_1`）；只写 `GSM6045825` 匹配不上（匹配前会剥掉 GSM 前缀，两侧都剥 → 变成空串）。
+- **双细胞率异常高（>30%）** → 通常说明你喂进来的是"一份大矩阵"，所有细胞被当成**同一个样本**，
+  scDblFinder 的高估计值不可信。正确做法是先按真实样本标签（如 `sample_name` 列）把矩阵拆成多个输入再跑。
+- **"一份 counts + 一份 cell metadata"（GEO 常见形态）怎么按 metadata 分组？** → 本流程目前**只能按"输入样本"分组**，
+  吃不了逐细胞标签；要么先按标签拆成多个输入文件，要么等 `scRNA-seq-compare`（规划中）。
+- **`.RDS.gz` / `.h5ad.gz` 喂进去没反应** → 输入扫描只认 `.rds` / `.h5ad` 等裸扩展名，压缩包会被**静默跳过**；
+  先手动解压（`.RDS.gz` 还可能是**双层 gzip**，解一层后仍需再解一层）。
 - **为什么必须用技能自带脚本，不能让 AI 现写？**
   `scripts/` 里的是经过验证的路径：它们在示例数据上跑过，边界情况有文档记录。AI 现场生成的代码是
   "结果悄悄出错"的最常见来源。遇到没覆盖的情况，先改命令行参数；不够就复制脚本到临时目录做最小改动

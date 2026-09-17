@@ -1,0 +1,60 @@
+{
+  "skill": "scRNA-seq",
+  "version": "0.1.0",
+  "timestamp": "2026-09-17T19:57:24.735196",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "r_version": "Rscript (R) version 4.5.2 (2025-10-31)",
+  "r_packages": {
+    "Seurat": true,
+    "harmony": true,
+    "SingleR": true,
+    "celldex": true,
+    "scDblFinder": true,
+    "clustree": true,
+    "presto": true,
+    "hdf5r": true,
+    "Matrix": true,
+    "ggplot2": true,
+    "dplyr": true,
+    "patchwork": true,
+    "data.table": true,
+    "jsonlite": true
+  },
+  "parameters": {
+    "metadata": null,
+    "exclude": "",
+    "organism": "mouse",
+    "mt_pattern": null,
+    "min_cells": 3,
+    "min_features": 200,
+    "mt_max": 20.0,
+    "max_features_qc": 6000,
+    "no_doublets": false,
+    "integrate": "harmony",
+    "sct": false,
+    "resolution": 0.5,
+    "no_tsne": false,
+    "downsample": 0,
+    "reference": "MouseRNAseqData",
+    "custom_ref": null,
+    "marker_file": null,
+    "no_annotation": false,
+    "install_deps": false,
+    "export_slim": true,
+    "rscript": "D:\\myfile\\R_2025\\R-4.5.2\\bin\\x64\\Rscript.exe",
+    "resume": false,
+    "overwrite": true
+  },
+  "input": "D:\\single_cell_1\\_run_ex6\\GSE197289_snRNA-seq_mouse_raw_counts.RDS",
+  "mode": "single",
+  "samples": [
+    {
+      "name": "GSE197289_snRNA-seq_mouse_raw_counts",
+      "type": "rds",
+      "group": null,
+      "fixes": []
+    }
+  ],
+  "cells_after_qc": 63470,
+  "n_clusters": 28
+}

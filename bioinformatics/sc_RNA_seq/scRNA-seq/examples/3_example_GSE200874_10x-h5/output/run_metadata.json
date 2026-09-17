@@ -1,0 +1,78 @@
+{
+  "skill": "scRNA-seq",
+  "version": "0.1.0",
+  "timestamp": "2026-09-17T17:32:40.701316",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "r_version": "Rscript (R) version 4.5.2 (2025-10-31)",
+  "r_packages": {
+    "Seurat": true,
+    "harmony": true,
+    "SingleR": true,
+    "celldex": true,
+    "scDblFinder": true,
+    "clustree": true,
+    "presto": true,
+    "hdf5r": true,
+    "Matrix": true,
+    "ggplot2": true,
+    "dplyr": true,
+    "patchwork": true,
+    "data.table": true,
+    "jsonlite": true
+  },
+  "parameters": {
+    "metadata": "D:\\single_cell_1\\_run_ex3\\input\\sample_metadata.csv",
+    "exclude": "",
+    "organism": "mouse",
+    "mt_pattern": null,
+    "min_cells": 3,
+    "min_features": 200,
+    "mt_max": 20.0,
+    "max_features_qc": 6000,
+    "no_doublets": false,
+    "integrate": "harmony",
+    "sct": false,
+    "resolution": 0.5,
+    "no_tsne": false,
+    "downsample": 0,
+    "reference": "MouseRNAseqData",
+    "custom_ref": null,
+    "marker_file": null,
+    "no_annotation": false,
+    "install_deps": false,
+    "export_slim": true,
+    "rscript": "D:\\myfile\\R_2025\\R-4.5.2\\bin\\x64\\Rscript.exe",
+    "resume": true,
+    "overwrite": false
+  },
+  "input": "D:\\single_cell_1\\_run_ex3\\input",
+  "mode": "multi",
+  "samples": [
+    {
+      "name": "GSM6045825_wt_filtered_gene_bc_matrices_h5_1",
+      "type": "10x_h5",
+      "group": "Control",
+      "fixes": []
+    },
+    {
+      "name": "GSM6045826_wt_filtered_gene_bc_matrices_h5_2",
+      "type": "10x_h5",
+      "group": "Control",
+      "fixes": []
+    },
+    {
+      "name": "GSM6045827_mut_filtered_gene_bc_matrices_h5_1",
+      "type": "10x_h5",
+      "group": "Test",
+      "fixes": []
+    },
+    {
+      "name": "GSM6045828_mut_filtered_gene_bc_matrices_h5_2",
+      "type": "10x_h5",
+      "group": "Test",
+      "fixes": []
+    }
+  ],
+  "cells_after_qc": 6408,
+  "n_clusters": 22
+}

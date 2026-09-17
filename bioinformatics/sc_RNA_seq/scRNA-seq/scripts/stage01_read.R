@@ -58,8 +58,17 @@ read_sample <- function(s) {
                   as.character(obj@version), ncol(obj), nrow(obj)))
       return(obj)   # already a Seurat object: use as-is
     }
-    counts <- as(as.matrix(obj), "CsparseMatrix")
-    cat("[stage01]   rds was a bare matrix -> CreateSeuratObject\n")
+    if (inherits(obj, "Matrix")) {
+      # already sparse (dgCMatrix/dgTMatrix/...): keep it sparse. Going through
+      # as.matrix() would densify it -- a 20k x 50k count matrix is ~8 GB dense
+      # and OOMs a 16 GB machine for no reason.
+      counts <- as(obj, "CsparseMatrix")
+      cat(sprintf("[stage01]   rds was a sparse %s -> used as-is (not densified)\n",
+                  class(obj)[1]))
+    } else {
+      counts <- as(as.matrix(obj), "CsparseMatrix")
+      cat("[stage01]   rds was a bare dense matrix -> CreateSeuratObject\n")
+    }
   } else {
     stop("unsupported type in plan: ", s$type)
   }
