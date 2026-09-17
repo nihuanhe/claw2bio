@@ -69,6 +69,10 @@ Rscript scripts/enrich.R examples/input examples/output --organism mouse
 - **断网 / KEGG 接口超时** → 自动回退本地缓存；新机器先跑一次 `Rscript scripts/build_pathway_cache.R --organism both` 建缓存（KEGG 缓存因版权只存本地，不上 COS）。
 - **没有 OrgDb 包** → 用 bulk-RNA-seq 技能 `resources/` 里的预编译包（COS 镜像），一次安装两个技能共用。
 - **DEG 表不是本流程出的** → 只要有 `gene` / `log2fc`(或 `logFC` / `log2FoldChange`) / `padj` 列即可读入。
+- **为什么必须用技能自带脚本，不能让 AI 现写？**
+  `scripts/` 里的是经过验证的路径：它们在示例数据上跑过，边界情况有文档记录。AI 现场生成的代码是
+  "结果悄悄出错"的最常见来源。遇到没覆盖的情况，先改命令行参数；不够就复制脚本到临时目录做最小改动
+  并说明改了什么；只有完全没有对应脚本时才允许新写，且新写后要回沉淀到 `scripts/`。
 
 ## 相关链接
 

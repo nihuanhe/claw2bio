@@ -69,6 +69,13 @@ Alternative palettes with identical statistics: `barplot_2col_green_pink.py`, `b
 
 - **Wrong script picked** → check for stray non-numeric header columns; or call the exact script directly.
 - **Labels cut off** → the Y-axis auto-extends; if a custom range is needed, edit `Y_LABEL`/axis settings in the script header.
+- **Why must the agent run the bundled scripts instead of writing its own?**
+  The scripts in `scripts/` are the tested path — they have been run on the example
+  data, and their edge cases are documented. Code generated on the fly by an agent is
+  the most common source of silently wrong results. If a case is not covered, change
+  the CLI arguments first; if that is not enough, copy a script to a scratch directory
+  and make a minimal, reported edit; only write new code when nothing covers the task,
+  and fold it back into `scripts/` afterwards.
 
 ## Links
 

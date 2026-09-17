@@ -137,6 +137,13 @@ Each script: read CSV → compute → fill its block in `Table-all.md` → write
 - **logistf missing** → `install.packages("logistf")`.
 - **Continuous variable missing from the baseline table** → add it to `baseline_continuous_vars` in `DEFAULT_CONFIG`.
 - **Cox table absent** → only appears when both `survival_time` and `survival_event` columns exist.
+- **Why must the agent run the bundled scripts instead of writing its own?**
+  The scripts in `scripts/` are the tested path — they have been run on the example
+  data, and their edge cases are documented. Code generated on the fly by an agent is
+  the most common source of silently wrong results. If a case is not covered, change
+  the CLI arguments first; if that is not enough, copy a script to a scratch directory
+  and make a minimal, reported edit; only write new code when nothing covers the task,
+  and fold it back into `scripts/` afterwards.
 
 ## Links
 

@@ -78,6 +78,10 @@ python scripts/run_pseudotime.py <annotated_seurat.rds> <output_dir> \
   `.checkpoint_cds_learned.rds`，崩溃后加 `--resume` 即可复用（跳过建 cds 与 learn_graph，
   不必重算）。运行正常结束时会自动删掉该检查点。
 - **graph_test 太慢** → 加 `--no-graph-test` 只要轨迹，或 `--subset-labels` 缩小细胞范围。
+- **为什么必须用技能自带脚本，不能让 AI 现写？**
+  `scripts/` 里的是经过验证的路径：它们在示例数据上跑过，边界情况有文档记录。AI 现场生成的代码是
+  "结果悄悄出错"的最常见来源。遇到没覆盖的情况，先改命令行参数；不够就复制脚本到临时目录做最小改动
+  并说明改了什么；只有完全没有对应脚本时才允许新写，且新写后要回沉淀到 `scripts/`。
 
 ## 相关链接
 

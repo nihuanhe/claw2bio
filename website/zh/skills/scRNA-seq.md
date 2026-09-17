@@ -105,6 +105,10 @@ python scripts/run_scrnaseq.py \
 - **percent.mt 全为 0** → 线粒体前缀会被自动嗅探；识别失败时用 `--mt-pattern "^MT-"` 手动指定。
 - **想手动注释** → 把 `top10_markers.csv` 改成两列 `cluster,cell_type` CSV，跑 `Rscript scripts/apply_manual_annotation.R <rds> <csv> <outdir>`（REPORT.md 里有同样指引）。
 - **h5ad 输入报错** → 需要 `pip install anndata`。
+- **为什么必须用技能自带脚本，不能让 AI 现写？**
+  `scripts/` 里的是经过验证的路径：它们在示例数据上跑过，边界情况有文档记录。AI 现场生成的代码是
+  "结果悄悄出错"的最常见来源。遇到没覆盖的情况，先改命令行参数；不够就复制脚本到临时目录做最小改动
+  并说明改了什么；只有完全没有对应脚本时才允许新写，且新写后要回沉淀到 `scripts/`。
 
 ## 相关链接
 

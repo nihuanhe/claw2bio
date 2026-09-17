@@ -76,6 +76,13 @@ GAPDH,Treat,18.20,18.30,18.25
 - **"Output file exists"** → add `--overwrite`, or change `--name`.
 - **Reference gene not detected** → check the target name spelling, or pass `--ref-targets ACTB`.
 - **ModuleNotFoundError** → ask your agent to install the dependencies, or run `pip install pandas numpy scipy matplotlib`.
+- **Why must the agent run the bundled scripts instead of writing its own?**
+  The scripts in `scripts/` are the tested path — they have been run on the example
+  data, and their edge cases are documented. Code generated on the fly by an agent is
+  the most common source of silently wrong results. If a case is not covered, change
+  the CLI arguments first; if that is not enough, copy a script to a scratch directory
+  and make a minimal, reported edit; only write new code when nothing covers the task,
+  and fold it back into `scripts/` afterwards.
 
 ## Links
 

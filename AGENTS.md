@@ -40,3 +40,9 @@ input and expected output.
   smoke-test convention, adapter pattern).
 - Scripts run locally; no data leaves the user's machine.
 - Python skills expect Python 3.10+ with `pip install pandas numpy scipy matplotlib statsmodels`.
+- **Execution rule / 执行铁律**: run the scripts in `scripts/` — never write your own.
+  Preferred order: (1) run the script as-is, changing CLI arguments only; (2) copy
+  it to a scratch dir and make a minimal edit for a case the CLI cannot express,
+  reporting exactly what changed; (3) only if no script covers the task at all,
+  write new code and then fold it back into `scripts/` so the next run reuses it.
+  **AI agents must not write replacement scripts on the fly.**

@@ -70,6 +70,10 @@ Rscript scripts/gsea.R examples/input/DEG_Mutant_vs_Control.csv \
 - **MSigDB 文件哪里来** → MSigDB 官网注册下载（许可要求自行下载，技能不代发）；拷进 `resources/gmt/` 即可。
 - **想做 KEGG 的 GSEA** → MSigDB 无 KEGG 基因集；用 [RNA-seq-enrichment](/zh/skills/RNA-seq-enrichment) 的 KEGG 富集替代。
 - **在 Windows 上卡住不动** → fgsea 被强制串行（并行 socket 在部分 Windows 环境打不开端口），耐心等即可，不是死机。
+- **为什么必须用技能自带脚本，不能让 AI 现写？**
+  `scripts/` 里的是经过验证的路径：它们在示例数据上跑过，边界情况有文档记录。AI 现场生成的代码是
+  "结果悄悄出错"的最常见来源。遇到没覆盖的情况，先改命令行参数；不够就复制脚本到临时目录做最小改动
+  并说明改了什么；只有完全没有对应脚本时才允许新写，且新写后要回沉淀到 `scripts/`。
 
 ## 相关链接
 

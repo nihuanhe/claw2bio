@@ -137,6 +137,10 @@ python ../../scripts/pipeline/make_table9_sequencing_quality.py   # Table 9 独�
 - **logistf 未安装** → `install.packages("logistf")`。
 - **连续变量没进基线表** → 加进 `DEFAULT_CONFIG` 的 `baseline_continuous_vars`。
 - **没有 Cox 表** → 只有同时存在 `survival_time` 和 `survival_event` 列才会生成。
+- **为什么必须用技能自带脚本，不能让 AI 现写？**
+  `scripts/` 里的是经过验证的路径：它们在示例数据上跑过，边界情况有文档记录。AI 现场生成的代码是
+  "结果悄悄出错"的最常见来源。遇到没覆盖的情况，先改命令行参数；不够就复制脚本到临时目录做最小改动
+  并说明改了什么；只有完全没有对应脚本时才允许新写，且新写后要回沉淀到 `scripts/`。
 
 ## 相关链接
 
