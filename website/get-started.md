@@ -60,4 +60,4 @@ need one skill instead of the whole library.
   design principle of Claw2Bio.
 - **Which Python do I need?** None that you manage yourself — let the agent set it up.
 - **GitHub is slow in my region.** Use the per-skill COS zip links on each tutorial
-  page (available at site launch).
+  page (coming soon — being packaged).

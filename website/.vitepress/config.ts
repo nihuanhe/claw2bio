@@ -32,7 +32,19 @@ export default defineConfig({
             {
               text: 'Bioinformatics Analysis',
               items: [
-                { text: 'Coming soon…', link: '/skills/#bioinformatics' }
+                {
+                  text: 'Phylogenetic tree',
+                  items: []
+                },
+                {
+                  text: 'Single-cell sequencing',
+                  items: []
+                },
+                {
+                  text: 'RNA-seq analysis',
+                  items: []
+                },
+                { text: 'Tutorials in Chinese →', link: '/zh/skills/#bioinformatics' }
               ]
             },
             {
@@ -72,14 +84,41 @@ export default defineConfig({
             {
               text: '生信数据分析',
               items: [
-                { text: '敬请期待…', link: '/zh/skills/#bioinformatics' }
+                {
+                  text: '进化树',
+                  collapsed: false,
+                  items: [
+                    { text: '进化树 · 建树', link: '/zh/skills/phylo-tree-build' },
+                    { text: '进化树 · 绘图', link: '/zh/skills/phylo-tree-plot' }
+                  ]
+                },
+                {
+                  text: '单细胞测序',
+                  collapsed: false,
+                  items: [
+                    { text: '单细胞 RNA-seq', link: '/zh/skills/scRNA-seq' },
+                    { text: '单细胞拟时序', link: '/zh/skills/scRNA-seq-pseudotime' },
+                    { text: '单细胞虚拟敲除', link: '/zh/skills/scRNA-seq-virtual-ko' }
+                  ]
+                },
+                {
+                  text: 'RNA-seq分析',
+                  collapsed: false,
+                  items: [
+                    { text: 'Bulk RNA-seq 差异分析', link: '/zh/skills/bulk-RNA-seq' },
+                    { text: '富集分析（GO/KEGG/Reactome）', link: '/zh/skills/RNA-seq-enrichment' },
+                    { text: '基因表达对比图', link: '/zh/skills/RNA-seq-gene-plot' },
+                    { text: 'GSEA', link: '/zh/skills/RNA-seq-GSEA' }
+                  ]
+                }
               ]
             },
             {
               text: '图表生成',
               items: [
                 { text: '分组柱状图', link: '/zh/skills/barplot' },
-                { text: '临床统计表', link: '/zh/skills/clinical-table' }
+                { text: '临床统计表', link: '/zh/skills/clinical-table' },
+                { text: '生存分析曲线', link: '/zh/skills/survival-curve' }
               ]
             }
           ]
@@ -96,7 +135,7 @@ export default defineConfig({
     ],
     footer: {
       message: 'Lab-validated AI agent skills for biomedical research. 实验室实战验证的 AI agent 技能库。',
-      copyright: '© 2026 Claw2Bio · <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">ICP备案号待填</a>'
+      copyright: '© 2026 Claw2Bio · <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">粤ICP备2026052114号</a>'
     },
     search: {
       provider: 'local'

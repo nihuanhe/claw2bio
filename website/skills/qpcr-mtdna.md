@@ -13,9 +13,9 @@ Please set up the "qpcr-mtdna" skill from the Claw2Bio library for me:
 3. Run the bundled example in examples/ to verify my environment, and show me the output figure.
 ```
 
-**Option B — standalone zip** (few MB, Tencent COS direct link): *available at site launch*.
+**Option B — standalone zip** (few MB, Tencent COS direct link): *coming soon — being packaged*.
 
-**Option C — full example dataset** (COS, per-skill folder): *available at site launch*.
+**Option C — full example dataset** (COS, per-skill folder): *coming soon — being packaged*.
 :::
 
 ## What it does
