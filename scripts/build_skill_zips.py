@@ -39,6 +39,7 @@ MANIFEST = OUT / "manifest.csv"
 BIG_EXAMPLES = 50 * 1024 * 1024   # examples above this get split into a mode C package
 FILE_IN_B = 20 * 1024 * 1024      # single example/resource file kept in mode B
 SERVER_LIMIT = 50 * 1024 * 1024   # packages <= this are served from the website
+WARN_LIMIT = 200 * 1024 * 1024    # beyond this something almost certainly leaked in
 COS_BASE = "https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com"
 SITE_BASE = "https://claw2bio.site/downloads"
 
@@ -283,6 +284,9 @@ def main() -> None:
                 "note": f"mode {'C full examples' if mode == 'c' else 'B package'} -> {target}",
             })
             print(f"{zip_name:<38}{size / 1048576:9.2f}  {target:<8}{action}")
+            if size > WARN_LIMIT:
+                print(f"  [WARN] {zip_name} exceeds 200 MB — inspect for leaked "
+                      f"artefacts (rds/log/checkpoints) BEFORE uploading")
 
     with MANIFEST.open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=["file", "md5", "size", "example", "note"])

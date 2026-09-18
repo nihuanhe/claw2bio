@@ -127,21 +127,31 @@ curl.exe -I https://claw2bio.site/downloads/clinical-table.zip
    - 收敛：新增 `scRNA-seq-pseudotime/.gitignore`、`scRNA-seq-virtual-ko/.gitignore`；
      根 `.gitignore` 增加 `**/examples/**/output/**/*.rds` 与 `**/examples/**/output/**/*.log`
      （落实 D5"大 rds 不进 git"）；已删除 `examples/1_smoke/output/pseudotime_cds.rds`（5.39 MB）
-   - **已知代价**：`bulk-RNA-seq/examples/2_example_.../output/gene_annotation.csv` 60.19 MB，
-     超过 GitHub 推荐的 50 MB（**未超 100 MB 硬限**），远端返回 GH001 警告但不阻塞；
-     另有 `all.concat.fa` 24 MB、`normalized_expression.csv` 7.7 MB、12 个基因组 fasta（约 58 MB）。
-     要瘦身只能改写历史（不建议）；也可日后把这些改成 COS 直链 + `.gitignore`
+   - **已知代价（已于 2026-09-18 第二轮瘦身解决）**：`gene_annotation.csv` 60 MB 与
+     `all.concat.fa` 24 MB 已按 markers_all.csv 同款流程从 git 全历史移除
+     （备份分支 `prerewrite-backup-2`@0fac2d4，强推至 `af44ebe`）；git 侧现无 rds/log/大转储
    - ⚠️ 有 4 个 `SKILL.md`（`experiment-data/OFT/{1,2,3}`、`figure-generation/compress-image`）
      被 `.gitignore` 屏蔽，改了但**不进 git、不进网站 zip** —— 属预期（本地 skill）
 3. **凭据轮换（建议尽快，优先级已上调）**：COS/CAM 密钥与服务器密码都曾在聊天记录中出现过；
    2026-09-17 部署时又从凭据文件读取过服务器密码（仅写入会话环境变量、未落盘），
    且"打码预览"时正则漏掉无冒号的那一行、**密码被明文打印进对话**，建议本轮结束前轮换；
-   轮换步骤见凭据文件（见第六节）
-4. **10 个英文技能页仍是占位**（"English tutorial is being prepared"）：仅 4 个技能有完整英文页
-5. **`resources/` 里的 R 依赖未托管**（bulk-RNA-seq 约 903 MB，含 OrgDb）：文档已改为
+   轮换步骤见凭据文件（见第六节）。**2026-09-18 用户确认**：出差期间可从另一台电脑的
+   腾讯云控制台操作（CAM 新建/禁用密钥 + Lighthouse 重置密码），禁用旧密钥后本机部署
+   即失效，回来后需更新本机凭据文件
+4. **[✅ 已完成 2026-09-18] 单细胞全线收尾 + 分发再发布**：主流程 6 个 example + 下游
+   pseudotime/virtual-ko 各 2 个（smoke + GSE234527 真实版）全部跑通归档；
+   `build_skill_zips.py` 补排除规则（rds/log/.checkpoints/.staging/markers_all.csv）后
+   17 包重建（449.5 MB）并全部重传（服务器 13 + COS 3，md5 抽检 MATCH）；
+   scRNA-seq.zip 102 MB 超阈值改走 COS；**`annotated_seurat.slim.rds`（39 MB）实测跑通
+   两个下游 skill 后发布到 COS**（`scRNA-seq/data/`，md5 `aed4304e…`），两个中文技能页
+   已附直链与复现命令——网站展示图用户可完整复现；网站当日三次部署均线上复核通过；
+   MIT LICENSE 已加入仓库（用户批准）
+5. **10 个英文技能页仍是占位**（"English tutorial is being prepared"）：仅 4 个技能有完整英文页
+   （用户 2026-09-18 确认：保持占位，记入长期任务）
+6. **`resources/` 里的 R 依赖未托管**（bulk-RNA-seq 约 903 MB，含 OrgDb）：文档已改为
    "not mirrored online yet"；要做需新开一个阶段
-6. **整库单一 zip 未提供**（页面已明确写「暂不提供」）
-7. **`.build/`（打包产物、state、manifest）与 `cos-staging/` 都在 .gitignore 里**：
+7. **整库单一 zip 未提供**（页面已明确写「暂不提供」）
+8. **`.build/`（打包产物、state、manifest）与 `cos-staging/` 都在 .gitignore 里**：
    服务器上的 14 个包因此没有 git 侧清单，靠 manifest 复现（zip 确定性输出，重建可得同样 md5）
 
 ---
