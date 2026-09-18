@@ -461,7 +461,7 @@ git config user          → nihuanhe / nihuanhe@163.com
 |---|---|
 | **1. `report_writer.py` 改** | ✅ 已改（`references` / `refs_disagree_clusters` 在被 `auto_unbox` 压成标量时先包回 list）；并用 `--resume` **只重跑 stage05** 重生成 ex2/ex3/ex6 的 `REPORT.md`（现在正确显示 `SingleR references: MouseRNAseqData`；ex5 双参考本来就正常）。ex5/ex6 的 README、TODO、HANDOFF 均未受影响 |
 | **2. 允许禁止休眠，但每 30 min 汇报** | ✅ `powercfg /change standby-timeout-ac 0` + `hibernate-timeout-ac 0`（交流电）；**完成后应恢复**（`standby-timeout-ac 30`）。virtual-ko 计时探路 21:01:46 启动：`2000 genes × 3 nets × 500 cells`，`--gene ACTA2`，输入 `D:\single_cell_1\GSE234527_output\annotated_seurat.rds`（63.8 MB / 10,859 细胞），输出到 `scRNA-seq-virtual-ko/examples/2_real_GSE234527/output` |
-| **3. 要瘦身** | ✅ **已完成**：`.gitignore` + `git rm --cached`（4d63977）后，又经你同意做了**全历史改写**（`filter-branch` 移除全部 27 个提交里的 `markers_all.csv`，备份分支 `prerewrite-backup`@4331768），`--force-with-lease` 强推至 `ee319fc`。残留 GH 警告：60.19 MB 的 `gene_annotation.csv`（超本次批准范围，未动） |
+| **3. 要瘦身** | ✅ **已完成**：`.gitignore` + `git rm --cached`（4d63977）后，又经你同意做了**全历史改写**（`filter-branch` 移除全部 27 个提交里的 `markers_all.csv`，备份分支 `prerewrite-backup`@4331768），`--force-with-lease` 强推至 `ee319fc`。**第二轮（2026-09-18，你确认"GitHub 按之前约定瘦身"）**：同样流程移除 `gene_annotation.csv`（60 MB，bulk ex2 产出）与 `all.concat.fa`（24 MB，phylo 产出），备份分支 `prerewrite-backup-2`@0fac2d4，强推至 `af44ebe`；网站分发包不受影响（从磁盘树打包，两文件仍在包内） |
 
 ### 14.1 待办（下一步）
 
