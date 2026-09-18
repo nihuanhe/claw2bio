@@ -20,7 +20,7 @@
 
 ## 它能做什么
 
-前提是先跑完 [scRNA-seq 常规流程](/zh/skills/scRNA-seq) 拿到 `annotated_seurat.rds`（本技能不做 QC / 聚类）。它复用已有的 UMAP 嵌入与 cluster ID，用 monocle3 学轨迹图，从你指定的起点（root cluster 或细胞类型标签）为 1820 个细胞（示例数据）排出拟时序，并用 graph_test 找出 2227 个拟时序相关基因（q < 0.05，示例数据）。
+前提是先跑完 [scRNA-seq 常规流程](/zh/skills/scRNA-seq) 拿到 `annotated_seurat.rds`（本技能不做 QC / 聚类）。它复用已有的 UMAP 嵌入与 cluster ID，用 monocle3 学轨迹图，从你指定的起点（root cluster 或细胞类型标签）排出拟时序，并用 graph_test 找拟时序相关基因。真实示例（GSE234527，10,859 个细胞，以 cluster 0 为 root）全程约 11 分钟，找出 13,790 个拟时序相关基因（q < 0.05）。
 
 ![拟时序轨迹图](/skills/scRNA-seq-pseudotime/trajectory_by_pseudotime.png)
 
@@ -30,9 +30,9 @@
 
 同一轨迹按 cluster 着色，便于确认轨迹走向与细胞类型的对应关系。
 
-![拟时序基因趋势图](/skills/scRNA-seq-pseudotime/gene_NEXN_on_trajectory.png)
+![拟时序基因趋势图](/skills/scRNA-seq-pseudotime/gene_HES4_on_trajectory.png)
 
-graph_test 排名靠前的基因（示例为 NEXN）在轨迹上的表达趋势，top-4 基因各出一张。
+graph_test 排名靠前的基因（真实示例为 HES4）在轨迹上的表达趋势，top-4 基因各出一张。
 
 **起点选择是生物学决策**：技能拒绝在无 `--root-cluster` / `--root-label` 的情况下运行，会先打印 cluster → 标签对照表帮你选。
 

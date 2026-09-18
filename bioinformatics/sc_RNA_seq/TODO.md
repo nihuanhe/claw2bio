@@ -20,8 +20,24 @@
 ## 下游 skill（依赖主 skill 真实产出）
 
 - [x] `scRNA-seq-pseudotime`（monocle3；SKILL/README/scripts 完成，example 1 冒烟跑通：轨迹图 4 套 + graph_test + 基因轨迹图；root 必填校验✓；全量数据案例待 GSE234527 验证跑后补）
-- [x] `scRNA-seq-virtual-ko`（scTenifoldKnk 1.0.3 已装并跑通；处理了版本坑：函数名/参数名/列名全变；**实测性能：2000 基因×全细胞 8h 跑不完→杀掉；2000×10net×500cell 3.5h+ 未完成；500 基因×5net×500cell ≈17min 出结果（10 显著基因）——nfeatures 是平方级大头，--nc-ncells 默认已改回官方 500**；真实 ACTA2 结果在 D:\single_cell_1\GSE234527_vko_ACTA2）
-- [ ] ACTA2 全参数重跑（2000×10×500，出差回来后择机，预计 4h+）
+- [x] `scRNA-seq-virtual-ko`（scTenifoldKnk 1.0.3 已装并跑通；处理了版本坑：函数名/参数名/列名全变；**实测性能：2000 基因×全细胞 8h 跑不完→杀掉；2000×10net×500cell 3.5h+ 未完成；500 基因×5net×500cell ≈17min 出结果（10 显著基因）——nfeatures 是平方级大头，**--nc-ncells 默认已改回官方 500**；真实 ACTA2 结果在 D:\single_cell_1\GSE234527_vko_ACTA2）
+- [x] **计时探路完成（2026-09-17）**：`--nfeatures 2000 --nc-nnet 3 --nc-ncells 500`，真实对象
+      （10,859 细胞）→ **90 min**（20:24:03→21:54:11；期间有 ~69 min 被一个重复进程抢 CPU，
+      干净环境应更快）；出 **58 个显著基因**（p_adj<0.05），top 命中 **MYLK / TPM1 / DES / CNN1**
+      —— 经典平滑肌共调控基因，生物学合理。产物归档 `D:\single_cell_1\_run_vko_probe\probe_2000x3_output`
+- [ ] **官方默认 `2000×10×500` 正式跑 → ❌ 数值失败（2026-09-18 02:48）**：
+      22:21:06 启动，**建网络 100%（10 个网络，约 2 h）+ CP 分解/张量分解都成功**
+      （norm explained 21.8%），随后死在 scTenifoldKnk 内部的**流形对齐**：
+      `Error in E$vectors[, E$values > 1e-08] : incorrect number of dimensions`
+      （`Calls: scTenifoldKnk -> manifoldAlignment`，另有 22 个 warnings）。无任何结果文件写出。
+      → **结论：`--nc-nnet 10` 在这份数据上数值退化**（3 网络时 norm explained 29.9% 可正常跑完）；
+      这是包内部实现的问题，skill 侧只能选参数规避
+- [x] 规避验证 ✅：**`2000×5×500` 通过（2026-09-18 03:33:58 → 05:30:40，约 2 h；
+      前 56 min 有一个孤儿进程抢 CPU）**：**54 个显著基因**，产物齐全（含 `REPORT.md`）。
+      对比 3 网络（58 个显著、90 min）→ 两档结果量级一致，说明 3–5 网络都稳定；**10 网络数值失败**
+      → **建议把 `--nc-nnet ≤ 5` 写进 SKILL/README**（对这类 2000 基因规模的数据）
+- [x] `run_virtual_ko.py` 增加 **`--report-only`**（驱动进程意外退出、R 已跑完时，只重生成
+      `REPORT.md` 不重算）——本次探路就靠它补出了缺失的 REPORT
 
 ## 复核修复（2026-09-17，见 plan-skill-example-completion.md §12）
 

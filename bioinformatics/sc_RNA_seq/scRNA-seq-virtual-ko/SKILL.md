@@ -76,16 +76,24 @@ python scripts/run_virtual_ko.py annotated_seurat.rds output --gene TP53 \
   variable; a warning prints when it is expressed in <5% of cells.
 - Results are computational predictions from network perturbation — validate
   experimentally.
-- Runtime scales ~quadratically with genes and per-network cells; the smoke
-  example (500 genes x 3 nets) takes minutes. **Runtime on full-size settings is
-  not yet characterised**: a 2000-gene x 10-net run with the default 500-cell
-  subsampling was measured at >3.5 h without finishing on a 16 GB / 12-core
-  Windows machine (killed). Budget hours, and use `--nc-nnet` as the main knob.
+- Runtime scales ~quadratically with genes and ~linearly with `--nc-nnet`; the
+  smoke example (500 genes x 3 nets) takes minutes. **Measured on a 16 GB /
+  12-core Windows machine (real GSE234527 object, 10,859 cells, knocking out
+  ACTA2)**: `2000 x 3 x 500` = 90 min -> 58 significant genes; `2000 x 5 x 500`
+  = 2 h -> 54 significant genes (41 shared; top hits MYLK / TPM1 / TPM2 / TAGLN /
+  CNN1 / DES — the smooth-muscle programme, biologically coherent). Budget 1-2 h
+  at these settings and use `--nc-nnet` as the main knob.
+  **Keep `--nc-nnet` <= 5**: the package default of 10 died inside
+  `manifoldAlignment` (`Error in E$vectors[, E$values > 1e-08] : incorrect number
+  of dimensions`) after 2 h of network construction on this dataset — a numeric
+  degeneracy inside scTenifoldKnk that no CLI flag can work around.
   **never combine all-cells with thousands of genes** (see `--nc-ncells`).
 - **No checkpoint / not resumable.** scTenifoldKnk is a single non-interruptible
   call, so unlike the main pipeline and `scRNA-seq-pseudotime` this skill has no
   `--resume`: if the run dies or the machine sleeps, all work is lost. Confirm
-  the machine will not sleep before starting a long run.
+  the machine will not sleep before starting a long run. If the *driver* process
+  dies but the R stage already finished (results + `virtual_ko_summary.json` on
+  disk), use `--report-only` to regenerate `REPORT.md` without recomputing.
 - Version drift handled internally: scTenifoldKnk ≤1.0.3 exports
   `scTenifoldKnk()` (not `sctenifoldknk()`) with args `gKO/qc/nc_nNet/nCores`
   and result columns `gene/p.adj`; the stage script harmonises to

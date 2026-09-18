@@ -88,21 +88,21 @@ hero:
     </div>
   </a>
   <a class="task-card" href="/skills/scRNA-seq-pseudotime">
-    <img src="/skills/scRNA-seq-pseudotime/gene_NEXN_on_trajectory.png" alt="gene along trajectory" />
+    <img src="/skills/scRNA-seq-pseudotime/gene_HES4_on_trajectory.png" alt="gene along trajectory" />
     <div class="card-body">
       <p class="card-name">Gene along Trajectory</p>
       <p class="card-desc">scRNA-seq-pseudotime · any gene's expression over pseudotime.</p>
     </div>
   </a>
   <a class="task-card" href="/skills/scRNA-seq-virtual-ko">
-    <img src="/skills/scRNA-seq-virtual-ko/ADIRF_barplot_top20.png" alt="virtual KO top20 barplot" />
+    <img src="/skills/scRNA-seq-virtual-ko/ACTA2_barplot_top20.png" alt="virtual KO top20 barplot" />
     <div class="card-body">
       <p class="card-name">Virtual KO — Top Targets</p>
       <p class="card-desc">scRNA-seq-virtual-ko · scTenifoldKnk in-silico knockout ranking.</p>
     </div>
   </a>
   <a class="task-card" href="/skills/scRNA-seq-virtual-ko">
-    <img src="/skills/scRNA-seq-virtual-ko/ADIRF_zscore_scatter.png" alt="virtual KO zscore scatter" />
+    <img src="/skills/scRNA-seq-virtual-ko/ACTA2_zscore_scatter.png" alt="virtual KO zscore scatter" />
     <div class="card-body">
       <p class="card-name">Virtual KO — Z-score Scatter</p>
       <p class="card-desc">scRNA-seq-virtual-ko · differential regulation after in-silico KO.</p>

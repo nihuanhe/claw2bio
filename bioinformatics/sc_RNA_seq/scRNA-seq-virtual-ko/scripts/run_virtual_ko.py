@@ -37,6 +37,30 @@ def find_rscript(user_path=None):
     sys.exit("ERROR: Rscript not found. Pass --rscript <path>.")
 
 
+def write_report(out, rds):
+    """Write REPORT.md from an existing virtual_ko_summary.json."""
+    summ = json.load(open(os.path.join(out, "virtual_ko_summary.json"),
+                          encoding="utf-8"))
+    L = ["# scRNA-seq-virtual-ko REPORT\n",
+         f"- input rds: {rds}",
+         f"- knocked-out gene: **{summ.get('gene')}** "
+         f"(expression rank in data: {summ.get('gene_expr_rank', 'NA')})",
+         f"- cells used: {summ.get('n_cells')} | genes in network: "
+         f"{summ.get('n_genes')} | networks averaged: {summ.get('nc_nnet')}",
+         f"- significant differentially regulated (p_adj<0.05): "
+         f"{summ.get('n_significant')}",
+         "\n## 注意\n",
+         "> 虚拟敲除是**计算预测**（基于基因调控网络的扰动模拟），"
+         "结果需实验验证；目标基因表达太低时结果不可靠（见上行 rank）。",
+         "\n## Output files\n",
+         "| file | content |", "|---|---|",
+         "| `<GENE>_diffRegulation.csv` | full scTenifoldKnk result table |",
+         "| `<GENE>_barplot_top20.png/pdf` | top-20 |FC| genes |",
+         "| `<GENE>_zscore_scatter.png/pdf` | Z-score vs -log10(p_adj) |",
+         "| `virtual_ko_summary.json` | machine-readable summary |"]
+    open(os.path.join(out, "REPORT.md"), "w", encoding="utf-8").write("\n".join(L))
+
+
 def main():
     ap = argparse.ArgumentParser(description="scTenifoldKnk virtual knockout")
     ap.add_argument("rds")
@@ -57,10 +81,19 @@ def main():
     ap.add_argument("--cores", type=int, default=0,
                     help="cores (default: detectCores()-1)")
     ap.add_argument("--overwrite", action="store_true")
+    ap.add_argument("--report-only", action="store_true",
+                    help="regenerate REPORT.md from an existing "
+                         "virtual_ko_summary.json (no R run)")
     ap.add_argument("--rscript")
     args = ap.parse_args()
 
     out = os.path.abspath(args.output)
+    if args.report_only:
+        # the R stage may have finished while the driver died (long runs have
+        # no checkpoint) -- rewrite the report without recomputing anything
+        write_report(out, args.rds)
+        print("[run_virtual_ko] REPORT.md regenerated in", out)
+        return
     if os.path.exists(out) and os.listdir(out) and not args.overwrite:
         sys.exit("ERROR: output dir not empty; use --overwrite")
     os.makedirs(out, exist_ok=True)
@@ -84,26 +117,7 @@ def main():
     if proc.returncode != 0:
         sys.exit(f"ERROR: stage_virtual_ko.R failed; see {log_path}")
 
-    summ = json.load(open(os.path.join(out, "virtual_ko_summary.json"),
-                          encoding="utf-8"))
-    L = ["# scRNA-seq-virtual-ko REPORT\n",
-         f"- input rds: {args.rds}",
-         f"- knocked-out gene: **{summ.get('gene')}** "
-         f"(expression rank in data: {summ.get('gene_expr_rank', 'NA')})",
-         f"- cells used: {summ.get('n_cells')} | genes in network: "
-         f"{summ.get('n_genes')} | networks averaged: {summ.get('nc_nnet')}",
-         f"- significant differentially regulated (p_adj<0.05): "
-         f"{summ.get('n_significant')}",
-         "\n## 注意\n",
-         "> 虚拟敲除是**计算预测**（基于基因调控网络的扰动模拟），"
-         "结果需实验验证；目标基因表达太低时结果不可靠（见上行 rank）。",
-         "\n## Output files\n",
-         "| file | content |", "|---|---|",
-         "| `<GENE>_diffRegulation.csv` | full scTenifoldKnk result table |",
-         "| `<GENE>_barplot_top20.png/pdf` | top-20 |FC| genes |",
-         "| `<GENE>_zscore_scatter.png/pdf` | Z-score vs -log10(p_adj) |",
-         "| `virtual_ko_summary.json` | machine-readable summary |"]
-    open(os.path.join(out, "REPORT.md"), "w", encoding="utf-8").write("\n".join(L))
+    write_report(out, args.rds)
     print("[run_virtual_ko] DONE. Outputs in", out)
 
 

@@ -56,15 +56,35 @@ def main():
     ap.add_argument("--resume", action="store_true",
                     help="reuse .checkpoint_cds_learned.rds if present "
                          "(skip cds build + learn_graph)")
+    ap.add_argument("--list-clusters", action="store_true",
+                    help="print the cluster -> cell_type_final table and exit")
     ap.add_argument("--overwrite", action="store_true")
     ap.add_argument("--rscript")
     args = ap.parse_args()
 
-    if not args.root_cluster and not args.root_label:
-        sys.exit("ERROR: choose the trajectory root: --root-cluster <id> or "
-                 "--root-label '<cell_type_final label>'. This is a biological "
-                 "decision the pipeline cannot make for you.")
     out = os.path.abspath(args.output)
+    if args.list_clusters:
+        os.makedirs(out, exist_ok=True)
+        rscript = find_rscript(args.rscript)
+        print("[run_pseudotime] cluster -> cell_type_final table:", flush=True)
+        sys.exit(subprocess.run(
+            [rscript, os.path.join(HERE, "stage_pseudotime.R"),
+             "--rds", os.path.abspath(args.rds),
+             "--output", out, "--list-clusters"]).returncode)
+    if not args.root_cluster and not args.root_label:
+        # the skill promises the cluster -> label table so the user can pick a
+        # root; only R can produce it (it reads the rds), and it must run before
+        # the expensive cds/learn_graph steps
+        os.makedirs(out, exist_ok=True)
+        rscript = find_rscript(args.rscript)
+        print("[run_pseudotime] printing the cluster -> cell_type_final table:",
+              flush=True)
+        subprocess.run([rscript, os.path.join(HERE, "stage_pseudotime.R"),
+                        "--rds", os.path.abspath(args.rds),
+                        "--output", out, "--list-clusters"])
+        sys.exit("ERROR: choose the trajectory root: --root-cluster <id> or "
+                 "--root-label '<cell_type_final label>' (table above). This is a "
+                 "biological decision the pipeline cannot make for you.")
     if os.path.exists(out) and os.listdir(out) and not (args.overwrite or args.resume):
         sys.exit("ERROR: output dir not empty; use --overwrite or --resume")
     os.makedirs(out, exist_ok=True)

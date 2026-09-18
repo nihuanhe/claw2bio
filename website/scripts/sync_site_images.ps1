@@ -31,13 +31,13 @@ $map = [ordered]@{
     @('bioinformatics/sc_RNA_seq/scRNA-seq/examples/1_example_GSE234527_downsampled-10x-mtx/output/QC_violin_after.png', 'QC_violin_after.png')
   )
   'scRNA-seq-pseudotime' = @(
-    @('bioinformatics/sc_RNA_seq/scRNA-seq-pseudotime/examples/1_smoke/output/trajectory_by_pseudotime.png', 'trajectory_by_pseudotime.png'),
-    @('bioinformatics/sc_RNA_seq/scRNA-seq-pseudotime/examples/1_smoke/output/trajectory_by_cluster.png', 'trajectory_by_cluster.png'),
-    @('bioinformatics/sc_RNA_seq/scRNA-seq-pseudotime/examples/1_smoke/output/gene_NEXN_on_trajectory.png', 'gene_NEXN_on_trajectory.png')
+    @('bioinformatics/sc_RNA_seq/scRNA-seq-pseudotime/examples/2_real_GSE234527/output/trajectory_by_pseudotime.png', 'trajectory_by_pseudotime.png'),
+    @('bioinformatics/sc_RNA_seq/scRNA-seq-pseudotime/examples/2_real_GSE234527/output/trajectory_by_cluster.png', 'trajectory_by_cluster.png'),
+    @('bioinformatics/sc_RNA_seq/scRNA-seq-pseudotime/examples/2_real_GSE234527/output/gene_HES4_on_trajectory.png', 'gene_HES4_on_trajectory.png')
   )
   'scRNA-seq-virtual-ko' = @(
-    @('bioinformatics/sc_RNA_seq/scRNA-seq-virtual-ko/examples/1_smoke/output/ADIRF_barplot_top20.png', 'ADIRF_barplot_top20.png'),
-    @('bioinformatics/sc_RNA_seq/scRNA-seq-virtual-ko/examples/1_smoke/output/ADIRF_zscore_scatter.png', 'ADIRF_zscore_scatter.png')
+    @('bioinformatics/sc_RNA_seq/scRNA-seq-virtual-ko/examples/2_real_GSE234527/output/ACTA2_barplot_top20.png', 'ACTA2_barplot_top20.png'),
+    @('bioinformatics/sc_RNA_seq/scRNA-seq-virtual-ko/examples/2_real_GSE234527/output/ACTA2_zscore_scatter.png', 'ACTA2_zscore_scatter.png')
   )
   'bulk-RNA-seq' = @(
     @('bioinformatics/bulk_RNA_seq/bulk-RNA-seq/examples/1_example_GSE270189_clean-mouse-3groups/output/Volcano_Mutant_vs_Control.png', 'Volcano.png'),

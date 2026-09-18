@@ -20,13 +20,13 @@
 
 ## 它能做什么
 
-前提是先跑完 [scRNA-seq 常规流程](/zh/skills/scRNA-seq) 拿到 `annotated_seurat.rds`。指定一个目标基因（`--gene TP53`），scTenifoldKnk（PMID: 35510185）会从 RNA counts 层构建基因调控网络，在计算机中虚拟敲除该基因，输出差异调控表和两张图。内置 smoke 示例敲除 ADIRF：1820 个细胞、500 个网络基因、3 个子采样网络平均，得到 14 个显著差异调控基因（p_adj < 0.05）。
+前提是先跑完 [scRNA-seq 常规流程](/zh/skills/scRNA-seq) 拿到 `annotated_seurat.rds`。指定一个目标基因（`--gene TP53`），scTenifoldKnk（PMID: 35510185）会从 RNA counts 层构建基因调控网络，在计算机中虚拟敲除该基因，输出差异调控表和两张图。真实示例（GSE234527，10,859 个细胞）敲除 ACTA2：2000 个高变基因 × 5 个子采样网络 × 每网 500 细胞，约 2 小时得到 54 个显著差异调控基因（p_adj < 0.05），top hits 为 MYLK / TPM1 / TPM2 / TAGLN / CNN1 / DES 等平滑肌程序基因。
 
-![虚拟敲除 top20 条形图](/skills/scRNA-seq-virtual-ko/ADIRF_barplot_top20.png)
+![虚拟敲除 top20 条形图](/skills/scRNA-seq-virtual-ko/ACTA2_barplot_top20.png)
 
-敲除 ADIRF 后 |FC| 最大的 top-20 差异调控基因。
+敲除 ACTA2 后 |FC| 最大的 top-20 差异调控基因（真实示例）。
 
-![Z 值散点图](/skills/scRNA-seq-virtual-ko/ADIRF_zscore_scatter.png)
+![Z 值散点图](/skills/scRNA-seq-virtual-ko/ACTA2_zscore_scatter.png)
 
 Z 值 vs -log10(p_adj) 散点图，显著基因自动标出名称。
 
@@ -75,9 +75,9 @@ python scripts/run_virtual_ko.py annotated_seurat.rds output --gene TP53 \
 
 ## 常见问题
 
-- **跑得很慢** → 运行时间与 细胞数 × 基因数 × nc_nnet 成正比；smoke 示例（500 基因 × 3 网络 × 1820 细胞）几分钟。
-  **全量参数的耗时目前还没有确切数字**：2000 基因 × 10 网络 × 500 细胞在 16 GB / 12 核 Windows 上实测 3.5 h+ 仍未跑完（已中止）；
-  请按"数小时"预估，并用 `--nc-nnet` 作为主要的降规模旋钮。
+- **跑得很慢** → 运行时间与 细胞数 × 基因数 × nc_nnet 成正比；smoke 示例几分钟。16 GB / 12 核 Windows 上实测（GSE234527 真实对象，10,859 个细胞，敲除 ACTA2）：
+  `2000 基因 × 3 网络 × 500 细胞` = **90 分钟**（58 个显著基因）；`2000 × 5 × 500` = **约 2 小时**（54 个显著基因，两者重合 41 个）。
+  **建议 `--nc-nnet` 不超过 5**：包默认的 10 会在 manifoldAlignment 内部因数值退化报错（`incorrect number of dimensions`），且 2 小时的网络构建全部作废。降规模的主要旋钮就是 `--nc-nnet`。
 - **能不能中途断了再续？** → **不能**。scTenifoldKnk 是一次不可中断的调用，本技能没有 `--resume`
   （与常规流程、拟时序分析不同）：跑挂了或机器休眠，前面的计算全部作废。长跑前先确认机器不会休眠。
 - **目标基因不在高变基因里** → 会被强制纳入网络；若该基因在 <5% 的细胞中表达，会打印警告。

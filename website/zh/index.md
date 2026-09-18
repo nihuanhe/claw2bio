@@ -88,21 +88,21 @@ hero:
     </div>
   </a>
   <a class="task-card" href="/zh/skills/scRNA-seq-pseudotime">
-    <img src="/skills/scRNA-seq-pseudotime/gene_NEXN_on_trajectory.png" alt="基因沿轨迹表达" />
+    <img src="/skills/scRNA-seq-pseudotime/gene_HES4_on_trajectory.png" alt="基因沿轨迹表达" />
     <div class="card-body">
       <p class="card-name">基因沿轨迹表达</p>
       <p class="card-desc">scRNA-seq-pseudotime · 任意基因沿拟时序的表达变化。</p>
     </div>
   </a>
   <a class="task-card" href="/zh/skills/scRNA-seq-virtual-ko">
-    <img src="/skills/scRNA-seq-virtual-ko/ADIRF_barplot_top20.png" alt="虚拟敲除 Top20" />
+    <img src="/skills/scRNA-seq-virtual-ko/ACTA2_barplot_top20.png" alt="虚拟敲除 Top20" />
     <div class="card-body">
       <p class="card-name">虚拟敲除 Top 靶点</p>
       <p class="card-desc">scRNA-seq-virtual-ko · scTenifoldKnk 计算机模拟敲除排序。</p>
     </div>
   </a>
   <a class="task-card" href="/zh/skills/scRNA-seq-virtual-ko">
-    <img src="/skills/scRNA-seq-virtual-ko/ADIRF_zscore_scatter.png" alt="虚拟敲除 Z 值散点" />
+    <img src="/skills/scRNA-seq-virtual-ko/ACTA2_zscore_scatter.png" alt="虚拟敲除 Z 值散点" />
     <div class="card-body">
       <p class="card-name">虚拟敲除 Z 值散点</p>
       <p class="card-desc">scRNA-seq-virtual-ko · 敲除后差异调控全景。</p>

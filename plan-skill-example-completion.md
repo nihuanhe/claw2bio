@@ -465,7 +465,12 @@ git config user          → nihuanhe / nihuanhe@163.com
 
 ### 14.1 待办（下一步）
 
-- virtual-ko 探路结果 → 按实测外推 `2000×10` 是否整夜跑（D3）
+- **virtual-ko 探路结果（✅ 2026-09-17）**：`2000 genes × 3 nets × 500 cells` = **90 min**
+  （20:24:03→21:54:11，其中 ~69 min 被一个重复进程抢 CPU）→ **58 个显著基因**，top 命中
+  **MYLK / TPM1 / DES / CNN1**（经典平滑肌共调控基因）。按 `--nc-nnet` 线性外推，
+  官方默认 `2000×10×500` ≈ **4.5–5.5 h** → 已于 **22:21:06 启动正式跑**（休眠已关），
+  产物写进 `scRNA-seq-virtual-ko/examples/2_real_GSE234527/output`
+- 顺带给 `run_virtual_ko.py` 加了 **`--report-only`**（驱动死了但 R 已跑完时补 REPORT，不重算）
 - `scRNA-seq-pseudotime` 的 `2_real_GSE234527`：覆盖 `--root-label` / `--subset-labels` /
   `--no-graph-test` / `--resume` 四条从未真实跑过的分支
 - 网站：pseudotime / virtual-ko 两页换成真实数字与图

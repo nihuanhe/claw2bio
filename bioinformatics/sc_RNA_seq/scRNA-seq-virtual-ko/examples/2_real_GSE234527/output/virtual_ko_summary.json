@@ -1,0 +1,9 @@
+{
+  "gene": "ACTA2",
+  "n_cells": 10859,
+  "n_genes": 2000,
+  "nc_nnet": 5,
+  "nc_ncells": 500,
+  "n_significant": 54,
+  "gene_expr_rank": 23
+}

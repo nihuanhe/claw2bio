@@ -24,6 +24,7 @@ root_clu  <- get_arg("--root-cluster")
 root_lab  <- get_arg("--root-label")
 subset_l  <- get_arg("--subset-labels")
 no_gtest  <- "--no-graph-test" %in% args
+list_clu  <- "--list-clusters" %in% args
 cores     <- as.integer(get_arg("--cores", "4"))
 resume    <- "--resume" %in% args
 ckpt_path <- file.path(out_dir, ".checkpoint_cds_learned.rds")
@@ -50,6 +51,26 @@ if (!is.null(subset_l)) {
     stop("[pseudotime] subset left 0 cells. Available labels: ",
          paste(unique(pbmc$cell_type_final), collapse = ", "))
 }
+
+# ---- cluster -> dominant-label table (printed on --list-clusters, and when a
+#      root is invalid). Computed BEFORE learn_graph so a wrong root fails fast.
+avail <- data.frame(cluster = levels(factor(pbmc$seurat_clusters)),
+                    label = tapply(as.character(pbmc$cell_type_final),
+                                   pbmc$seurat_clusters,
+                                   function(v) names(sort(table(v),
+                                                   decreasing = TRUE))[1]))
+if (list_clu) {
+  cat("[pseudotime] cluster -> cell_type_final (dominant label per cluster):\n")
+  print(avail)
+  quit(save = "no", status = 0)
+}
+if (!is.null(root_lab) && !root_lab %in% pbmc$cell_type_final)
+  stop("[pseudotime] --root-label '", root_lab, "' not found. Available:\n",
+       paste(capture.output(print(avail)), collapse = "\n"))
+if (is.null(root_lab) && !is.null(root_clu) &&
+    !root_clu %in% as.character(pbmc$seurat_clusters))
+  stop("[pseudotime] --root-cluster '", root_clu, "' not found. Available:\n",
+       paste(capture.output(print(avail)), collapse = "\n"))
 
 # ---- build cds, reusing Seurat embeddings (skipped when a checkpoint exists)
 if (resume && file.exists(ckpt_path)) {
@@ -79,12 +100,7 @@ if (resume && file.exists(ckpt_path)) {
   cat("[pseudotime] checkpoint written ->", ckpt_path, "\n")
 }
 
-# ---- root cells (user's biological choice)
-avail <- data.frame(cluster = levels(factor(pbmc$seurat_clusters)),
-                    label = tapply(as.character(pbmc$cell_type_final),
-                                   pbmc$seurat_clusters,
-                                   function(v) names(sort(table(v),
-                                                   decreasing = TRUE))[1]))
+# ---- root cells (user's biological choice; already validated above)
 if (!is.null(root_lab)) {
   if (!root_lab %in% pbmc$cell_type_final)
     stop("[pseudotime] --root-label '", root_lab, "' not found. Available:\n",
