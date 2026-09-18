@@ -18,7 +18,9 @@ Z 值散点图、REPORT.md。本 fixture 是随机子集，生物学结论无意
 ## 2_real_GSE234527 — 真实全量数据（已跑通归档）
 
 输入 = GSE234527 全量 `annotated_seurat.rds`（10,859 细胞，**不随仓库/zip 分发**；
-slim 版可从 COS 下载，见主 skill `examples/manifest.csv`）。目标基因 ACTA2。
+slim 版 39 MB 可从 COS 下载并已实测可跑通本技能：
+<https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/scRNA-seq/data/annotated_seurat.slim.rds>
+，md5 `aed4304ebf7602d8d0c9129dcff90f5b`）。目标基因 ACTA2。
 
 ```bash
 python scripts/run_virtual_ko.py <annotated_seurat.rds> examples/2_real_GSE234527/output \

@@ -49,6 +49,7 @@ python scripts/run_pseudotime.py <annotated_seurat.rds> <output_dir> \
 ## 输入格式
 
 - 常规流程输出的 `annotated_seurat.rds`（需要 `seurat_clusters`、UMAP reduction；按标签定根时需要 `cell_type_final`）。
+- **想直接复现本页的真实案例图？** 输入 rds 的 slim 版（39 MB，GSE234527 全量 10,859 细胞，已实测可跑通本技能）可从 COS 下载：<https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/scRNA-seq/data/annotated_seurat.slim.rds>，下载后按上面「快速上手」的命令跑即可（root 选 `--root-cluster 0`）。
 
 ## 输出文件
 

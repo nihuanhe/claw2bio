@@ -5,3 +5,4 @@ example,dataset,accession,input_type,storage,location,md5,note
 4,synthetic-BGI,-,bgi_10x,repo,examples/4_example_synthetic-BGI/input,,synthetic fixture: features col1=symbol + MT. mito prefix; real 25057A-C NOT distributed
 5,GSM6923183,GSM6923183,h5ad,geo,https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM6923183,,h5ad via anndata export route
 6,GSE197289,GSE197289,multi_sample,geo,https://ftp.ncbi.nlm.nih.gov/geo/series/GSE197nnn/GSE197289/suppl/,6 groups; SingleR+presto case
+-,GSE234527,GSE234527,annotated_rds_slim,cos,https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/scRNA-seq/data/annotated_seurat.slim.rds,aed4304ebf7602d8d0c9129dcff90f5b,slim annotated rds (39 MB): input for pseudotime/virtual-ko reproduction

@@ -52,6 +52,7 @@ python scripts/run_virtual_ko.py annotated_seurat.rds output --gene TP53 \
 
 - 常规流程输出的 `annotated_seurat.rds`（使用 RNA counts 层；按标签子集化需要 `cell_type_final`）。
 - 目标基因名区分大小写，用目标物种的写法（人 `TP53`、鼠 `Trp53`）。
+- **想直接复现本页的真实案例图？** 输入 rds 的 slim 版（39 MB，GSE234527 全量 10,859 细胞，已实测可跑通本技能）可从 COS 下载：<https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/scRNA-seq/data/annotated_seurat.slim.rds>，下载后跑 `--gene ACTA2 --nc-nnet 5` 即可得到上图。
 
 ## 输出文件
 
