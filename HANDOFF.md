@@ -227,6 +227,14 @@ curl.exe -I https://claw2bio.site/downloads/clinical-table.zip
     旧版 `genes.tsv` 不带 .gz 却能读 —— 这正是 ex2 能跑通、ex5 跑不通的原因。已改为写 `.gz`。
     另：`_classify_10x_dir()` 原来只校验 feature 文件、不校验 matrix/barcodes，残缺目录会被判成
     合法输入、直到 Read10X 才报误导性错误 → 已加显式校验（报缺失文件名 + 提示删 `.staging/` 重跑）
+16. **`GIT_OBJECT_DIRECTORY` 绕过法的致命变种（2026-09-18 实测踩雷）**：终端会话的
+    环境变量**不一定跨 RunCommand 调用持久**。若上一条命令设了 `$env:GIT_OBJECT_DIRECTORY`、
+    下一条命令才用 `"$env:GIT_OBJECT_DIRECTORY\*"` 做 `Copy-Item`，变量为空时路径坍缩成
+    `\*`（= 当前盘根目录 `E:\*`）→ **把 E 盘根目录递归拷进 `.git/objects`**（本次混入
+    SteamLibrary 等 8 个目录），且 commit 对象只存在于 TEMP 对象库导致 `bad object HEAD`。
+    铁律：**设变量 → add/commit → Copy-Item 回拷 → 清变量，全部放在同一条命令里**；
+    或回拷时直接写死绝对路径 `$env:TEMP\gitobj-xxx`。事后清理：删掉 `.git/objects` 下
+    非 `[0-9a-f]{2}`/info/pack 的目录，再从 TEMP 对象库回拷，`git fsck` 验证。
 
 ---
 

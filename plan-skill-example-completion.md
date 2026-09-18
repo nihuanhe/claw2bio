@@ -461,19 +461,20 @@ git config user          → nihuanhe / nihuanhe@163.com
 |---|---|
 | **1. `report_writer.py` 改** | ✅ 已改（`references` / `refs_disagree_clusters` 在被 `auto_unbox` 压成标量时先包回 list）；并用 `--resume` **只重跑 stage05** 重生成 ex2/ex3/ex6 的 `REPORT.md`（现在正确显示 `SingleR references: MouseRNAseqData`；ex5 双参考本来就正常）。ex5/ex6 的 README、TODO、HANDOFF 均未受影响 |
 | **2. 允许禁止休眠，但每 30 min 汇报** | ✅ `powercfg /change standby-timeout-ac 0` + `hibernate-timeout-ac 0`（交流电）；**完成后应恢复**（`standby-timeout-ac 30`）。virtual-ko 计时探路 21:01:46 启动：`2000 genes × 3 nets × 500 cells`，`--gene ACTA2`，输入 `D:\single_cell_1\GSE234527_output\annotated_seurat.rds`（63.8 MB / 10,859 细胞），输出到 `scRNA-seq-virtual-ko/examples/2_real_GSE234527/output` |
-| **3. 要瘦身** | ⚠️ **部分完成**：根 `.gitignore` 增加 `**/examples/**/output/markers_all.csv`，并 `git rm --cached` 掉 6 个 example 的该文件（含历史里已有的 ex1/ex4）→ 后续 clone/checkout 不再包含这些 35–95 MB 的转储。**但它们仍留在 `198d967` 的历史里**（共 ~238 MB），要真正减小仓库体积必须改写历史 + `git push --force-with-lease`，这一步**未做**（等你明确同意） |
+| **3. 要瘦身** | ✅ **已完成**：`.gitignore` + `git rm --cached`（4d63977）后，又经你同意做了**全历史改写**（`filter-branch` 移除全部 27 个提交里的 `markers_all.csv`，备份分支 `prerewrite-backup`@4331768），`--force-with-lease` 强推至 `ee319fc`。残留 GH 警告：60.19 MB 的 `gene_annotation.csv`（超本次批准范围，未动） |
 
 ### 14.1 待办（下一步）
 
-- **virtual-ko 探路结果（✅ 2026-09-17）**：`2000 genes × 3 nets × 500 cells` = **90 min**
-  （20:24:03→21:54:11，其中 ~69 min 被一个重复进程抢 CPU）→ **58 个显著基因**，top 命中
-  **MYLK / TPM1 / DES / CNN1**（经典平滑肌共调控基因）。按 `--nc-nnet` 线性外推，
-  官方默认 `2000×10×500` ≈ **4.5–5.5 h** → 已于 **22:21:06 启动正式跑**（休眠已关），
-  产物写进 `scRNA-seq-virtual-ko/examples/2_real_GSE234527/output`
-- 顺带给 `run_virtual_ko.py` 加了 **`--report-only`**（驱动死了但 R 已跑完时补 REPORT，不重算）
-- `scRNA-seq-pseudotime` 的 `2_real_GSE234527`：覆盖 `--root-label` / `--subset-labels` /
-  `--no-graph-test` / `--resume` 四条从未真实跑过的分支
-- 网站：pseudotime / virtual-ko 两页换成真实数字与图
-- `cos-staging`：两个下游 skill 的 slim rds 与真数据同步
+- ~~virtual-ko 探路与正式跑~~ ✅（2026-09-18 凌晨）：`2000×3×500`=90 min→58 显著；
+  `2000×10×500` 建网 2 h 后在 manifoldAlignment 数值退化报错（`incorrect number of dimensions`，已记 TODO/HANDOFF）；
+  **`2000×5×500`=约 2 h→54 显著**（41 个与 3 网重合），产物已归档 `examples/2_real_GSE234527/output`
+- ~~`run_virtual_ko.py --report-only`~~ ✅ 已加
+- ~~pseudotime 参数分支~~ ✅ 全覆盖：A（无 root→打印对照表拒绝）、B（`--root-cluster 0 --no-graph-test`，80 s）、
+  C（`--root-label`）、D（`--subset-labels`+root-label）、E（全量+graph_test，13,790 基因/总 10.6 min）；
+  顺带修复 `--list-clusters` 快路径与 root 预校验（原先错误 root 要等 learn_graph 后才报）
+- ~~网站 pseudotime / virtual-ko 两页真实数字与图~~ ✅（2026-09-18）：zh 两页 + 中英首页卡片换
+  ACTA2/HES4 真实图，`sync_site_images.ps1` 源改指 `2_real_GSE234527`，旧 ADIRF/NEXN 图已删（线上 404 复核通过）；
+  EN 两页是 stub 无需改。已 build + 部署 + 线上复核
+- `cos-staging`：两个下游 skill 的 slim rds 与真数据同步（**未做**）
 - 凭据轮换（仍未做）
 - 收尾 `adversarial-review`
