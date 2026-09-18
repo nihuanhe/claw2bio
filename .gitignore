@@ -40,6 +40,9 @@ cos-staging/
 **/examples/**/output/**/*.log
 # full per-cluster DE dumps: 35-95 MB each and regenerable by rerunning the example
 **/examples/**/output/markers_all.csv
+# same convention: big regenerable example outputs (60 MB annotation dump / 24 MB core alignment)
+**/examples/**/output/gene_annotation.csv
+**/all.concat.fa
 
 # ---- OpenCLI web-read downloads (articles fetched for reference) ----
 web-articles/
