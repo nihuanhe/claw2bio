@@ -475,6 +475,11 @@ git config user          → nihuanhe / nihuanhe@163.com
 - ~~网站 pseudotime / virtual-ko 两页真实数字与图~~ ✅（2026-09-18）：zh 两页 + 中英首页卡片换
   ACTA2/HES4 真实图，`sync_site_images.ps1` 源改指 `2_real_GSE234527`，旧 ADIRF/NEXN 图已删（线上 404 复核通过）；
   EN 两页是 stub 无需改。已 build + 部署 + 线上复核
-- `cos-staging`：两个下游 skill 的 slim rds 与真数据同步（**未做**）
-- 凭据轮换（仍未做）
+- ~~`cos-staging`：两个下游 skill 的 slim rds 与真数据同步~~ ✅（2026-09-18）：两个下游 skill 的
+  输入就是主 skill 的 slim rds（已在 COS，无需新上传）；本轮实际是**分发包再打包**——
+  `build_skill_zips.py` 补排除规则（rds/log/.checkpoints/.staging/markers_all.csv，与 .gitignore 对齐），
+  17 包重建共 449.5 MB；scRNA-seq.zip 102 MB 超阈值改走 COS；服务器 13 包 + COS 3 包全部重传并线上复核
+- 凭据轮换（仍未做；凭据文件第 96 行记录了原因：密钥与密码曾在聊天记录中出现。你可在**另一台电脑**的
+  腾讯云控制台操作：CAM → API 密钥管理 → 新建密钥 + 禁用旧密钥；Lighthouse → 实例重置密码。
+  注意禁用旧密钥后本机部署功能立即失效，直到把新凭据写回本机凭据文件）
 - 收尾 `adversarial-review`

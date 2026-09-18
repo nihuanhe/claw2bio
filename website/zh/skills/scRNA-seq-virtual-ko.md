@@ -13,7 +13,7 @@
 3. 运行 examples/ 里的示例验证环境，把输出的图给我看。
 ```
 
-**方式 B —— 独立 zip 包**（约 0.2 MB，本站下载）：<https://claw2bio.site/downloads/scRNA-seq-virtual-ko.zip>
+**方式 B —— 独立 zip 包**（约 0.5 MB，本站下载）：<https://claw2bio.site/downloads/scRNA-seq-virtual-ko.zip>
 
 **方式 C —— 全量示例数据**：已包含在方式 B 包内（同一个压缩包）。
 :::

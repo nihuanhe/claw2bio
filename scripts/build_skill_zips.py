@@ -59,8 +59,12 @@ SKILLS = {
     "survival-curve": "figure-generation/survival-curve",
 }
 
-EXCLUDE_DIRS = {"__pycache__", ".git", ".ipynb_checkpoints", ".mpl-cache"}
-EXCLUDE_FILES = {".DS_Store", "Thumbs.db"}
+EXCLUDE_DIRS = {"__pycache__", ".git", ".ipynb_checkpoints", ".mpl-cache",
+                ".checkpoints", ".staging"}
+EXCLUDE_FILES = {".DS_Store", "Thumbs.db", "markers_all.csv"}
+# Regenerable per-run artefacts are never distributed (mirrors root .gitignore:
+# examples/**/output/*.rds, *.log, markers_all.csv stay out of git AND out of zips)
+EXCLUDE_SUFFIXES = (".rds", ".log")
 FIXED_TIME = (1980, 1, 1, 0, 0, 0)
 
 
@@ -94,7 +98,8 @@ def collect(skill_dir: Path, slug: str, examples_split: bool, drop_resources: bo
         for fn in filenames:
             p = Path(dirpath) / fn
             rel = p.relative_to(skill_dir).as_posix()
-            if fn in EXCLUDE_FILES or fn.startswith(".git") or fn.endswith(".pyc"):
+            if (fn in EXCLUDE_FILES or fn.startswith(".git") or fn.endswith(".pyc")
+                    or fn.endswith(EXCLUDE_SUFFIXES)):
                 continue
             if drop_resources and rel.startswith("resources/"):
                 skipped.append(rel)

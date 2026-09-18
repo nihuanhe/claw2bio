@@ -13,9 +13,9 @@
 3. 运行 examples/ 里的示例验证环境，把输出的图给我看。
 ```
 
-**方式 B —— 独立 zip 包**（约 28 MB，本站下载）：<https://claw2bio.site/downloads/scRNA-seq.zip>
+**方式 B —— 独立 zip 包**（约 102 MB，腾讯 COS 直链）：<https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/scRNA-seq/zip/scRNA-seq.zip>
 
-**方式 C —— 全量示例数据**（约 105 MB，腾讯 COS 直链）：<https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/scRNA-seq/data/scRNA-seq-examples.zip>
+**方式 C —— 全量示例数据**（约 102 MB，腾讯 COS 直链）：<https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/scRNA-seq/data/scRNA-seq-examples.zip>
 :::
 
 ## 它能做什么
