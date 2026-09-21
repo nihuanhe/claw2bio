@@ -1,7 +1,7 @@
 # Skills
 
 All skills are lab-validated fixed scripts packaged in the standard `SKILL.md` format.
-Chinese tutorials are online; English tutorials are being prepared.
+Each skill page is a zero-basics, copy-paste tutorial in English and Chinese.
 
 > **First time here? Start with [Set up your first AI Agent](/skills/ai-agent-setup)** — install an AI agent from scratch, then come back to pick a skill.
 

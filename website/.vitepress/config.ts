@@ -40,24 +40,39 @@ export default defineConfig({
               items: [
                 {
                   text: 'Phylogenetic tree',
-                  items: []
+                  collapsed: false,
+                  items: [
+                    { text: 'Phylo tree — build', link: '/skills/phylo-tree-build' },
+                    { text: 'Phylo tree — plot', link: '/skills/phylo-tree-plot' }
+                  ]
                 },
                 {
                   text: 'Single-cell sequencing',
-                  items: []
+                  collapsed: false,
+                  items: [
+                    { text: 'Single-cell RNA-seq', link: '/skills/scRNA-seq' },
+                    { text: 'scRNA-seq pseudotime', link: '/skills/scRNA-seq-pseudotime' },
+                    { text: 'scRNA-seq virtual KO', link: '/skills/scRNA-seq-virtual-ko' }
+                  ]
                 },
                 {
                   text: 'RNA-seq analysis',
-                  items: []
-                },
-                { text: 'Tutorials in Chinese →', link: '/zh/skills/#bioinformatics' }
+                  collapsed: false,
+                  items: [
+                    { text: 'Bulk RNA-seq DEG', link: '/skills/bulk-RNA-seq' },
+                    { text: 'Enrichment (GO/KEGG/Reactome)', link: '/skills/RNA-seq-enrichment' },
+                    { text: 'Gene expression plots', link: '/skills/RNA-seq-gene-plot' },
+                    { text: 'GSEA', link: '/skills/RNA-seq-GSEA' }
+                  ]
+                }
               ]
             },
             {
               text: 'Figure & Table Generation',
               items: [
                 { text: 'Grouped bar plot', link: '/skills/barplot' },
-                { text: 'Clinical tables', link: '/skills/clinical-table' }
+                { text: 'Clinical tables', link: '/skills/clinical-table' },
+                { text: 'Survival curve', link: '/skills/survival-curve' }
               ]
             }
           ]
