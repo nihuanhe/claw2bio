@@ -16,7 +16,7 @@
   `python scripts\deploy_site.py deploy website\.vitepress\dist /var/www/claw2bio`；
   curl 抽查：中英各 3 个技能页 + 2 个 ai-agent-setup + 3 张截图（HTTP 200 且含教程标题）；
   CDN 注意：以页面正文关键字命中为准，不只看状态码
-- [ ] Task 8: git 提交推送——按坑 #16 铁律同一条命令内完成
+- [x] Task 8: git 提交推送——按坑 #16 铁律同一条命令内完成
   `GIT_OBJECT_DIRECTORY` 一条龙，commit + push，复核 `git ls-remote` 一致
 
 # Task Dependencies
