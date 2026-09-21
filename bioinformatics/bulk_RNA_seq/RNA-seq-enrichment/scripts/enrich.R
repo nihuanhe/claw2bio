@@ -78,9 +78,10 @@ run_one <- function(entrez, label) {
     if (!is.null(eg) && nrow(as.data.frame(eg)) > 0) {
       write.csv(as.data.frame(eg), file.path(outdir, sprintf("GO_%s_%s.csv", label, ont)),
                 row.names = FALSE)
-      p <- dotplot(eg, showCategory = 15, title = sprintf("GO %s — %s", ont, label))
+      p <- dotplot(eg, showCategory = 15, label_format = 1000,
+                   title = sprintf("GO %s — %s", ont, label))
       ggsave(file.path(outdir, sprintf("GO_%s_%s_dotplot.png", label, ont)), p,
-             width = 9, height = 7, dpi = 300)
+             width = 11, height = 7, dpi = 300)
     }
   }
   # KEGG — online REST first (unless --offline), local cache fallback
@@ -104,11 +105,15 @@ run_one <- function(entrez, label) {
     }
   }
   if (!is.null(kk) && nrow(as.data.frame(kk)) > 0) {
+    # strip KEGG organism suffix, e.g. " - Mus musculus (house mouse)"
+    kk@result$Description <- sub(" - [A-Za-z]+ [a-z]+ \\([^)]*\\)$", "",
+                                 kk@result$Description)
     write.csv(as.data.frame(kk), file.path(outdir, sprintf("KEGG_%s.csv", label)),
               row.names = FALSE)
-    p <- dotplot(kk, showCategory = 15, title = sprintf("KEGG — %s", label))
+    p <- dotplot(kk, showCategory = 15, label_format = 1000,
+                 title = sprintf("KEGG — %s", label))
     ggsave(file.path(outdir, sprintf("KEGG_%s_dotplot.png", label)), p,
-           width = 9, height = 7, dpi = 300)
+           width = 11, height = 7, dpi = 300)
   }
   # Reactome — fully offline via local cache (open-license tables)
   rcache <- load_cache("reactome")
