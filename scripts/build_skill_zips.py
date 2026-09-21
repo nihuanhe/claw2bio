@@ -58,6 +58,11 @@ SKILLS = {
     "barplot": "figure-generation/barplot",
     "clinical-table": "figure-generation/clinical-table",
     "survival-curve": "figure-generation/survival-curve",
+    "if-contrast": "experiment-data/IF-免疫荧光",
+    "OFT": "experiment-data/OFT",
+    "wb-imagej": "experiment-data/WB-imageJ-定量",
+    "brain-if-atlas-annotate": "figure-generation/brain-if-atlas-annotate",
+    "compress-image": "figure-generation/compress-image",
 }
 
 EXCLUDE_DIRS = {"__pycache__", ".git", ".ipynb_checkpoints", ".mpl-cache",

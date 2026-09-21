@@ -19,18 +19,13 @@ website/.vitepress/cache/
 # ---- Local build outputs (skill zip packages, see plan-skill-packages.md) ----
 .build/
 
-# ---- Batch-2 skills: old structure, pending sanitization + COS data split ----
-# Their full-size example data will be hosted on Tencent COS; only mini
-# examples (a few MB) enter the repo after rework. See plan.md F.
-experiment-data/IF-免疫荧光/
-experiment-data/OFT/
-experiment-data/WB-imageJ-定量/
-figure-generation/brain-if-atlas-annotate/
-figure-generation/compress-image/
+# ---- Batch-2 skills: published 2026-09-21 (sanitized; big tif examples on COS) ----
 
 # ---- Large raw data types (full datasets live on COS, not in git) ----
 *.tif
 *.tiff
+# Exception: small downsampled mIF fixtures (a few hundred KB each) stay in git
+!experiment-data/IF-免疫荧光/**/examples/**/*.tif
 cos-staging/
 
 # ---- Large per-run artefacts in example outputs (see plan-skill-example-completion.md D5) ----

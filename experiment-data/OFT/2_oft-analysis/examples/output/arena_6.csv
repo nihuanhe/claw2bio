@@ -1,0 +1,45 @@
+﻿[Primary Metrics],,
+Metric,Value,Unit
+Total distance,1159.4,cm
+Entries in center,13,times
+Rest time,19.2,s
+Time in center,15.74,%
+
+[Validation Checks],,,,,
+Check Item,Measured Value,Threshold,Unit,Reference,Status
+Mean speed,9.66,≤ 20,cm/s,"MouseActivity (PMC6990588, 2020): C57BL/6J WT 10min mean ~4-5 cm/s",PASS
+Max instantaneous speed,45.80,≤ 80,cm/s,Mouse physiology consensus: sprint ceiling ~80 cm/s,PASS
+Max acceleration,130.90,≤ 500,cm/s²,"Tracking artifacts typical: normal start <200, >500 likely noise",PASS
+Burst ratio (>30 cm/s),2.6,≤ 10,%,OFT normal exploration pattern: sustained high-speed running atypical,PASS
+Rest ratio (<1 cm/s),11.7,≥ 2 且 ≤ 50,%,"Animal state check: >50% sedation/disease, <2% tracking noise",PASS
+P99/P95 speed ratio,1.45,≤ 3.0,—,Jump artifact detection: wide tail suggests spurious jumps,PASS
+
+[Speed Distribution],,
+Statistic,Value,Unit
+Mean speed,9.66,cm/s
+Median speed,8.69,cm/s
+Max speed,45.80,cm/s
+P5 speed,0.00,cm/s
+P25 speed,3.75,cm/s
+P75 speed,13.03,cm/s
+P95 speed,24.16,cm/s
+P99 speed,35.14,cm/s
+Burst >30 cm/s,2.6,%
+Burst >50 cm/s,0.0,%
+Rest <1 cm/s,11.7,%
+Mean acceleration,18.5,cm/s²
+Max acceleration,130.9,cm/s²
+P95 acceleration,57.2,cm/s²
+P99/P95 speed ratio,1.45,—
+Sample count (speeds),343,frames
+
+[Run Parameters],,
+Parameter,Value,
+Total duration,120.00 s,
+Arena bounds (px),"908,384,1270,745",
+Arena size,50 cm,
+px_per_cm,7.24,
+Padding,0.02,
+Center ratio,0.4,
+Rest threshold,2.0 cm/s,
+Input file,e:\工作\博士后阶段\课题\课题-AI-Openclaw\内容整理\experiment-data\OFT\2_oft-analysis\examples\input\6.csv,

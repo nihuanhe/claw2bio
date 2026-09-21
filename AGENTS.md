@@ -11,6 +11,9 @@ input and expected output.
 |---|---|---|
 | qpcr-mrna | `experiment-data/qpcr-mrna/SKILL.md` | mRNA qPCR ΔΔCt analysis + publication-ready bar plots (t-test / ANOVA + Dunnett) |
 | qpcr-mtdna | `experiment-data/qpcr-mtdna/SKILL.md` | mtDNA qPCR (ND1/ND5/B2M/POLG) ΔCt + Mean copy number + bar plots |
+| if-contrast | `experiment-data/IF-免疫荧光/SKILL.md` | mIF multi-channel batch contrast adjustment (Fiji/ImageJ macro) |
+| OFT | `experiment-data/OFT/SKILL.md` | Open-field test pipeline: Tracker trajectory → analysis plots → pixelated heatmaps |
+| wb-imagej | `experiment-data/WB-imageJ-定量/SKILL.md` | WB band densitometry: ImageJ macro → Python normalization + stats + bar plot |
 
 ## Stage 2 — Bioinformatics analysis (`bioinformatics/`)
 
@@ -33,6 +36,8 @@ input and expected output.
 | barplot | `figure-generation/barplot/SKILL.md` | Grouped bar plots from wide-format CSV, auto-selects 2–6 group script |
 | clinical-table | `figure-generation/clinical-table/SKILL.md` | Clinical three-line tables: generic 2-cohort baseline (χ²/Fisher + t, OR, Cox) + R suite reproducing all 10 tables (Tables 1–10 = manuscript Table 1/2 + S1–S8: Firth, genotype crosses, univariate) — real CRE vs CSE example, cell-reconciled |
 | survival-curve | `figure-generation/survival-curve/SKILL.md` | KM survival curve + univariate Cox (surv_cutpoint cutoff, risk table, HR forest plot, 600 dpi) |
+| brain-if-atlas-annotate | `figure-generation/brain-if-atlas-annotate/SKILL.md` | Mouse brain atlas line-art overlays (100 plates ×2 versions) for IF brain-region annotation |
+| compress-image | `figure-generation/compress-image/SKILL.md` | Batch image compression (huge scanner TIFF → shareable JPEG) |
 
 ## Conventions
 

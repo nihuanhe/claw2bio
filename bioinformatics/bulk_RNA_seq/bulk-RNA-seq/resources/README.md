@@ -1,7 +1,9 @@
 # resources/
 
 Offline installation assets for this skill. Too large for git — archives are
-gitignored and are not distributed online yet.
+gitignored and hosted on COS:
+`https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/bulk-RNA-seq/deps/r-win/`
+(`r-deps.zip` + the three OrgDb archives below).
 
 ## 1. OrgDb gene-ID conversion packages
 
