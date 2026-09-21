@@ -11,6 +11,9 @@
 |---|---|
 | [qPCR mRNA（ΔΔCt）](/zh/skills/qpcr-mrna) | 原始 Ct 表 → 相对表达量，每个靶标一张图 |
 | [qPCR mtDNA 拷贝数](/zh/skills/qpcr-mtdna) | ND1/ND5 + B2M/POLG 配对，Mean copy number |
+| [免疫荧光多通道对比度](/zh/skills/if-contrast) | mIF 多通道批量对比度调整（Fiji/ImageJ 宏） |
+| [旷场实验 OFT](/zh/skills/OFT) | Tracker 轨迹 → 分析图 → 像素化热图 |
+| [WB 灰度定量](/zh/skills/wb-imagej) | ImageJ 宏灰度定量 → Python 归一化 + 统计 + 柱状图 |
 
 ## 🧬 生信数据分析 {#bioinformatics}
 
@@ -45,3 +48,5 @@
 | [分组柱状图](/zh/skills/barplot) | 宽表 CSV → 300 dpi 带统计标注柱状图 |
 | [临床统计表](/zh/skills/clinical-table) | 一套管线复现论文全套 10 张表：基线 / Firth / 基因型交叉 / 单因素 |
 | [生存分析曲线](/zh/skills/survival-curve) | 最优截点 KM 曲线 + 风险表 + Cox 森林图 |
+| [脑 atlas 叠加标注](/zh/skills/brain-if-atlas-annotate) | 小鼠脑 atlas 线稿叠加（100 张图谱 ×2 版本），IF 脑区标注 |
+| [图片批量压缩](/zh/skills/compress-image) | 超大扫描 TIFF → 可分享 JPEG 批量压缩 |

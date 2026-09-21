@@ -146,11 +146,20 @@ curl.exe -I https://claw2bio.site/downloads/clinical-table.zip
    两个下游 skill 后发布到 COS**（`scRNA-seq/data/`，md5 `aed4304e…`），两个中文技能页
    已附直链与复现命令——网站展示图用户可完整复现；网站当日三次部署均线上复核通过；
    MIT LICENSE 已加入仓库（用户批准）
-5. **10 个英文技能页仍是占位**（"English tutorial is being prepared"）：仅 4 个技能有完整英文页
-   （用户 2026-09-18 确认：保持占位，记入长期任务）
-6. **`resources/` 里的 R 依赖未托管**（bulk-RNA-seq 约 903 MB，含 OrgDb）：文档已改为
-   "not mirrored online yet"；要做需新开一个阶段
+5. **[✅ 已完成 2026-09-21] 英文技能页占位已消除**：10 个 stub 页随教程替换全部上线英文教程，
+   英文侧边栏空分组已修复，5 个 Batch-2 技能亦有英文页
+6. **[✅ 已完成 2026-09-21] `resources/` R 依赖已托管 COS**：`cos-staging/bulk-RNA-seq/deps/r-win/`
+   （r-deps.zip 644.5 MB + OrgDb 三包），sync_cos census 173 对象一致；中英 bulk 教程 Step 2
+   已加「离线安装」小节；resources/README.md 措辞已更新。本地 resources/ 保留
 7. **整库单一 zip 未提供**（页面已明确写「暂不提供」）
+8. **[✅ 已完成 2026-09-21] Batch-2 五技能清洗上架**：if-contrast / OFT / wb-imagej /
+   brain-if-atlas-annotate / compress-image 全部补文档（IF/WB/brain-if 新写 SKILL.md+README）、
+   跑通验证（IF 的 ijm 宏例外，语法审查代替）、小 fixture 进 git（IF 的 tif fixture 加了
+   .gitignore 例外）、大 tif 上 COS（compress-image 187 MB + if-contrast 98.5 MB）；
+   5 个 zip 全 ≤50 MB 走服务器（deploy_downloads 已传）；中英各 5 个教程页新写上线；
+   侧边栏/索引/下载页已接线。技能总数 14 → 19
+9. **[✅ 已完成 2026-09-21] 服务器备份目录清理**：3 个旧 .bak 目录已删；每次部署会新生成
+   一个时间戳备份（当前保留最新一个作回滚）
 8. **`.build/`（打包产物、state、manifest）与 `cos-staging/` 都在 .gitignore 里**：
    服务器上的 14 个包因此没有 git 侧清单，靠 manifest 复现（zip 确定性输出，重建可得同样 md5）
 

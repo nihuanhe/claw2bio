@@ -32,7 +32,10 @@ export default defineConfig({
               text: 'Experiment Data Processing',
               items: [
                 { text: 'qPCR mRNA (ΔΔCt)', link: '/skills/qpcr-mrna' },
-                { text: 'qPCR mtDNA copy number', link: '/skills/qpcr-mtdna' }
+                { text: 'qPCR mtDNA copy number', link: '/skills/qpcr-mtdna' },
+                { text: 'mIF contrast (ImageJ)', link: '/skills/if-contrast' },
+                { text: 'Open-field test', link: '/skills/OFT' },
+                { text: 'WB densitometry', link: '/skills/wb-imagej' }
               ]
             },
             {
@@ -72,7 +75,9 @@ export default defineConfig({
               items: [
                 { text: 'Grouped bar plot', link: '/skills/barplot' },
                 { text: 'Clinical tables', link: '/skills/clinical-table' },
-                { text: 'Survival curve', link: '/skills/survival-curve' }
+                { text: 'Survival curve', link: '/skills/survival-curve' },
+                { text: 'Brain atlas annotate', link: '/skills/brain-if-atlas-annotate' },
+                { text: 'Compress images', link: '/skills/compress-image' }
               ]
             }
           ]
@@ -105,7 +110,10 @@ export default defineConfig({
               text: '实验数据处理',
               items: [
                 { text: 'qPCR mRNA（ΔΔCt）', link: '/zh/skills/qpcr-mrna' },
-                { text: 'qPCR mtDNA 拷贝数', link: '/zh/skills/qpcr-mtdna' }
+                { text: 'qPCR mtDNA 拷贝数', link: '/zh/skills/qpcr-mtdna' },
+                { text: '免疫荧光多通道对比度', link: '/zh/skills/if-contrast' },
+                { text: '旷场实验 OFT', link: '/zh/skills/OFT' },
+                { text: 'WB 灰度定量', link: '/zh/skills/wb-imagej' }
               ]
             },
             {
@@ -145,7 +153,9 @@ export default defineConfig({
               items: [
                 { text: '分组柱状图', link: '/zh/skills/barplot' },
                 { text: '临床统计表', link: '/zh/skills/clinical-table' },
-                { text: '生存分析曲线', link: '/zh/skills/survival-curve' }
+                { text: '生存分析曲线', link: '/zh/skills/survival-curve' },
+                { text: '脑 atlas 叠加标注', link: '/zh/skills/brain-if-atlas-annotate' },
+                { text: '图片批量压缩', link: '/zh/skills/compress-image' }
               ]
             }
           ]

@@ -71,6 +71,44 @@ step2结束，AI agent会告诉你本机安装的R语言版本和脚本位置。
 
 ![step2结束](/tutorials/bulk-rna-seq/slide08-1.png)
 
+### 离线安装（网络慢/装不上时）
+
+如果 CRAN / Bioconductor 在线安装太慢或失败，可以改用我们托管在 COS 的离线依赖包（共 139 个 R 包的完整闭包，R 4.5 Windows 二进制版本，已用本技能脚本实测验证）：
+
+**1. 下载 r-deps 离线仓库（约 425 MB）：**
+
+```
+https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/bulk-RNA-seq/deps/r-win/r-deps.zip
+```
+
+下载后解压，然后在 R 中运行（把 `<path-to>` 换成解压目录的实际路径）：
+
+```r
+install.packages(c("DESeq2", "edgeR", "limma", "clusterProfiler", "DOSE",
+                   "enrichplot", "org.Mm.eg.db", "org.Hs.eg.db",
+                   "pheatmap", "ggplot2", "ggrepel"),
+                 repos = "file:///<path-to>/r-deps", type = "win.binary")
+```
+
+R 会根据仓库自带的 PACKAGES 索引自动解析依赖顺序。
+
+**2. 也可以按需单独下载 OrgDb 注释包：**
+
+| 文件 | 包 | 类型 |
+|---|---|---|
+| [org.Mm.eg.db_3.22.0_R4.5_win-binary.zip](https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/bulk-RNA-seq/deps/r-win/org.Mm.eg.db_3.22.0_R4.5_win-binary.zip) | org.Mm.eg.db（小鼠） | Windows 二进制，R 4.5 |
+| [org.Hs.eg.db_3.22.0_R4.5_win-binary.zip](https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/bulk-RNA-seq/deps/r-win/org.Hs.eg.db_3.22.0_R4.5_win-binary.zip) | org.Hs.eg.db（人） | Windows 二进制，R 4.5 |
+| [org.Hs.eg.db_3.22.0.tar.gz](https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/bulk-RNA-seq/deps/r-win/org.Hs.eg.db_3.22.0.tar.gz) | org.Hs.eg.db（人） | 源码包，跨平台 |
+
+单包安装方法（在下载目录下运行 R）：
+
+```r
+install.packages("org.Mm.eg.db_3.22.0_R4.5_win-binary.zip",
+                 repos = NULL, type = "win.binary")
+```
+
+> ⚠️ 以上离线包均为 **R 4.5.x** 编译。如果你的 R 版本不是 4.5.x，请改走在线安装 `BiocManager::install(...)`。
+
 ---
 
 ## Step 3｜跑通示例数据

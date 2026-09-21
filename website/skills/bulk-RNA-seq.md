@@ -71,6 +71,44 @@ When step 2 finishes, the AI agent will tell you the R version installed on your
 
 ![Step 2 finished](/tutorials/bulk-rna-seq/slide08-1.png)
 
+### Offline installation (when the network is slow or installs fail)
+
+If online installation from CRAN / Bioconductor is too slow or keeps failing, use the offline dependency packages we host on COS instead — a complete closure of 139 R packages (R 4.5 Windows binaries, battle-tested with this skill's scripts):
+
+**1. Download the r-deps offline repository (~425 MB):**
+
+```
+https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/bulk-RNA-seq/deps/r-win/r-deps.zip
+```
+
+Unzip it, then run in R (replace `<path-to>` with the actual extraction folder):
+
+```r
+install.packages(c("DESeq2", "edgeR", "limma", "clusterProfiler", "DOSE",
+                   "enrichplot", "org.Mm.eg.db", "org.Hs.eg.db",
+                   "pheatmap", "ggplot2", "ggrepel"),
+                 repos = "file:///<path-to>/r-deps", type = "win.binary")
+```
+
+R resolves the dependency order automatically from the bundled PACKAGES index.
+
+**2. Or download individual OrgDb annotation packages as needed:**
+
+| File | Package | Type |
+|---|---|---|
+| [org.Mm.eg.db_3.22.0_R4.5_win-binary.zip](https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/bulk-RNA-seq/deps/r-win/org.Mm.eg.db_3.22.0_R4.5_win-binary.zip) | org.Mm.eg.db (mouse) | Windows binary, R 4.5 |
+| [org.Hs.eg.db_3.22.0_R4.5_win-binary.zip](https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/bulk-RNA-seq/deps/r-win/org.Hs.eg.db_3.22.0_R4.5_win-binary.zip) | org.Hs.eg.db (human) | Windows binary, R 4.5 |
+| [org.Hs.eg.db_3.22.0.tar.gz](https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/bulk-RNA-seq/deps/r-win/org.Hs.eg.db_3.22.0.tar.gz) | org.Hs.eg.db (human) | Source, cross-platform |
+
+Install a single package (run R in the download folder):
+
+```r
+install.packages("org.Mm.eg.db_3.22.0_R4.5_win-binary.zip",
+                 repos = NULL, type = "win.binary")
+```
+
+> ⚠️ All offline packages above are built for **R 4.5.x**. If your R version is not 4.5.x, install online via `BiocManager::install(...)` instead.
+
 ---
 
 ## Step 3 | Run the bundled example data

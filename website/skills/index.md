@@ -11,6 +11,9 @@ Each skill page is a zero-basics, copy-paste tutorial in English and Chinese.
 |---|---|
 | [qPCR mRNA (ΔΔCt)](/skills/qpcr-mrna) | Relative expression from raw Ct tables, one plot per target |
 | [qPCR mtDNA copy number](/skills/qpcr-mtdna) | ND1/ND5 + B2M/POLG pairing, mean copy number |
+| [mIF contrast (ImageJ)](/skills/if-contrast) | mIF multi-channel batch contrast adjustment (Fiji/ImageJ macro) |
+| [Open-field test](/skills/OFT) | Tracker trajectory → analysis plots → pixelated heatmaps |
+| [WB densitometry](/skills/wb-imagej) | WB band densitometry: ImageJ macro → Python normalization + stats + bar plot |
 
 ## 🧬 Bioinformatics Analysis {#bioinformatics}
 
@@ -33,3 +36,5 @@ Each skill page is a zero-basics, copy-paste tutorial in English and Chinese.
 | [Grouped bar plot](/skills/barplot) | Wide-format CSV → 300-dpi annotated bar plot |
 | [Clinical tables](/skills/clinical-table) | One pipeline reproducing all 10 tables of a paper: baseline / Firth / genotype cross-tabs / univariate |
 | [Survival curve](/skills/survival-curve) | Optimal-cutoff KM curve + risk table + Cox forest plot |
+| [Brain atlas annotate](/skills/brain-if-atlas-annotate) | Mouse brain atlas line-art overlays (100 plates ×2 versions) for IF brain-region annotation |
+| [Compress images](/skills/compress-image) | Batch image compression (huge scanner TIFF → shareable JPEG) |
