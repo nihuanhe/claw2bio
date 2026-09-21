@@ -1,141 +1,214 @@
-# bulk RNA-seq 差异分析（counts → DEG）
+# 零基础——用 AI Agent 做 bulk RNA-seq 差异分析 | 全程复制粘贴
 
-> 一句话：counts 矩阵 + 分组表进，差异表达全套出——输入体检自动修复格式坑，按数据自动选择 DESeq2 / edgeR+voom / limma 引擎并打印理由。
+<!-- 本文与配套 PPTX《示例教程-bulk-RNA-seq.pptx》对应；文中所有 prompt 与 PPTX 中蓝色字体完全一致，直接复制粘贴即可。插图为 PPTX 内嵌的原始截图。 -->
 
-::: info 获取本技能 · Get this skill
-**方式 A —— 一键引导 prompt（推荐）**。复制下面这段，粘贴到你的 AI agent IDE：
+本教程以workbuddy作为AI agent，Hy3作为AI API为例。
+
+**教程结构：**
+
+- **Step 1**｜安装 bulk-RNA-seq 技能（只需一次）
+- **Step 2**｜配置运行环境（只需一次）
+- **Step 3**｜跑通示例数据
+- **Step 4**｜换成你自己的数据
+- **Step 5**｜读懂 REPORT.md
+- **Step 6**｜多分组时自己挑对比算 DEG
+- **更多分析**｜下游技能简介（富集分析 / 指定基因柱状图）
+
+---
+
+## Step 1｜Install the bulk-RNA-seq skill
+
+输入《Install the bulk-RNA-seq skill》的prompt：
 
 ```
-请帮我安装 Claw2Bio 技能库中的 "bulk-RNA-seq" 技能：
-1. 从 GitHub 仓库 https://github.com/nihuanhe/claw2bio 只拉取 bioinformatics/bulk_RNA_seq/bulk-RNA-seq
-   这一个文件夹（用 sparse checkout，不要克隆整库）。
-2. 阅读其中的 SKILL.md 并注册该技能。
-3. 运行 examples/ 里的示例验证环境，把输出的图给我看。
+Please install the "bulk-RNA-seq" skill for me, into the D:\claw2bio folder:
+1. Create a folder named claw2bio in the root of the D: drive (if it doesn't exist yet).
+2. From the GitHub repository https://github.com/nihuanhe/claw2bio, fetch ONLY the folder
+   bioinformatics/bulk_RNA_seq/bulk-RNA-seq (use sparse checkout — do NOT clone the whole
+   repository), and place it at D:\claw2bio\bulk-RNA-seq.
+3. If downloading from GitHub fails or is too slow, download the zip from this mirror link instead:
+   https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/bulk-RNA-seq/zip/bulk-RNA-seq.zip
+   and extract it to D:\claw2bio\bulk-RNA-seq.
+4. Read the SKILL.md inside, then confirm to me that the skill is ready and list the contents
+   of the folder.
+(If my PC has no D: drive, install to C:\claw2bio instead and tell me the actual path.)
 ```
 
-**方式 B —— 独立 zip 包**（约 76 MB，腾讯 COS 直链）：<https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/bulk-RNA-seq/zip/bulk-RNA-seq.zip>
+![粘贴prompt，AI agent开始运行](/tutorials/bulk-rna-seq/slide03-1.png)
 
-**方式 C —— 全量示例数据**（约 87 MB，腾讯 COS 直链）：<https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/bulk-RNA-seq/data/bulk-RNA-seq-examples.zip>
-:::
+Step1完成：
 
-## 它能做什么
+![Step1完成](/tutorials/bulk-rna-seq/slide04-1.png)
 
-输入基因 × 样本的 counts 矩阵和样本分组表，stage 00.5 输入体检自动修复混合矩阵 / GEO series_matrix 表头 / 转置 / 毁名 / 重复 symbol 等常见坑，然后按数据自动分叉引擎（理由强制打印）：
+查看文件管理器：
 
-| 输入诊断 | 引擎 |
-|---|---|
-| 非整数 / 已归一化（FPKM、TPM、log） | limma-trend |
-| 整数 counts，最小组 n < 8 | DESeq2 |
-| 整数 counts，最小组 n ≥ 8 | edgeR + limma-voom |
-| 声明 `--paired-by`（以上任意） | 强制 limma + duplicateCorrelation |
-| 任一组 n = 1 | 探索模式：limma-trend 只算 fold change，REPORT 显著警告 |
+![查看文件管理器](/tutorials/bulk-rna-seq/slide05-1.png)
 
-内置示例为 GSE270189（小鼠前列腺基底细胞，3 组 × 2 重复），自动走 DESeq2 分支，输出 QC、每个 contrast 的 DEG 表、火山图、MA 图和 DEG 热图：
+---
 
-![QC PCA 图](/skills/bulk-RNA-seq/QC_PCA.png)
+## Step 2｜Set up the runtime environment
 
-样本 PCA——检查组间分离与离群样本（离群只标记，绝不自动剔除）。
+输入prompt：
 
-![样本相关性热图](/skills/bulk-RNA-seq/QC_correlation_heatmap.png)
-
-样本间表达相关性热图，批次效应在此一览无余。
-
-![火山图](/skills/bulk-RNA-seq/Volcano.png)
-
-每个 contrast 一张火山图，top-10 基因自动标注（默认阈值 padj < 0.05 且 |log2FC| ≥ 1）。
-
-![MA 图](/skills/bulk-RNA-seq/MA.png)
-
-MA 图——检查归一化是否成功、logFC 与表达量是否脱钩。
-
-![DEG 热图](/skills/bulk-RNA-seq/DEG_heatmap.png)
-
-显著 DEG 并集的 z-score 热图。
-
-**本流程只到 DEG 为止**——富集分析、指定基因柱状图、GSEA 是三个独立技能，都吃本流程的产出。
-
-## 快速上手（30 秒）
-
-技能装好后，直接对 agent 说：
-
-> 运行 bulk-RNA-seq 的示例，把火山图给我看。
-
-或手动执行：
-
-```bash
-cd bioinformatics/bulk_RNA_seq/bulk-RNA-seq
-pip install pandas numpy
-python scripts/run_rnaseq.py \
-  examples/1_example_GSE270189_clean-mouse-3groups/input/counts_matrix.csv \
-  examples/1_example_GSE270189_clean-mouse-3groups/input/sample_metadata.csv \
-  examples/1_example_GSE270189_clean-mouse-3groups/output \
-  --control Control --organism mouse --overwrite
+```
+Please set up the runtime environment for me:
+1. First, SEARCH THIS PC for an existing R installation. If R is already installed,
+   report its version to me; if the version is BELOW 4.5, advise me to install a newer
+   version and wait for my confirmation. Only if R is NOT installed at all, install
+   R version 4.5 or above (Windows), downloaded from the official R website (CRAN),
+   accepting all default options.
+2. Install all R packages this skill needs: try CRAN / Bioconductor online first;
+   if any package fails or is too slow (especially large annotation packages such as
+   org.Hs.eg.db and org.Mm.eg.db), stop and tell me about it — I will provide a
+   mirror download address.
+3. When everything is installed, run the dependency-check script scripts/00_check_deps.R
+   inside the skill folder and show me the result.
 ```
 
-需要 R（≥4.3）及 DESeq2 / edgeR / limma / OrgDb 等包；stage 00 先查依赖，缺包可加 `--install-deps` 让 agent 代装。
+![AI agent正在配置运行环境](/tutorials/bulk-rna-seq/slide07-1.png)
 
-## 输入格式
+step2结束，AI agent会告诉你本机安装的R语言版本和脚本位置。
 
-`counts_matrix.csv`——基因行 × 样本列的原始整数 counts（归一化矩阵也收，自动走 limma-trend；csv/tsv/txt 及 `.gz` 均可，分隔符与压缩自动识别）：
+![step2结束](/tutorials/bulk-rna-seq/slide08-1.png)
 
-```csv
-,CJI1.A,CJI2.B,CJI3.I
-ENSMUSG00000000001,2014,2003,2847
-ENSMUSG00000000003,13736,19194,...
+---
+
+## Step 3｜跑通示例数据
+
+输入prompt：
+
+```
+The skill is installed at D:\claw2bio\bulk-RNA-seq. Please run the full pipeline on the
+bundled example data:
+1. Example input is at D:\claw2bio\bulk-RNA-seq\examples\1_example_GSE270189_clean-mouse-3groups\input\
+2. Write results to D:\claw2bio\bulk-RNA-seq\examples\1_example_GSE270189_clean-mouse-3groups\output\
+3. Prefer the skill's own scripts in scripts/ — do NOT write new analysis code from scratch.
+4. When the run succeeds, show me the key results in this order:
+   first the QC plots (PCA plot and sample-correlation heatmap), then the volcano plots,
+   and finally explain the generated REPORT.md line by line.
 ```
 
-`sample_metadata.csv`——必需列 `sample,group`；可选 `batch` / 个体列配合 `--batch` / `--paired-by`：
+step3，开始：
 
-```csv
-sample,group,subject
-S1_pre,pre,Subject1
-S1_post,post,Subject1
+![step3，开始](/tutorials/bulk-rna-seq/slide10-1.png)
+
+step3，结束。看看QC_PCA_plot：
+
+![step3，结束。看看QC_PCA_plot](/tutorials/bulk-rna-seq/slide11-1.png)
+
+step3，结束。看看火山图：
+
+![step3，结束。看看火山图](/tutorials/bulk-rna-seq/slide12-1.png)
+
+---
+
+## Step 4｜Switch to your own data
+
+此时，我们就可以使用自己的bulk RNA-seq的矩阵数据进行生信分析了。
+
+此处，我们假设GSE223159这个数据是你自己的矩阵：
+
+![此处，我们假设GSE223159这个数据是你自己的矩阵](/tutorials/bulk-rna-seq/slide14-1.png)
+
+粘贴prompt：
+
+```
+My data is at: <paste the path to your data file here>.
+Please first check whether my data has any format problems; if so, fix them and tell me
+what you did. Once the data checks out, run the full pipeline and show me the result
+figures and the DEG tables.
+Prefer the skill's own scripts in scripts/; if anything needs adapting, make the smallest
+possible change — do NOT write large amounts of new code.
 ```
 
-第一个 group 默认为对照，除非 `--control` 指定；非标准列名自动归一化。
+![粘贴prompt](/tutorials/bulk-rna-seq/slide15-1.png)
 
-## 输出文件
+等候AI agent运行结束：
 
-| 文件 | 内容 |
-|---|---|
-| `DEG_<treat>_vs_<ref>.csv` | 每个 contrast 的完整 DEG 表（Ensembl 已转成 Symbol） |
-| `Volcano_<treat>_vs_<ref>.png/pdf` | 火山图（top-10 基因标注） |
-| `MA_<treat>_vs_<ref>.png/pdf` | MA 图 |
-| `DEG_heatmap.png/pdf` | 显著 DEG 并集 z-score 热图 |
-| `QC_PCA_plot.*` / `QC_sample_correlation_heatmap.*` / `QC_summary.txt` | QC 三件套 |
-| `normalized_expression.csv` | 归一化矩阵（供 RNA-seq-gene-plot 使用） |
-| `cleaned_counts.csv` / `cleaned_metadata.csv` | 仅当输入被修复时输出（原文件不动） |
-| `REPORT.md` / `run_metadata.json` | 产出说明报告 + 机器可读运行记录 |
+![等候AI agent运行结束](/tutorials/bulk-rna-seq/slide16-1.png)
 
-## 参数
+---
 
-| 参数 | 默认值 | 说明 |
-|---|---|---|
-| `--control` | metadata 第一个组 | 对照组名 |
-| `--engine` | `auto` | 强制 `deseq2` / `edger-limma` / `limma` |
-| `--voom-min-n` | 8 | voom 分支的最小组样本数阈值 |
-| `--organism` | `mouse` | `mouse` / `human` / `rat` OrgDb 快捷方式 |
-| `--orgdb` / `--gene-map` | — | 任意 OrgDb 包 / 两列 ID 转换 CSV |
-| `--batch` | — | 批次列（进 design 公式 + QC 着色） |
-| `--paired-by` | — | 个体列（强制 limma + duplicateCorrelation） |
-| `--contrasts` | — | 显式 contrast，如 `'A vs B, C vs D'` |
-| `--padj` / `--log2fc` | 0.05 / 1 | 显著性阈值 |
-| `--exclude-samples` | — | 显式剔除样本（绝不自动） |
-| `--overwrite` | 关 | 允许非空输出目录 |
+## Step 5｜Read the REPORT.md: summary and interpretation of your results
 
-## 常见问题
+![Step 5 | Read the REPORT.md](/tutorials/bulk-rna-seq/slide17-1.png)
 
-- **数据是 FPKM 怎么办** → 直接给，自动走 limma-trend 并打印理由；无需自己转换。
-- **有批次效应** → metadata 加一列批次，跑时加 `--batch <列名>`。
-- **配对样本 / 重复测量** → 加 `--paired-by <个体列>`，自动强制 limma + duplicateCorrelation。
-- **OrgDb 包装不上** → 可用预编译压缩包（Download 页 COS 镜像），或 `--gene-map` 两列 CSV 免 OrgDb；`resources/r-deps/` 还有 139 个 Windows 二进制包的离线小仓库。
-- **输入文件被改了吗** → 没有，修复后的副本写入输出目录，原件不动。
-- **为什么必须用技能自带脚本，不能让 AI 现写？**
-  `scripts/` 里的是经过验证的路径：它们在示例数据上跑过，边界情况有文档记录。AI 现场生成的代码是
-  "结果悄悄出错"的最常见来源。遇到没覆盖的情况，先改命令行参数；不够就复制脚本到临时目录做最小改动
-  并说明改了什么；只有完全没有对应脚本时才允许新写，且新写后要回沉淀到 `scripts/`。
+让AI 给你解析实验结果：
 
-## 相关链接
+```
+Please explain the REPORT.md in my results folder line by line:
+1. What each output file is and what it contains;
+2. How many differentially expressed genes were found in total, and how many are
+   up- vs down-regulated;
+3. Any warnings or things I should pay attention to (e.g., sample quality, group balance).
+After explaining, tell me which results can be used directly in a paper or presentation.
+```
 
-- [GitHub 源码与 SKILL.md](https://github.com/nihuanhe/claw2bio/tree/main/bioinformatics/bulk_RNA_seq/bulk-RNA-seq)
-- 相关技能：[富集分析](/zh/skills/RNA-seq-enrichment) · [指定基因柱状图](/zh/skills/RNA-seq-gene-plot) · [GSEA](/zh/skills/RNA-seq-GSEA)
+![让AI 给你解析实验结果](/tutorials/bulk-rna-seq/slide18-1.png)
+
+阅读完AI的解释，如果有不懂的直接问它：
+
+![阅读完AI的解释，如果有不懂的直接问它](/tutorials/bulk-rna-seq/slide19-1.png)
+
+---
+
+## Step 6｜More than 2 groups? You pick the comparisons for DEG（差异分析）
+
+输入prompt：
+
+```
+My samples have multiple groups. Please read my sample-metadata table first, list all
+group names with the number of samples in each, and show me the list.
+Do NOT start the analysis yet — wait until I tell you which comparisons to run.
+```
+
+![AI agent列出分组](/tutorials/bulk-rna-seq/slide21-1.png)
+
+AI agent会把全部分组给你显示处理，或者去文件夹看分组文件：
+
+![AI agent显示全部分组](/tutorials/bulk-rna-seq/slide22-1.png)
+
+![去文件夹看分组文件](/tutorials/bulk-rna-seq/slide22-2.png)
+
+挑选分组对比进行DEG分析（RNA_WT vs RNA_KO，各自三个组），输入prompt：
+
+```
+Please compute ONLY these comparisons: <write them here, e.g., Model vs Control,
+Treatment vs Model>, write the results to D:\claw2bio\bulk-RNA-seq\output, and show me
+the volcano plots and DEG tables for each comparison.
+```
+
+![挑选分组对比进行DEG分析](/tutorials/bulk-rna-seq/slide23-1.png)
+
+DEG分析结果：
+
+![DEG分析结果](/tutorials/bulk-rna-seq/slide24-1.png)
+
+---
+
+## 更多分析
+
+更多的分析比如KEGG，GO和GSEA，请看 www.claw2bio.site 的相关skill，保存你自己数据的output数据，就可进行。
+
+本技能只做到差异分析（DEG）为止。下面两个下游技能直接吃本技能的 output 结果，安装方式与本技能完全相同（一键 prompt 或网站下载 zip 包）：
+
+### 富集分析（GO / KEGG / Reactome）—— RNA-seq-enrichment
+
+**一句话：DEG 表进，GO / KEGG / Reactome 富集表和点图出。**
+
+指向 bulk-RNA-seq 的输出目录（或任何含 `DEG_*.csv` 的文件夹），它会自动把每个对比拆成上调 / 下调两个基因集，用 clusterProfiler 分别做 GO（BP/MF/CC）、KEGG、Reactome 富集，每个方向 × 每个通路库各出一张表和一张点图。GO 和 Reactome 全程离线；KEGG 在线优先、失败自动回退本地缓存，断网也能出图。支持人和小鼠。
+
+详细介绍与下载：/zh/skills/RNA-seq-enrichment
+
+### 指定基因表达柱状图 —— RNA-seq-gene-plot
+
+**一句话：把某个基因从归一化矩阵里单独拎出来画图。**
+
+给它归一化表达矩阵 + 分组表，就能回答两类问题：
+
+- **某基因在各组表达多少**——柱状图 + SD 误差线 + 抖动散点，2 组 t 检验、≥3 组 ANOVA + Tukey，统计方法标在图注里；
+- **同组内两个基因谁高谁低**（如 TP53 vs GAPDH）——并列柱 + SD + 散点，每组内做配对 t 检验。
+
+基因查询支持 Ensembl ID 或 Symbol（不区分大小写），只依赖 ggplot2，是最轻量的技能之一，适合论文里挑关键基因出图。
+
+详细介绍与下载：/zh/skills/RNA-seq-gene-plot

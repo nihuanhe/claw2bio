@@ -1,148 +1,173 @@
-# 临床统计表
+# 零基础——用 AI Agent 做临床统计表（clinical-table） | 全程复制粘贴
 
-> 一句话：患者级 CSV 进，发表级三线表出——本技能已用一篇真实 CRE/CSE 队列研究的**全部 10 张表格**（Table 1–10 = 手稿 Table 1/2 + 补充材料 S1–S8）完整验证：基线对比、Firth 回归、基因型交叉表、单因素分析、测序质量表。
+本教程以 workbuddy 作为 AI agent、Hy3 作为 AI API 为例。AI agent 本身的安装与配置请看[AI Agent 安装教程](/zh/skills/ai-agent-setup)。
 
-::: info 获取本技能 · Get this skill
-**方式 A —— 一键引导 prompt（推荐）**。复制下面这段，粘贴到你的 AI agent IDE：
+**在开始之前（必读）：**
+
+- **如果你是第一次用 AI agent 做数据分析，强烈建议先跟一遍 [bulk-RNA-seq 差异分析教程](/zh/skills/bulk-RNA-seq)**，熟悉"装技能 → 配环境 → 跑示例 → 换自己数据"的完整流程，再回来做本技能。
+- 本技能是**独立技能**，不依赖任何其他技能的输出——给一张患者级 CSV 就能跑。
+- 一句话：**患者级 CSV 进，论文 Table 1 基线特征表出**——分类变量 n (%) + χ²（期望 <5 自动 Fisher）+ 连续变量 mean±SD + t 检验；另支持相关性矩阵、Cox 回归、OR 汇总。输出 Markdown 三线表，可用 Pandoc 一键转 DOCX。
+- 本技能有**两种用法**，本教程主线讲**通用引擎**（Python，开箱即用）；文末"进阶"介绍**手稿级全套表格 R 管线**（9 个 R 脚本 + 1 个 Python 脚本，从患者级 CSV 复现一篇论文的 Table 1–10）。
+- **注意**：本技能的 χ² **不做 Yates 连续性校正**（发表 Table 1 的惯例），所以 p 值可能和 SPSS 对不上——这是特性，不是 bug。
+
+**教程结构：**
+
+- **Step 1**｜安装 clinical-table 技能（只需一次）
+- **Step 2**｜配置运行环境（只需一次）
+- **Step 3**｜跑通示例数据（通用引擎）
+- **Step 4**｜换成你自己的数据
+- **Step 5**｜让 AI 解读结果
+- **进阶**｜手稿级全套表格 R 管线
+- **更多分析**｜相关技能简介（生存曲线 / 分组柱状图）
+
+---
+
+## Step 1｜Install the clinical-table skill
+
+输入以下 prompt：
 
 ```
-请帮我安装 Claw2Bio 技能库中的 "clinical-table" 技能：
-1. 从 GitHub 仓库 https://github.com/nihuanhe/claw2bio 只拉取 figure-generation/clinical-table
-   这一个文件夹（用 sparse checkout，不要克隆整库）。
-2. 阅读其中的 SKILL.md 并注册该技能。
-3. 运行 examples/ 里的示例验证环境，把输出的表格给我看。
+Please install the "clinical-table" skill for me, into the D:\claw2bio folder:
+1. Create a folder named claw2bio in the root of the D: drive (if it doesn't exist yet).
+2. From the GitHub repository https://github.com/nihuanhe/claw2bio, fetch ONLY the folder
+   figure-generation/clinical-table (use sparse checkout — do NOT clone the whole repository),
+   and place it at D:\claw2bio\clinical-table.
+3. If downloading from GitHub fails or is too slow, download the zip from this mirror link instead:
+   https://claw2bio.site/downloads/clinical-table.zip
+   and extract it to D:\claw2bio\clinical-table.
+4. Read the SKILL.md inside, then confirm to me that the skill is ready and list the contents
+   of the folder.
+(If my PC has no D: drive, install to C:\claw2bio instead and tell me the actual path.)
 ```
 
-**方式 B —— 独立 zip 包**（约 0.2 MB，本站下载）：<https://claw2bio.site/downloads/clinical-table.zip>
+Step 1 完成后，打开文件管理器确认 `D:\claw2bio\clinical-table` 文件夹存在，里面有 `scripts/`、`examples/`、`SKILL.md` 等内容。
 
-**方式 C —— 全量示例数据**：已包含在方式 B 包内（同一个压缩包）。
-:::
+---
 
-## 它能做什么
+## Step 2｜Set up the runtime environment
 
-**通用引擎（Python，开箱即用）**：两队列基线特征表——分类变量 n (%) + Pearson χ²（期望 <5 自动 Fisher）+ 连续变量 mean±SD + Student t；另支持相关性矩阵、Cox 回归、OR 汇总。
+通用引擎只需要 Python（进阶 R 管线才需要 R + logistf 包）。输入 prompt：
 
-**手稿级全表套件（R 管线）**：`scripts/pipeline/` 内 9 个 R 脚本 + 1 个 Python 脚本，按序运行即从患者级 CSV 复现一篇论文的**全套表格**（Table 1–10 = 手稿正文 Table 1/2 + 补充材料 S1–S8）——基线、Firth 惩罚逻辑回归、耐药基因/序列型/质粒复制子交叉表、单因素分析、菌株测序质量表。
-
-输出为 Markdown 三线表，可用 Pandoc 一键转 DOCX（`pandoc output.md -o output.docx`）。
-
-## 示例输出（真实队列研究全套 10 张表，点击切换）
-
-以下 10 张图全部由本技能 R 管线对**真实 CRE/CSE 队列研究**（投稿中）的假名化患者级数据真实产出，每个数字均与作者独立复核脚本逐格对账：
-
-<div class="table-picker">
-  <input type="radio" name="ct-tables" id="ct-t1" checked>
-  <input type="radio" name="ct-tables" id="ct-t2">
-  <input type="radio" name="ct-tables" id="ct-t3">
-  <input type="radio" name="ct-tables" id="ct-t4">
-  <input type="radio" name="ct-tables" id="ct-t5">
-  <input type="radio" name="ct-tables" id="ct-t6">
-  <input type="radio" name="ct-tables" id="ct-t7">
-  <input type="radio" name="ct-tables" id="ct-t8">
-  <input type="radio" name="ct-tables" id="ct-t9">
-  <input type="radio" name="ct-tables" id="ct-t10">
-  <label for="ct-t1">Table 1 · Baseline</label>
-  <label for="ct-t2">Table 2 · Firth 回归</label>
-  <label for="ct-t3">Table 3 · β-内酰胺酶</label>
-  <label for="ct-t4">Table 4 · 序列型</label>
-  <label for="ct-t5">Table 5 · 磺胺基因</label>
-  <label for="ct-t6">Table 6 · 疾病×基因型</label>
-  <label for="ct-t7">Table 7 · 操作×基因型</label>
-  <label for="ct-t8">Table 8 · 单因素分析</label>
-  <label for="ct-t9">Table 9 · 测序质量</label>
-  <label for="ct-t10">Table 10 · 质粒复制子</label>
-  <div class="ct-panel ct-p1">
-    <img src="/skills/clinical-table/table1_baseline.png" alt="Table 1 Baseline 基线特征">
-    <p class="ct-cap">Table 1 · Baseline（= 手稿 Table 1）· CRE (n=67) vs CSE (n=72) 基线特征：分类变量 χ²/Fisher + 连续变量 Student t。年龄 69.16±10.43 vs 63.18±12.56（p=0.0028）；性别 p=0.2907。住院时长/机械通气等与 CRE 相关的因素见 Table 2 与 Table 8。</p>
-  </div>
-  <div class="ct-panel ct-p2">
-    <img src="/skills/clinical-table/table2_firth.png" alt="Table 2 Firth 惩罚逻辑回归">
-    <p class="ct-cap">Table 2 · Firth（= 手稿 Table 2）· Firth 惩罚多因素逻辑回归（CRE vs CSE，9 个协变量）：小样本罕见事件稳健估计，OR (95% CI) 逐行输出。</p>
-  </div>
-  <div class="ct-panel ct-p3">
-    <img src="/skills/clinical-table/table3_esbl_genes.png" alt="Table 3 ESBL 基因组合">
-    <p class="ct-cap">Table 3 · ESBL genes（= 手稿 Supplemental Table S1）· CRE 菌株额外 β-内酰胺酶基因组合 × 碳青霉烯酶组（n (%)，Kleborate 标志已剥离）。</p>
-  </div>
-  <div class="ct-panel ct-p4">
-    <img src="/skills/clinical-table/table4_sequence_types.png" alt="Table 4 序列型">
-    <p class="ct-cap">Table 4 · Sequence types（= 手稿 Supplemental Table S2）· CRE 菌株物种–ST 组合 × 碳青霉烯酶组（46 行，每物种未分型行单列）。</p>
-  </div>
-  <div class="ct-panel ct-p5">
-    <img src="/skills/clinical-table/table5_sul_genes.png" alt="Table 5 磺胺耐药基因">
-    <p class="ct-cap">Table 5 · sul genes（= 手稿 Supplemental Table S3）· CRE 菌株磺胺耐药基因（sul）组合 × 碳青霉烯酶组。</p>
-  </div>
-  <div class="ct-panel ct-p6">
-    <img src="/skills/clinical-table/table6_disease_genotype.png" alt="Table 6 基础疾病×基因型">
-    <p class="ct-cap">Table 6 · Disease × genotype（= 手稿 Supplemental Table S4）· 基础疾病分布 × CRE 基因型（糖尿病/脑血管病/肺部疾病）。</p>
-  </div>
-  <div class="ct-panel ct-p7">
-    <img src="/skills/clinical-table/table7_procedures_genotype.png" alt="Table 7 侵入操作×基因型">
-    <p class="ct-cap">Table 7 · Procedures × genotype（= 手稿 Supplemental Table S5）· 侵入操作、白蛋白水平、住院时长 × CRE 基因型。</p>
-  </div>
-  <div class="ct-panel ct-p8">
-    <img src="/skills/clinical-table/table8_univariate.png" alt="Table 8 单因素分析">
-    <p class="ct-cap">Table 8 · Univariate（= 手稿 Supplemental Table S6）· CRE 感染相关因素单因素分析（30 行，χ²/Fisher 自动切换）。</p>
-  </div>
-  <div class="ct-panel ct-p9">
-    <img src="/skills/clinical-table/table9_sequencing_quality.png" alt="Table 9 测序质量">
-    <p class="ct-cap">Table 9 · Sequencing quality（= 手稿 Supplemental Table S7）· 67 株 CRE 测序质量指标（contigs/N50/GC/数据量/测序深度，独立 CSV 输出）。</p>
-  </div>
-  <div class="ct-panel ct-p10">
-    <img src="/skills/clinical-table/table10_plasmid_replicons.png" alt="Table 10 质粒复制子">
-    <p class="ct-cap">Table 10 · Plasmid replicons（= 手稿 Supplemental Table S8）· 质粒复制子携带 × 碳青霉烯酶组（Kleborate/PlasmidFinder，47 行）。</p>
-  </div>
-</div>
-
-## 快速上手（30 秒，通用引擎）
-
-```bash
-cd figure-generation/clinical-table
-pip install pandas numpy scipy statsmodels
-python scripts/clinical_table.py examples/input/clinical_cohorts.csv examples/output/clinical_tables.md
+```
+Please set up the runtime environment for the "clinical-table" skill at
+D:\claw2bio\clinical-table:
+1. First, SEARCH THIS PC for an existing Python installation. If Python is already installed,
+   report its version to me. Only if Python is NOT installed at all, install a recent Python 3
+   (Windows), downloaded from the official python.org website, accepting all default options —
+   and make sure to check "Add python.exe to PATH" during installation.
+2. Install all Python packages this skill needs: pandas, numpy, scipy, statsmodels
+   (use pip; if a package fails or is too slow, stop and tell me about it).
+3. The general engine is Python-only. The advanced R pipeline additionally needs R with the
+   logistf package — check whether R is installed; if yes, also install logistf; if no,
+   just tell me that the R pipeline won't be available (I can still use the general engine).
+4. When everything is installed, confirm to me what is ready.
 ```
 
-期望锚点：`CRE n=67, CSE n=72`；Age `69.16±10.43 vs 63.18±12.56, p=0.003`。
+---
 
-## 快速上手（R 管线，复现全套手稿表格）
+## Step 3｜跑通示例数据（通用引擎）
 
-需要 R（含 `logistf` 包，Table 2 用）。把两份假名化 CSV + `Table-all.md` 骨架放同一目录，按序运行：
+输入 prompt：
 
-```bash
-cd examples/input/pipeline   # 两份 CSV 与 Table-all.md 骨架都在这里
-Rscript ../../scripts/pipeline/table1_baseline.R    # 填充 Table-all.md 的 Table 1 区块
-Rscript ../../scripts/pipeline/table2_firth.R       # Firth 回归
-Rscript ../../scripts/pipeline/table3_esbl_genes.R  # 之后 Table 3–8、10 依序
-python ../../scripts/pipeline/make_table9_sequencing_quality.py   # Table 9 独立生成 CSV
+```
+The skill is installed at D:\claw2bio\clinical-table. Please run the bundled example with the
+GENERAL ENGINE:
+1. Example input is at D:\claw2bio\clinical-table\examples\input\clinical_cohorts.csv
+2. Run: python scripts/clinical_table.py examples/input/clinical_cohorts.csv
+   examples/output/clinical_tables.md
+3. Prefer the skill's own scripts in scripts/ — do NOT write new analysis code from scratch.
+4. When the run succeeds, show me the generated clinical_tables.md and explain it table by
+   table.
 ```
 
-每个脚本：读 CSV → 计算 → 回填 `Table-all.md` 对应区块 → 输出独立 CSV。全表锚点见 `examples/output/pipeline/REPORT.md`。
+运行成功后的**锚点结果**：CRE n=67、CSE n=72；Age 69.16±10.43 vs 63.18±12.56，p=0.003。你的结果与此一致即说明环境正常。技能页上有用 R 管线对真实队列数据产出的全套 10 张表的效果图（Table 1 基线表如下，你的网站实跑结果会替换成自己的截图）：
 
-## 输入格式
+![Table 1 基线表示例](/skills/clinical-table/table1_baseline.png)
 
-- **通用引擎**：患者级 CSV（一行一个患者）：两水平分组列（默认 `cohort`）+ 0/1 二分类列 + 连续列；变量清单在 `DEFAULT_CONFIG` 或 `--config your.json`。
-- **R 管线**：两个队列各一份 CSV（列结构见 examples/input/pipeline/），示例数据即假名化真实数据——处理您自己的数据时按相同列结构准备即可。
+**把三线表转成 Word**：Markdown 表格可用 Pandoc 一键转 DOCX——让 AI 执行 `pandoc output.md -o output.docx`（如果没装 Pandoc，让 AI 帮你装）。
 
-## 输出文件
+---
 
-| 文件 | 内容 |
-|---|---|
-| `clinical_tables.md`（通用引擎） | 基线/相关性/Cox/OR 三线表 |
-| `Table-all.md`（R 管线） | 填数后的全套手稿表格（224 行） |
-| `table1_baseline.csv` … `table10_plasmid_replicons.csv` | 每张表的独立 CSV（Table 9 = `table9_sequencing_quality.csv`） |
+## Step 4｜换成你自己的数据
 
-## 常见问题
+准备一张**患者级 CSV**（一行一个患者）：一个两水平分组列（默认列名 `cohort`）+ 若干 0/1 二分类列 + 若干连续列。输入 prompt：
 
-- **p 值与 SPSS 对不上** → 本技能 χ² 不做 Yates 连续性校正（发表 Table 1 惯例）。
-- **R 脚本在 Windows 上崩** → 必须用英文注释版本（仓库内已是）；如自行修改注释，保存为 UTF-8 无 BOM，或运行时加 `--encoding=utf-8`。
-- **logistf 未安装** → `install.packages("logistf")`。
-- **连续变量没进基线表** → 加进 `DEFAULT_CONFIG` 的 `baseline_continuous_vars`。
-- **没有 Cox 表** → 只有同时存在 `survival_time` 和 `survival_event` 列才会生成。
-- **为什么必须用技能自带脚本，不能让 AI 现写？**
-  `scripts/` 里的是经过验证的路径：它们在示例数据上跑过，边界情况有文档记录。AI 现场生成的代码是
-  "结果悄悄出错"的最常见来源。遇到没覆盖的情况，先改命令行参数；不够就复制脚本到临时目录做最小改动
-  并说明改了什么；只有完全没有对应脚本时才允许新写，且新写后要回沉淀到 `scripts/`。
+```
+My own patient-level CSV is at: <paste the path to your CSV file here>.
+My grouping column is <cohort / your column name> with the two groups <group A> and <group B>.
+1. First check my table: one row per patient; a two-level grouping column; 0/1 binary columns
+   for categorical variables; numeric columns for continuous variables. If anything is wrong,
+   fix it and tell me what you did.
+2. The variable list is configured in DEFAULT_CONFIG or via --config your.json — list the
+   variables you detected in my data, ask me which ones to include in the baseline table,
+   and put the continuous variables into baseline_continuous_vars.
+3. If my data has survival_time and survival_event columns, tell me — the skill will then
+   also generate a Cox table.
+4. Run the general engine with the skill's own script — do NOT write new analysis code from
+   scratch. Show me the resulting clinical_tables.md and convert it to DOCX with Pandoc.
+```
 
-## 相关链接
+等候 AI agent 运行结束：一张 Markdown 三线表（基线 / 相关性 / Cox / OR）+ 可选的 DOCX。
 
-- [GitHub 源码与 SKILL.md](https://github.com/nihuanhe/claw2bio/tree/main/figure-generation/clinical-table)
-- 相关技能：[KM 生存曲线](/zh/skills/survival-curve)
+---
+
+## Step 5｜让 AI 解读结果
+
+输入 prompt：
+
+```
+Please explain the tables in my clinical_tables.md line by line:
+1. For each variable: which statistical test was used (χ², Fisher exact, or Student t) and
+   why — remind me that χ² here does NOT use the Yates continuity correction, so p values
+   may differ slightly from SPSS, which is the Table 1 publication convention;
+2. Which baseline variables differ significantly between my two cohorts, and what that means
+   for interpreting downstream comparisons (potential confounders);
+3. If a Cox or OR table was generated: walk me through the effect sizes and confidence
+   intervals;
+4. Any warnings or things I should pay attention to.
+After explaining, tell me how to cite/report these tables in a manuscript.
+```
+
+阅读完 AI 的解释，如果有不懂的直接问它。
+
+---
+
+## 进阶｜手稿级全套表格 R 管线
+
+如果你要复现一整套论文表格（基线、Firth 惩罚逻辑回归、基因/序列型交叉表、单因素分析……共 10 张），技能内 `scripts/pipeline/` 有 9 个 R 脚本 + 1 个 Python 脚本，按序运行即可把结果回填进 `Table-all.md` 骨架。输入 prompt：
+
+```
+I want to use the ADVANCED R pipeline of the clinical-table skill at D:\claw2bio\clinical-table
+to reproduce a full manuscript table suite:
+1. Look at examples/input/pipeline/ — two patient-level CSVs plus the Table-all.md skeleton
+   live there. First run the pipeline on the EXAMPLE data: run the scripts in scripts/pipeline/
+   in order (table1_baseline.R, table2_firth.R, table3_esbl_genes.R, and so on; Table 9 is
+   generated by the Python script make_table9_sequencing_quality.py). Each script reads the
+   CSVs, computes, fills its section of Table-all.md, and writes a standalone CSV.
+2. Use the skill's own scripts unchanged — do NOT write new analysis code from scratch.
+   IMPORTANT on Windows: use the English-comment script versions as shipped in the repo;
+   if any script is edited, save it as UTF-8 WITHOUT BOM, or R may crash.
+3. Verify the run against the anchors in examples/output/pipeline/REPORT.md.
+4. After the example works, ask me for my own two-cohort CSVs (prepared with the same column
+   structure) and repeat the pipeline on them.
+```
+
+技能页有全套 10 张表的真实产出图（Table 1–10，每个数字均与作者独立复核脚本逐格对账过），可对照参考：/zh/skills/clinical-table
+
+---
+
+## 更多分析
+
+下面两个技能与本技能相关，安装方式完全相同（一键 prompt 或网站下载 zip 包）：
+
+### 生存分析曲线 —— survival-curve
+
+**一句话：随访表进，KM 生存曲线 + 风险表 + Cox 森林图出。** 如果你的患者数据里有随访时间和结局事件，基线表之外通常还要配一张 KM 曲线。
+
+详细介绍与下载：/zh/skills/survival-curve
+
+### 分组柱状图 —— barplot
+
+**一句话：任何 2–6 组的实验数据一键出带统计标注的柱状图。** 临床数据之外的实验数据（ELISA、WB 灰度……）用它。
+
+详细介绍与下载：/zh/skills/barplot

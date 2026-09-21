@@ -23,6 +23,12 @@ export default defineConfig({
         sidebar: {
           '/skills/': [
             {
+              text: 'Skills',
+              items: [
+                { text: 'Set up your AI Agent (read first)', link: '/skills/ai-agent-setup' }
+              ]
+            },
+            {
               text: 'Experiment Data Processing',
               items: [
                 { text: 'qPCR mRNA (ΔΔCt)', link: '/skills/qpcr-mrna' },
@@ -74,6 +80,12 @@ export default defineConfig({
         ],
         sidebar: {
           '/zh/skills/': [
+            {
+              text: '技能',
+              items: [
+                { text: '安装 AI Agent（先读）', link: '/zh/skills/ai-agent-setup' }
+              ]
+            },
             {
               text: '实验数据处理',
               items: [

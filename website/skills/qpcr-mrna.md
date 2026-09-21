@@ -1,90 +1,137 @@
-# qPCR mRNA (ΔΔCt)
+# Zero-Basics — qPCR mRNA Relative Expression Analysis (ΔΔCt) with an AI Agent | Copy & Paste All the Way
 
-> One-line: relative mRNA expression by ΔΔCt, from raw Ct CSV to publication-ready bar plots — one per target gene.
+This tutorial uses workbuddy as the AI agent and Hy3 as the AI API. For installing and configuring the AI agent itself, see the [AI Agent setup tutorial](/skills/ai-agent-setup).
 
-::: info Get this skill · 获取本技能
-**Option A — one-click agent prompt (recommended).** Copy this into your AI agent IDE:
+**Before you start (must read):**
+
+- **If this is your first time doing data analysis with an AI agent, we strongly recommend following the [bulk-RNA-seq differential analysis tutorial](/skills/bulk-RNA-seq) first**, to learn the full "install skill → set up environment → run example → switch to your own data" workflow, then come back to this skill.
+- This skill is **standalone** — it does not depend on the output of any other skill. Give it a raw qPCR Ct table and it runs.
+- In one sentence: **ΔΔCt relative-expression analysis — from a raw Ct table straight to one publication-grade barplot per target gene** — automatic normalization against the reference gene, automatic statistics (t-test for 2 groups; ANOVA + Dunnett for ≥3 groups).
+- This skill uses **Python** (not R) — environment setup is much lighter than the RNA-seq family.
+
+**Tutorial structure:**
+
+- **Step 1** | Install the qpcr-mrna skill (one time only)
+- **Step 2** | Set up the runtime environment (one time only)
+- **Step 3** | Run the bundled example data
+- **Step 4** | Switch to your own data
+- **Step 5** | Let the AI interpret the results
+- **More analysis** | Related skills (qPCR mtDNA / grouped barplot)
+
+---
+
+## Step 1 | Install the qpcr-mrna skill
+
+Paste this prompt:
 
 ```
-Please set up the "qpcr-mrna" skill from the Claw2Bio library for me:
-1. Fetch only the folder "experiment-data/qpcr-mrna" from the GitHub repo
-   https://github.com/nihuanhe/claw2bio (use sparse checkout; do not clone the whole repo).
-2. Read its SKILL.md and register the skill.
-3. Run the bundled example in examples/ to verify my environment, and show me the output figure.
+Please install the "qpcr-mrna" skill for me, into the D:\claw2bio folder:
+1. Create a folder named claw2bio in the root of the D: drive (if it doesn't exist yet).
+2. From the GitHub repository https://github.com/nihuanhe/claw2bio, fetch ONLY the folder
+   experiment-data/qpcr-mrna (use sparse checkout — do NOT clone the whole repository),
+   and place it at D:\claw2bio\qpcr-mrna.
+3. If downloading from GitHub fails or is too slow, download the zip from this mirror link instead:
+   https://claw2bio.site/downloads/qpcr-mrna.zip
+   and extract it to D:\claw2bio\qpcr-mrna.
+4. Read the SKILL.md inside, then confirm to me that the skill is ready and list the contents
+   of the folder.
+(If my PC has no D: drive, install to C:\claw2bio instead and tell me the actual path.)
 ```
 
-**Option B — standalone zip** (~0.2 MB, served from this site): <https://claw2bio.site/downloads/qpcr-mrna.zip>
+When Step 1 finishes, open the file manager and confirm that `D:\claw2bio\qpcr-mrna` exists, with `scripts/`, `examples/`, `SKILL.md`, etc. inside.
 
-**Option C — full example dataset**: already included in the Option B package above.
-:::
+---
 
-## What it does
+## Step 2 | Set up the runtime environment
 
-Given a raw qPCR Ct table (`Target, Sample, Rep1, Rep2, Rep3`), the skill normalizes each target to reference genes (default `GAPDH`), computes ΔΔCt and fold change against the control group, runs the right statistics (2 groups: t-test; ≥3 groups: ANOVA + Dunnett), and draws one 300-dpi bar plot per target gene:
+Paste this prompt:
 
-![qPCR mRNA example output](/cards/qpcr-mrna.png)
-
-## Quick start (30 seconds)
-
-After your agent has fetched the skill (Get-this-skill box above), just say:
-
-> Run the qpcr-mrna example and show me the figure.
-
-Or manually:
-
-```bash
-cd experiment-data/qpcr-mrna
-pip install pandas numpy scipy matplotlib
-python scripts/run_mrna.py examples/input/mrna-input.csv examples/output --name Figure1 --overwrite
+```
+Please set up the runtime environment for the "qpcr-mrna" skill at D:\claw2bio\qpcr-mrna:
+1. First, SEARCH THIS PC for an existing Python installation. If Python is already installed,
+   report its version to me. Only if Python is NOT installed at all, install a recent Python 3
+   (Windows), downloaded from the official python.org website, accepting all default options —
+   and make sure to check "Add python.exe to PATH" during installation.
+2. Install all Python packages this skill needs: pandas, numpy, scipy, matplotlib
+   (use pip; if a package fails or is too slow, stop and tell me about it).
+3. When everything is installed, confirm to me that the skill can run.
 ```
 
-You should get `Figure1.csv` plus one `Figure1_<target>_barplot.png` per target (IL6 ~6.8× up, P<0.001).
+When Step 2 finishes, the AI agent will tell you your Python version and the dependency installation result.
 
-## Input format
+---
 
-```csv
-Target,Sample,Rep1,Rep2,Rep3
-IL6,Ctrl,20.10,20.30,20.20
-IL6,Treat,17.50,17.80,17.60
-GAPDH,Ctrl,18.00,18.10,18.05
-GAPDH,Treat,18.20,18.30,18.25
+## Step 3 | Run the bundled example data
+
+Paste this prompt:
+
+```
+The skill is installed at D:\claw2bio\qpcr-mrna. Please run the bundled example:
+1. Example input is at D:\claw2bio\qpcr-mrna\examples\input\mrna-input.csv
+2. Write results to D:\claw2bio\qpcr-mrna\examples\output\ with the output name "Figure1".
+3. Prefer the skill's own scripts in scripts/ — do NOT write new analysis code from scratch.
+4. When the run succeeds, show me the result barplot for each target gene, and the Figure1.csv
+   table; explain both to me.
 ```
 
-- Reference-gene rows look like any other target row; the first `Sample` becomes the control group.
-- 2–6 groups supported (extended layout beyond that).
+When the run succeeds, each target gene gets a 300 dpi barplot. Anchor result for the example data: **IL6 is up-regulated ~6.8-fold, P<0.001** — if your result matches, the environment and pipeline are working correctly.
 
-## Output files
+[Image placeholder: qPCR mRNA example result barplot — no result screenshot on the skill webpage yet, to be added]
 
-| File | Content |
-|---|---|
-| `<name>.csv` | Raw Ct + ΔCt + fold change + P value + significance |
-| `<name>_<target>_barplot.png` | One 300-dpi plot per target gene |
+---
 
-## Parameters
+## Step 4 | Switch to your own data
 
-| Flag | Default | Description |
-|---|---|---|
-| `--name` | — | Output file prefix |
-| `--ref-targets` | `GAPDH` | Reference genes, comma-separated |
-| `--control` | first Sample | Control group name |
-| `--y-label` | — | Y-axis label |
-| `--dpi` | 300 | PNG resolution |
-| `--overwrite` | off | Allow overwriting existing outputs |
+Hand over your own raw Ct table. The input format is simple (five columns: Target, Sample, Rep1, Rep2, Rep3; reference-gene rows like GAPDH have the same format as target rows; the first Sample that appears is treated as the control group by default; 2–6 groups supported). Paste this prompt:
 
-## Troubleshooting
+```
+My own qPCR Ct table is at: <paste the path to your CSV file here>.
+1. First check whether my table has any format problems (required columns: Target, Sample,
+   Rep1, Rep2, Rep3; the reference gene row — default GAPDH — must be present and spelled
+   correctly); if so, fix them and tell me what you did.
+2. My reference gene is <GAPDH / write your own>, and my control group is <the group name as
+   it appears in the Sample column>.
+3. Once the data checks out, run the full ΔΔCt analysis with the output name <e.g., Figure2>,
+   and show me the barplot for each target gene plus the result CSV.
+4. Prefer the skill's own scripts in scripts/; if anything needs adapting, make the smallest
+   possible change — do NOT write large amounts of new code.
+```
 
-- **"Output file exists"** → add `--overwrite`, or change `--name`.
-- **Reference gene not detected** → check the target name spelling, or pass `--ref-targets ACTB`.
-- **ModuleNotFoundError** → ask your agent to install the dependencies, or run `pip install pandas numpy scipy matplotlib`.
-- **Why must the agent run the bundled scripts instead of writing its own?**
-  The scripts in `scripts/` are the tested path — they have been run on the example
-  data, and their edge cases are documented. Code generated on the fly by an agent is
-  the most common source of silently wrong results. If a case is not covered, change
-  the CLI arguments first; if that is not enough, copy a script to a scratch directory
-  and make a minimal, reported edit; only write new code when nothing covers the task,
-  and fold it back into `scripts/` afterwards.
+Wait for the AI agent to finish: one 300 dpi barplot with statistics per target gene (t-test for 2 groups; ANOVA + Dunnett for ≥3 groups), plus a result CSV with ΔCt, Fold change, P values, and significance.
 
-## Links
+---
 
-- [Source & SKILL.md on GitHub](https://github.com/nihuanhe/claw2bio/tree/main/experiment-data/qpcr-mrna)
-- Related skills: [qPCR mtDNA](/skills/qpcr-mtdna) · [Grouped bar plot](/skills/barplot)
+## Step 5 | Let the AI interpret the results
+
+Paste this prompt:
+
+```
+Please explain the result CSV and the barplots in my output folder line by line:
+1. What each column in the CSV means (raw Ct, ΔCt, ΔΔCt, Fold change, P value, significance);
+2. For each target gene: how much it is up- or down-regulated relative to my control group,
+   and whether the change is statistically significant;
+3. Which statistical test was used for each gene, and why;
+4. Any warnings or things I should pay attention to (e.g., high Ct replicate variation,
+   reference-gene stability).
+After explaining, tell me which figures can be used directly in a paper or presentation.
+```
+
+After reading the AI's explanation, if anything is unclear, just ask it directly.
+
+---
+
+## More analysis
+
+This skill only does ΔΔCt relative-expression analysis for mRNA. The two skills below are related and installed in exactly the same way (one-click prompt or zip download from the website):
+
+### qPCR mtDNA copy number — qpcr-mtdna
+
+**One sentence: compute relative mitochondrial DNA copy number from four Ct values (ND1 / ND5 / B2M / POLG).** Automatically applies Mean copy number = (2^(B2M-ND1) + 2^(POLG-ND5)) / 2, with automatic statistics and a 300 dpi barplot.
+
+Details & download: /skills/qpcr-mtdna
+
+### Grouped barplot — barplot
+
+**One sentence: any 2–6 group experimental data (ELISA, WB densitometry, cell counts…) → barplot with statistics in one shot.** Just give it a wide-format CSV; the statistical method is chosen automatically.
+
+Details & download: /skills/barplot

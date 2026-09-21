@@ -1,151 +1,173 @@
-# Clinical Tables
+# Zero-Basics — Clinical Statistics Tables with an AI Agent (clinical-table) | Copy & Paste All the Way
 
-> One-line: patient-level CSV in — publication-ready three-line tables out. Fully validated on **all 10 tables** (Table 1–10 = manuscript Table 1/2 + Supplemental S1–S8) of a real CRE/CSE cohort study: baseline comparison, Firth regression, genotype cross-tabs, univariate analysis, sequencing-quality table.
+This tutorial uses workbuddy as the AI agent and Hy3 as the AI API. For installing and configuring the AI agent itself, see the [AI Agent setup tutorial](/skills/ai-agent-setup).
 
-::: info Get this skill · 获取本技能
-**Option A — one-click agent prompt (recommended).** Copy this into your AI agent IDE:
+**Before you start (must read):**
+
+- **If this is your first time doing data analysis with an AI agent, we strongly recommend following the [bulk-RNA-seq differential analysis tutorial](/skills/bulk-RNA-seq) first**, to learn the full "install skill → set up environment → run example → switch to your own data" workflow, then come back to this skill.
+- This skill is **standalone** — it does not depend on the output of any other skill. Give it a patient-level CSV and it runs.
+- In one sentence: **patient-level CSV in, a paper-style Table 1 baseline-characteristics table out** — n (%) + χ² for categorical variables (automatic Fisher when expected counts <5) + mean±SD + Student t for continuous ones; correlation matrix, Cox regression, and OR summaries are also supported. Output is Markdown three-line tables, convertible to DOCX with Pandoc in one command.
+- This skill has **two modes**: this tutorial's main line covers the **general engine** (Python, works out of the box); the "Advanced" section at the end introduces the **manuscript-grade R pipeline** (9 R scripts + 1 Python script that reproduce a paper's full Table 1–10 from patient-level CSVs).
+- **Note**: this skill's χ² does **NOT** apply the Yates continuity correction (the publication convention for Table 1), so p values may differ slightly from SPSS — this is a feature, not a bug.
+
+**Tutorial structure:**
+
+- **Step 1** | Install the clinical-table skill (one time only)
+- **Step 2** | Set up the runtime environment (one time only)
+- **Step 3** | Run the bundled example data (general engine)
+- **Step 4** | Switch to your own data
+- **Step 5** | Let the AI interpret the results
+- **Advanced** | The manuscript-grade R pipeline
+- **More analysis** | Related skills (survival curve / grouped barplot)
+
+---
+
+## Step 1 | Install the clinical-table skill
+
+Paste this prompt:
 
 ```
-Please set up the "clinical-table" skill from the Claw2Bio library for me:
-1. Fetch only the folder "figure-generation/clinical-table" from the GitHub repo
-   https://github.com/nihuanhe/claw2bio (use sparse checkout; do not clone the whole repo).
-2. Read its SKILL.md and register the skill.
-3. Run the bundled example in examples/ to verify my environment, and show me the output tables.
+Please install the "clinical-table" skill for me, into the D:\claw2bio folder:
+1. Create a folder named claw2bio in the root of the D: drive (if it doesn't exist yet).
+2. From the GitHub repository https://github.com/nihuanhe/claw2bio, fetch ONLY the folder
+   figure-generation/clinical-table (use sparse checkout — do NOT clone the whole repository),
+   and place it at D:\claw2bio\clinical-table.
+3. If downloading from GitHub fails or is too slow, download the zip from this mirror link instead:
+   https://claw2bio.site/downloads/clinical-table.zip
+   and extract it to D:\claw2bio\clinical-table.
+4. Read the SKILL.md inside, then confirm to me that the skill is ready and list the contents
+   of the folder.
+(If my PC has no D: drive, install to C:\claw2bio instead and tell me the actual path.)
 ```
 
-**Option B — standalone zip** (~0.2 MB, served from this site): <https://claw2bio.site/downloads/clinical-table.zip>
+When Step 1 finishes, open the file manager and confirm that `D:\claw2bio\clinical-table` exists, with `scripts/`, `examples/`, `SKILL.md`, etc. inside.
 
-**Option C — full example dataset**: already included in the Option B package above.
-:::
+---
 
-## What it does
+## Step 2 | Set up the runtime environment
 
-**Generic engine (Python, zero setup)**: two-cohort baseline table — categorical n (%) + Pearson χ² (Fisher's exact when any expected cell < 5) + continuous mean ± SD + Student's t-test; plus correlation matrix, Cox regression, OR summary.
+The general engine only needs Python (the advanced R pipeline additionally needs R + the logistf package). Paste this prompt:
 
-**Full manuscript table suite (R pipeline)**: 9 R scripts + 1 Python script in `scripts/pipeline/`; run in order to reproduce a paper's **complete table set** (Table 1–10 = manuscript main-text Tables 1–2 + supplemental S1–S8) from patient-level CSVs — baseline, Firth penalized logistic regression, resistance-gene/sequence-type/plasmid-replicon cross-tabs, univariate analysis, isolate sequencing-quality table.
-
-Output is Markdown three-line tables, convertible to DOCX with Pandoc (`pandoc output.md -o output.docx`).
-
-## Example output (all 10 tables of a real cohort study, click to switch)
-
-All ten figures below were produced by the skill's R pipeline from the **pseudonymized patient-level data of a real CRE/CSE cohort study** (manuscript under review); every cell was reconciled against the authors' independent recalculation scripts:
-
-<div class="table-picker">
-  <input type="radio" name="ct-tables" id="ct-t1" checked>
-  <input type="radio" name="ct-tables" id="ct-t2">
-  <input type="radio" name="ct-tables" id="ct-t3">
-  <input type="radio" name="ct-tables" id="ct-t4">
-  <input type="radio" name="ct-tables" id="ct-t5">
-  <input type="radio" name="ct-tables" id="ct-t6">
-  <input type="radio" name="ct-tables" id="ct-t7">
-  <input type="radio" name="ct-tables" id="ct-t8">
-  <input type="radio" name="ct-tables" id="ct-t9">
-  <input type="radio" name="ct-tables" id="ct-t10">
-  <label for="ct-t1">Table 1 · Baseline</label>
-  <label for="ct-t2">Table 2 · Firth regression</label>
-  <label for="ct-t3">Table 3 · β-lactamases</label>
-  <label for="ct-t4">Table 4 · Sequence types</label>
-  <label for="ct-t5">Table 5 · Sulfonamide genes</label>
-  <label for="ct-t6">Table 6 · Diseases × genotype</label>
-  <label for="ct-t7">Table 7 · Procedures × genotype</label>
-  <label for="ct-t8">Table 8 · Univariate analysis</label>
-  <label for="ct-t9">Table 9 · Sequencing quality</label>
-  <label for="ct-t10">Table 10 · Plasmid replicons</label>
-  <div class="ct-panel ct-p1">
-    <img src="/skills/clinical-table/table1_baseline.png" alt="Table 1 baseline characteristics">
-    <p class="ct-cap">Table 1 · Baseline (= manuscript Table 1) · CRE (n=67) vs CSE (n=72) baseline characteristics: categorical χ²/Fisher + continuous Student's t. Age 69.16±10.43 vs 63.18±12.56 (p=0.0028); Sex p=0.2907. For hospital stay / intubation etc. see Table 2 and Table 8.</p>
-  </div>
-  <div class="ct-panel ct-p2">
-    <img src="/skills/clinical-table/table2_firth.png" alt="Table 2 Firth penalized logistic regression">
-    <p class="ct-cap">Table 2 · Firth (= manuscript Table 2) · Firth penalized multivariable logistic regression (CRE vs CSE, 9 covariates): robust inference for rare events, OR (95% CI) per row.</p>
-  </div>
-  <div class="ct-panel ct-p3">
-    <img src="/skills/clinical-table/table3_esbl_genes.png" alt="Table 3 additional beta-lactamase genes">
-    <p class="ct-cap">Table 3 · ESBL genes (= manuscript Supplemental Table S1) · Additional β-lactamase gene combinations in CRE isolates × carbapenemase groups (n (%), Kleborate flags stripped).</p>
-  </div>
-  <div class="ct-panel ct-p4">
-    <img src="/skills/clinical-table/table4_sequence_types.png" alt="Table 4 sequence types">
-    <p class="ct-cap">Table 4 · Sequence types (= manuscript Supplemental Table S2) · Species–ST combinations of CRE isolates × carbapenemase groups (46 rows, per-species untypeable rows).</p>
-  </div>
-  <div class="ct-panel ct-p5">
-    <img src="/skills/clinical-table/table5_sul_genes.png" alt="Table 5 sulfonamide resistance genes">
-    <p class="ct-cap">Table 5 · sul genes (= manuscript Supplemental Table S3) · Sulfonamide resistance gene (sul) combinations × carbapenemase groups.</p>
-  </div>
-  <div class="ct-panel ct-p6">
-    <img src="/skills/clinical-table/table6_disease_genotype.png" alt="Table 6 diseases by genotype">
-    <p class="ct-cap">Table 6 · Disease × genotype (= manuscript Supplemental Table S4) · Underlying disease distribution across CRE genotypes (diabetes / cerebrovascular / pulmonary disease).</p>
-  </div>
-  <div class="ct-panel ct-p7">
-    <img src="/skills/clinical-table/table7_procedures_genotype.png" alt="Table 7 procedures by genotype">
-    <p class="ct-cap">Table 7 · Procedures × genotype (= manuscript Supplemental Table S5) · Invasive procedures, albumin level, and hospital length of stay across CRE genotypes.</p>
-  </div>
-  <div class="ct-panel ct-p8">
-    <img src="/skills/clinical-table/table8_univariate.png" alt="Table 8 univariate analysis">
-    <p class="ct-cap">Table 8 · Univariate (= manuscript Supplemental Table S6) · Univariate analysis of factors associated with CRE infection (30 rows, χ²/Fisher auto-switch).</p>
-  </div>
-  <div class="ct-panel ct-p9">
-    <img src="/skills/clinical-table/table9_sequencing_quality.png" alt="Table 9 sequencing quality metrics">
-    <p class="ct-cap">Table 9 · Sequencing quality (= manuscript Supplemental Table S7) · Sequencing quality metrics of the 67 CRE isolates (contigs/N50/GC/throughput/depth; standalone CSV).</p>
-  </div>
-  <div class="ct-panel ct-p10">
-    <img src="/skills/clinical-table/table10_plasmid_replicons.png" alt="Table 10 plasmid replicon carriage">
-    <p class="ct-cap">Table 10 · Plasmid replicons (= manuscript Supplemental Table S8) · Plasmid replicon carriage by carbapenemase group (Kleborate/PlasmidFinder, 47 rows).</p>
-  </div>
-</div>
-
-## Quick start (30 seconds, generic engine)
-
-```bash
-cd figure-generation/clinical-table
-pip install pandas numpy scipy statsmodels
-python scripts/clinical_table.py examples/input/clinical_cohorts.csv examples/output/clinical_tables.md
+```
+Please set up the runtime environment for the "clinical-table" skill at
+D:\claw2bio\clinical-table:
+1. First, SEARCH THIS PC for an existing Python installation. If Python is already installed,
+   report its version to me. Only if Python is NOT installed at all, install a recent Python 3
+   (Windows), downloaded from the official python.org website, accepting all default options —
+   and make sure to check "Add python.exe to PATH" during installation.
+2. Install all Python packages this skill needs: pandas, numpy, scipy, statsmodels
+   (use pip; if a package fails or is too slow, stop and tell me about it).
+3. The general engine is Python-only. The advanced R pipeline additionally needs R with the
+   logistf package — check whether R is installed; if yes, also install logistf; if no,
+   just tell me that the R pipeline won't be available (I can still use the general engine).
+4. When everything is installed, confirm to me what is ready.
 ```
 
-Expected anchors: `CRE n=67, CSE n=72`; Age `69.16±10.43 vs 63.18±12.56, p=0.003`.
+---
 
-## Quick start (R pipeline, full manuscript table suite)
+## Step 3 | Run the bundled example data (general engine)
 
-Requires R with the `logistf` package (Table 2). Put the two pseudonymized CSVs and the `Table-all.md` skeleton in one folder and run in order:
+Paste this prompt:
 
-```bash
-cd examples/input/pipeline   # both CSVs and the Table-all.md skeleton live here
-Rscript ../../scripts/pipeline/table1_baseline.R    # fills the Table 1 block of Table-all.md
-Rscript ../../scripts/pipeline/table2_firth.R       # Firth regression
-Rscript ../../scripts/pipeline/table3_esbl_genes.R  # then Tables 3–8 and 10 in order
-python ../../scripts/pipeline/make_table9_sequencing_quality.py   # Table 9 writes a standalone CSV
+```
+The skill is installed at D:\claw2bio\clinical-table. Please run the bundled example with the
+GENERAL ENGINE:
+1. Example input is at D:\claw2bio\clinical-table\examples\input\clinical_cohorts.csv
+2. Run: python scripts/clinical_table.py examples/input/clinical_cohorts.csv
+   examples/output/clinical_tables.md
+3. Prefer the skill's own scripts in scripts/ — do NOT write new analysis code from scratch.
+4. When the run succeeds, show me the generated clinical_tables.md and explain it table by
+   table.
 ```
 
-Each script: read CSV → compute → fill its block in `Table-all.md` → write a standalone CSV. Full anchor list in `examples/output/pipeline/REPORT.md`.
+**Anchor results** for a successful run: CRE n=67, CSE n=72; Age 69.16±10.43 vs 63.18±12.56, p=0.003. If your results match, the environment is working. The skill webpage shows the full 10-table suite produced by the R pipeline on real cohort data (Table 1 baseline shown below; replace with your own screenshots later):
 
-## Input format
+![Table 1 baseline example](/skills/clinical-table/table1_baseline.png)
 
-- **Generic engine**: patient-level CSV (one row per patient): a two-level grouping column (default `cohort`) + 0/1 binary columns + continuous columns; configure via `DEFAULT_CONFIG` or `--config your.json`.
-- **R pipeline**: one CSV per cohort (column structure shown in examples/input/pipeline/); the bundled example IS the pseudonymized real data — prepare your own data with the same column layout.
+**Converting three-line tables to Word**: Markdown tables convert to DOCX with Pandoc in one command — ask the AI to run `pandoc output.md -o output.docx` (if Pandoc is not installed, ask the AI to install it).
 
-## Output files
+---
 
-| File | Content |
-|---|---|
-| `clinical_tables.md` (generic engine) | baseline / correlation / Cox / OR three-line tables |
-| `Table-all.md` (R pipeline) | the complete filled manuscript table set (224 lines) |
-| `table1_baseline.csv` … `table10_plasmid_replicons.csv` | standalone CSV per table (Table 9 = `table9_sequencing_quality.csv`) |
+## Step 4 | Switch to your own data
 
-## Troubleshooting
+Prepare a **patient-level CSV** (one row per patient): a two-level grouping column (default name `cohort`) + several 0/1 binary columns + several continuous columns. Paste this prompt:
 
-- **p values differ from SPSS** → this skill uses Pearson χ² WITHOUT continuity correction (publication Table-1 convention).
-- **R scripts crash on Windows** → keep comments ASCII/English (the bundled scripts already are); if you edit comments yourself, save as UTF-8 without BOM or run `Rscript --encoding=utf-8`.
-- **logistf missing** → `install.packages("logistf")`.
-- **Continuous variable missing from the baseline table** → add it to `baseline_continuous_vars` in `DEFAULT_CONFIG`.
-- **Cox table absent** → only appears when both `survival_time` and `survival_event` columns exist.
-- **Why must the agent run the bundled scripts instead of writing its own?**
-  The scripts in `scripts/` are the tested path — they have been run on the example
-  data, and their edge cases are documented. Code generated on the fly by an agent is
-  the most common source of silently wrong results. If a case is not covered, change
-  the CLI arguments first; if that is not enough, copy a script to a scratch directory
-  and make a minimal, reported edit; only write new code when nothing covers the task,
-  and fold it back into `scripts/` afterwards.
+```
+My own patient-level CSV is at: <paste the path to your CSV file here>.
+My grouping column is <cohort / your column name> with the two groups <group A> and <group B>.
+1. First check my table: one row per patient; a two-level grouping column; 0/1 binary columns
+   for categorical variables; numeric columns for continuous variables. If anything is wrong,
+   fix it and tell me what you did.
+2. The variable list is configured in DEFAULT_CONFIG or via --config your.json — list the
+   variables you detected in my data, ask me which ones to include in the baseline table,
+   and put the continuous variables into baseline_continuous_vars.
+3. If my data has survival_time and survival_event columns, tell me — the skill will then
+   also generate a Cox table.
+4. Run the general engine with the skill's own script — do NOT write new analysis code from
+   scratch. Show me the resulting clinical_tables.md and convert it to DOCX with Pandoc.
+```
 
-## Links
+Wait for the AI agent to finish: a Markdown three-line table suite (baseline / correlation / Cox / OR) + optional DOCX.
 
-- [Source & SKILL.md on GitHub](https://github.com/nihuanhe/claw2bio/tree/main/figure-generation/clinical-table)
-- Related skills: [Kaplan-Meier curve](/skills/survival-curve)
+---
+
+## Step 5 | Let the AI interpret the results
+
+Paste this prompt:
+
+```
+Please explain the tables in my clinical_tables.md line by line:
+1. For each variable: which statistical test was used (χ², Fisher exact, or Student t) and
+   why — remind me that χ² here does NOT use the Yates continuity correction, so p values
+   may differ slightly from SPSS, which is the Table 1 publication convention;
+2. Which baseline variables differ significantly between my two cohorts, and what that means
+   for interpreting downstream comparisons (potential confounders);
+3. If a Cox or OR table was generated: walk me through the effect sizes and confidence
+   intervals;
+4. Any warnings or things I should pay attention to.
+After explaining, tell me how to cite/report these tables in a manuscript.
+```
+
+After reading the AI's explanation, if anything is unclear, just ask it directly.
+
+---
+
+## Advanced | The manuscript-grade R pipeline
+
+If you need to reproduce a full manuscript table suite (baseline, Firth penalized logistic regression, gene/sequence-type cross-tables, univariate analysis… 10 tables in total), the skill ships 9 R scripts + 1 Python script under `scripts/pipeline/` that fill a `Table-all.md` skeleton in order. Paste this prompt:
+
+```
+I want to use the ADVANCED R pipeline of the clinical-table skill at D:\claw2bio\clinical-table
+to reproduce a full manuscript table suite:
+1. Look at examples/input/pipeline/ — two patient-level CSVs plus the Table-all.md skeleton
+   live there. First run the pipeline on the EXAMPLE data: run the scripts in scripts/pipeline/
+   in order (table1_baseline.R, table2_firth.R, table3_esbl_genes.R, and so on; Table 9 is
+   generated by the Python script make_table9_sequencing_quality.py). Each script reads the
+   CSVs, computes, fills its section of Table-all.md, and writes a standalone CSV.
+2. Use the skill's own scripts unchanged — do NOT write new analysis code from scratch.
+   IMPORTANT on Windows: use the English-comment script versions as shipped in the repo;
+   if any script is edited, save it as UTF-8 WITHOUT BOM, or R may crash.
+3. Verify the run against the anchors in examples/output/pipeline/REPORT.md.
+4. After the example works, ask me for my own two-cohort CSVs (prepared with the same column
+   structure) and repeat the pipeline on them.
+```
+
+The skill webpage shows the real 10-table output (Tables 1–10; every number cross-checked cell-by-cell against the authors' independent review scripts) for reference: /skills/clinical-table
+
+---
+
+## More analysis
+
+The two skills below are related and installed in exactly the same way (one-click prompt or zip download):
+
+### Survival curve — survival-curve
+
+**One sentence: a follow-up table in, KM survival curves + risk table + Cox forest plot out.** If your patient data includes follow-up time and outcome events, a KM curve usually goes alongside the baseline table.
+
+Details & download: /skills/survival-curve
+
+### Grouped barplot — barplot
+
+**One sentence: any 2–6 group experimental data → barplot with statistics in one shot.** For experimental data beyond the clinic (ELISA, WB densitometry…), use this one.
+
+Details & download: /skills/barplot

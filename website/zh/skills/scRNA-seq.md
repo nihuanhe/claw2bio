@@ -1,152 +1,176 @@
-# scRNA-seq 单细胞常规流程
+# 零基础——用 AI Agent 做 scRNA-seq 单细胞常规流程 | 全程复制粘贴
 
-> 一句话：从各种格式的原始矩阵进，到注释好的 Seurat 对象出——QC、Harmony 整合、聚类、UMAP、marker、SingleR 注释一条龙，每个阶段自动存 checkpoint 支持断点续跑。
+本教程以 workbuddy 作为 AI agent、Hy3 作为 AI API 为例。AI agent 本身的安装与配置请看[AI Agent 安装教程](/zh/skills/ai-agent-setup)。
 
-::: info 获取本技能 · Get this skill
-**方式 A —— 一键引导 prompt（推荐）**。复制下面这段，粘贴到你的 AI agent IDE：
+**在开始之前（必读）：**
+
+- **如果你是第一次用 AI agent 做生信分析，强烈建议先跟一遍 [bulk-RNA-seq 差异分析教程](/zh/skills/bulk-RNA-seq)**，熟悉"装技能 → 配环境 → 跑示例 → 换自己数据"的完整流程，再回来做本技能。
+- **⚠️ 硬件要求（单细胞技能通用）：请使用内存 ≥16 GB、多核 CPU 的电脑。** 官方实测：约 6 万细胞的数据集内存峰值约 5.7 GB；约 9.7 万细胞峰值约 11.9 GB——已是 16 GB 机器的上限。更大的数据请先降采样探索，或换内存更大的机器。
+- 一句话：**从各种格式的原始矩阵进，到注释好的 Seurat 对象出**——QC、Harmony 多样本整合、聚类、UMAP、marker、SingleR 注释一条龙；10X mtx / h5 / h5ad / rds / 文本矩阵 / 华大 BGI 都能自动识别，stage 00.5 自动体检并修复 9 类格式坑；每个阶段自动存 checkpoint，支持断点续跑。
+- **本流程只到自动注释为止**——拟时序、虚拟敲除是独立技能，都吃本流程产出的 `annotated_seurat.rds`（见文末"更多分析"）。
+
+**教程结构：**
+
+- **Step 1**｜安装 scRNA-seq 技能（只需一次）
+- **Step 2**｜配置运行环境（只需一次）
+- **Step 3**｜跑通示例数据
+- **Step 4**｜换成你自己的数据
+- **Step 5**｜读懂 REPORT.md
+- **更多分析**｜下游技能简介（拟时序 / 虚拟敲除）
+
+---
+
+## Step 1｜Install the scRNA-seq skill
+
+注意：本技能包较大（约 102 MB），且**示例数据是独立的 zip 包**（约 102 MB），与技能包分开。输入以下 prompt：
 
 ```
-请帮我安装 Claw2Bio 技能库中的 "scRNA-seq" 技能：
-1. 从 GitHub 仓库 https://github.com/nihuanhe/claw2bio 只拉取 bioinformatics/sc_RNA_seq/scRNA-seq
-   这一个文件夹（用 sparse checkout，不要克隆整库）。
-2. 阅读其中的 SKILL.md 并注册该技能。
-3. 运行 examples/ 里的示例验证环境，把输出的图给我看。
+Please install the "scRNA-seq" skill for me, into the D:\claw2bio folder:
+1. Create a folder named claw2bio in the root of the D: drive (if it doesn't exist yet).
+2. From the GitHub repository https://github.com/nihuanhe/claw2bio, fetch ONLY the folder
+   bioinformatics/sc_RNA_seq/scRNA-seq (use sparse checkout — do NOT clone the whole
+   repository), and place it at D:\claw2bio\scRNA-seq.
+3. If downloading from GitHub fails or is too slow, download the skill zip from this mirror
+   link instead:
+   https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/scRNA-seq/zip/scRNA-seq.zip
+   and extract it to D:\claw2bio\scRNA-seq. The example data is a SEPARATE zip:
+   https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/scRNA-seq/data/scRNA-seq-examples.zip
+   — download it too and merge its contents into the examples/ folder of the skill.
+4. Read the SKILL.md inside, then confirm to me that the skill is ready and list the contents
+   of the folder (including whether examples/ has input data).
+(If my PC has no D: drive, install to C:\claw2bio instead and tell me the actual path.)
 ```
 
-**方式 B —— 独立 zip 包**（约 102 MB，腾讯 COS 直链）：<https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/scRNA-seq/zip/scRNA-seq.zip>
+Step 1 完成后，打开文件管理器确认 `D:\claw2bio\scRNA-seq` 文件夹存在，里面有 `scripts/`、`examples/`、`SKILL.md` 等内容。
 
-**方式 C —— 全量示例数据**（约 102 MB，腾讯 COS 直链）：<https://my-website-1358159656.cos.ap-guangzhou.myqcloud.com/scRNA-seq/data/scRNA-seq-examples.zip>
-:::
+---
 
-## 它能做什么
+## Step 2｜Set up the runtime environment
 
-输入一个目录（10X mtx / h5 / h5ad / rds / 文本矩阵 / 华大 BGI / 多样本混杂均可，stage 00.5 自动体检并修复 9 类格式坑），输出注释好的 `annotated_seurat.rds` 与全套 QC、聚类、marker、注释图表。内置示例是降采样的 GSE234527（5 个样本 × 400 细胞）：QC 后保留 1820 个细胞（各样本保留率 93.8%–98.2%），聚成 9 个 cluster；多样本默认 Harmony 整合并输出整合前后对照 UMAP。
+本技能同时用 **R（≥4.5，Seurat / harmony / SingleR 等）** 和 **Python（pandas / numpy / scipy）**。如果你已经按 bulk-RNA-seq 教程装好了 R，这一步主要是补装 Seurat 系列大包（首次安装可能需要 20–60 分钟，耐心等）。输入 prompt：
 
-![QC 后小提琴图](/skills/scRNA-seq/QC_violin_after.png)
-
-QC 后每个样本的 nFeature / nCount / percent.mt 分布（示例 1820 细胞，QC 阈值 percent.mt ≤ 20%）。
-
-![按注释着色的 UMAP](/skills/scRNA-seq/UMAP_by_annotation.png)
-
-按 `cell_type_final` 着色的 UMAP——SingleR 自动注释结果（支持手动注释 CSV 一键回写，优先级高于 SingleR）。
-
-![按分组着色的 UMAP](/skills/scRNA-seq/UMAP_by_group.png)
-
-按样本分组着色的 UMAP，用于检查组间分布与批次混杂。
-
-![marker 点图](/skills/scRNA-seq/marker_dotplot.png)
-
-每个 cluster 的 top-5 marker 点图（presto 加速的 wilcoxauc 检验）。
-
-![marker 热图](/skills/scRNA-seq/marker_heatmap.png)
-
-top-5 marker 表达热图，用于人工核对 cluster 身份。
-
-**本流程只到自动注释为止**——拟时序、虚拟敲除是独立技能，都吃本流程的 `annotated_seurat.rds`。
-
-## 快速上手（30 秒）
-
-技能装好后，直接对 agent 说：
-
-> 运行 scRNA-seq 的示例，把 UMAP 给我看。
-
-或手动执行：
-
-```bash
-cd bioinformatics/sc_RNA_seq/scRNA-seq
-pip install pandas numpy scipy
-python scripts/run_scrnaseq.py \
-  examples/1_example_GSE234527_downsampled-10x-mtx/input \
-  examples/1_example_GSE234527_downsampled-10x-mtx/output \
-  --metadata examples/1_example_GSE234527_downsampled-10x-mtx/input/sample_metadata.csv \
-  --overwrite
+```
+Please set up the runtime environment for the "scRNA-seq" skill at D:\claw2bio\scRNA-seq:
+1. R should already be installed from the bulk-RNA-seq tutorial — verify that R is installed
+   and report its version to me (it must be 4.5 or above). If R is missing, stop and tell me.
+2. Also check for a Python installation; if Python is NOT installed, install a recent Python 3
+   from python.org (check "Add python.exe to PATH"), then pip install pandas numpy scipy.
+3. Install all R packages this skill needs (Seurat, harmony, SingleR and their dependencies):
+   try CRAN / Bioconductor online first; if any package fails or is too slow, stop and tell
+   me about it. These packages are LARGE — the first install may take 20–60 minutes, which
+   is normal.
+4. The skill's stage 00 checks dependencies automatically and supports an --install-deps flag.
+   When everything is installed, run the dependency check and show me the result.
+5. Reminder: this machine should have at least 16 GB RAM and a multi-core CPU for single-cell
+   work — tell me my RAM size and CPU core count, and warn me if they are below that.
 ```
 
-需要 R（≥4.5）及 Seurat / harmony / SingleR 等包；stage 00 会先检查依赖，缺包可加 `--install-deps` 让 agent 代装。
+---
 
-## 6 个示例的真实状态（2026-09-17 全部实跑）
+## Step 3｜跑通示例数据
 
-| # | 数据集 | 覆盖的格式坑 | 实测结果 | 用时 / 内存峰值 |
-|---|---|---|---|---|
-| 1 | GSE234527（降采样 fixture，随仓库） | 标准 10X mtx 多样本 + Harmony | 约 2k 细胞 → 9 clusters | 分钟级 |
-| 2 | GSE182135（10 样本 / 4 组） | 旧版**两列 `genes.tsv`** + 多样本合并 | 57,849 → 去双细胞 **54,484** 细胞 / **21 clusters** | ~48 min / ~5.7 GB |
-| 3 | GSE200874（4 个 `.h5`） | **10X h5** 多样本 | 7,189 → **6,408** 细胞 / **22 clusters** | ~20 min / ~1.5 GB |
-| 4 | 合成 BGI（随仓库） | features 列序颠倒 + `MT.` 线粒体前缀 | 单样本探索模式 | 分钟级 |
-| 5 | GSM6923183（`.h5ad`，53,748 细胞） | **h5ad → anndata 导出** | 53,748 → 去双细胞 **46,059** 细胞 / **27 clusters** | ~31 min / ~5 GB |
-| 6 | GSE197289（snRNA-seq） | **稀疏 `dgCMatrix` RDS**（96,933 × 29,329） | 96,933 → 去双细胞 **63,470** 细胞 / **28 clusters** | ~1 h / **~11.9 GB** |
+输入 prompt：
 
-> 6 号是这台 16 GB 机器的上限（stage02 的 scDblFinder 一度把可用内存压到 1.8 GB）；
-> 更大的数据请先 `--downsample` 探索，或换内存更大的机器。
+```
+The skill is installed at D:\claw2bio\scRNA-seq. Please run the bundled example
+(downsampled GSE234527, 5 samples × 400 cells, 10X mtx format):
+1. Example input is at D:\claw2bio\scRNA-seq\examples\1_example_GSE234527_downsampled-10x-mtx\input\
+2. Write results to D:\claw2bio\scRNA-seq\examples\1_example_GSE234527_downsampled-10x-mtx\output\
+   with the metadata file at ...\input\sample_metadata.csv, and use --overwrite.
+3. Prefer the skill's own scripts in scripts/ — do NOT write new analysis code from scratch.
+4. When the run succeeds, show me the key result figures in this order: the QC violin plot
+   (after QC), the UMAP colored by cell-type annotation, the UMAP colored by sample group,
+   and the marker dotplot + heatmap; then explain the generated REPORT.md line by line.
+```
 
-**这批实跑暴露并修好的坑**（细节见各 `examples/*/README.md`）：
+运行成功后的**锚点结果**：QC 后保留约 **1820 个细胞**（各样本保留率 93.8%–98.2%），聚成 **9 个 cluster**。你的结果与此一致即说明环境和流程正常。示例效果（你的网站实跑结果会替换成自己的截图）：
 
-1. **`metadata` 的 `sample` 列必须写"完整样本名"**（如 `GSM6045825_wt_filtered_gene_bc_matrices_h5_1`）：
-   匹配前会把 `GSM\d+_` 前缀从 metadata 名与样本名**两侧都剥掉**，只写 `GSM6045825` 会被剥成空串、
-   **静默**退化成探索模式（只留一行 `metadata rows with no matching sample: ['']`）。
-2. **h5ad 的 `X` 常常不是 counts**：scanpy 产出的 h5ad 把 log 归一化值放在 `X`、原始 counts 在
-   `layers['counts']`。现在导出时会优先用 counts 层（并在日志里写明来源），否则 R 会二次归一化、QC 全错；
-   导出的三件套也改为 `.gz`（Seurat 5 的 `Read10X` 对"新格式名"要求压缩，旧版 `genes.tsv` 不压缩才行）。
-3. **`.h5ad.gz` / `.RDS.gz` 不会被自动解压**：要先把文件解压成 `.h5ad` / `.rds` 再喂进来。
-   若解压后 R 仍报 `unknown input format`，说明它是**双层 gzip**（本例的 `.RDS.gz` 就是），再解一层即可。
-4. **裸稀疏矩阵（`dgCMatrix`）不再被转成稠密**：原实现走 `as.matrix()`，对 96,933 × 29,329 等于
-   22.7 GB 稠密矩阵 → 必爆内存。现已保持稀疏。
-5. **上游目录里混着的派生 `.rds` 会被当成额外样本**（细胞重复计入）→ 用 `--exclude` 点名剔除。
+QC 后每个样本的 nFeature / nCount / percent.mt 分布：
 
-## 输入格式
+![QC 小提琴图示例](/skills/scRNA-seq/QC_violin_after.png)
 
-- 单个 10X 目录、一目录的多样本文件，或上述 9 类格式的任意混合；输入永不被修改（解包/导出都进 `<output>/.staging/`）。
-- 可选 `sample_metadata.csv`：两列 `sample,group`（样本名模糊匹配，容忍 GSM 前缀与 `.tar` 后缀）；不提供则进入单样本探索模式。
+按细胞类型注释着色的 UMAP（SingleR 自动注释）：
 
-## 输出文件
+![UMAP 注释示例](/skills/scRNA-seq/UMAP_by_annotation.png)
 
-| 文件 | 内容 |
-|---|---|
-| `annotated_seurat.rds` | 核心交付物：QC 后、聚类、注释的 Seurat v5 对象 |
-| `markers_all.csv` / `top10_markers.csv` | 每个 cluster 的 marker 表（presto wilcoxauc） |
-| `annotation_per_cluster.csv` | 各参考注释对照 + `refs_agree` 一致性标记 |
-| `QC_violin_before/after.png` | QC 前后小提琴图 |
-| `UMAP_by_*` / `TSNE_by_*` | 按 cluster / 样本 / 分组着色的降维图 |
-| `UMAP_before/after_integration.*` | Harmony 整合前后对照（多样本时） |
-| `marker_heatmap.*` / `marker_dotplot.*` | top-5 marker 热图与点图 |
-| `REPORT.md` / `run_metadata.json` | 人类可读报告 + 机器可读运行记录 |
-| `.checkpoints/` | 每阶段 rds，供 `--resume` 断点续跑 |
+按样本分组着色的 UMAP（检查组间分布与批次混杂）：
 
-## 参数
+![UMAP 分组示例](/skills/scRNA-seq/UMAP_by_group.png)
 
-| 参数 | 默认值 | 说明 |
-|---|---|---|
-| `--metadata` | — | `sample,group` CSV（缺省 → 探索模式） |
-| `--organism` | `human` | `human` / `mouse` |
-| `--integrate` | `harmony` | `harmony` / `cca` / `rpca` / `none`（仅多样本） |
-| `--mt-max` | 20 | percent.mt 阈值（%） |
-| `--min-features` / `--max-features-qc` | 200 / 6000 | nFeature 上下界 |
-| `--no-doublets` | 关 | 跳过 scDblFinder 双细胞检测 |
-| `--resolution` | 0.5 | 聚类分辨率（参考 `clustree_resolution_scan.png`） |
-| `--downsample N` | 0 | 每样本抽样 N 个细胞（大样本探索用） |
-| `--resume` | 关 | 跳过已完成阶段 |
-| `--overwrite` | 关 | 允许非空输出目录 |
+每个 cluster 的 top-5 marker 点图与热图：
 
-## 常见问题
+![marker 点图示例](/skills/scRNA-seq/marker_dotplot.png)
 
-- **跑到一半爆内存** → 这是常态（合并/整合是内存高峰）：直接加 `--resume` 重跑，已完成阶段不会重复；大样本先 `--downsample`。
-- **UMAP 上批次分层明显** → 确认走了 Harmony（多样本默认开），查看 `UMAP_before/after_integration` 对照图。
-- **percent.mt 全为 0** → 线粒体前缀会被自动嗅探；识别失败时用 `--mt-pattern "^MT-"` 手动指定。
-- **想手动注释** → 把 `top10_markers.csv` 改成两列 `cluster,cell_type` CSV，跑 `Rscript scripts/apply_manual_annotation.R <rds> <csv> <outdir>`（REPORT.md 里有同样指引）。
-- **h5ad 输入报错** → 需要 `pip install anndata`；另外 `.h5ad.gz` **要先手动解压**成 `.h5ad`（本流程不做自动解压）。
-- **提示 `metadata rows with no matching sample: ['']`** → `sample` 列要写**完整样本名**（文件名去掉扩展名，如
-  `GSM6045825_wt_filtered_gene_bc_matrices_h5_1`）；只写 `GSM6045825` 匹配不上（匹配前会剥掉 GSM 前缀，两侧都剥 → 变成空串）。
-- **双细胞率异常高（>30%）** → 通常说明你喂进来的是"一份大矩阵"，所有细胞被当成**同一个样本**，
-  scDblFinder 的高估计值不可信。正确做法是先按真实样本标签（如 `sample_name` 列）把矩阵拆成多个输入再跑。
-- **"一份 counts + 一份 cell metadata"（GEO 常见形态）怎么按 metadata 分组？** → 本流程目前**只能按"输入样本"分组**，
-  吃不了逐细胞标签；要么先按标签拆成多个输入文件，要么等 `scRNA-seq-compare`（规划中）。
-- **`.RDS.gz` / `.h5ad.gz` 喂进去没反应** → 输入扫描只认 `.rds` / `.h5ad` 等裸扩展名，压缩包会被**静默跳过**；
-  先手动解压（`.RDS.gz` 还可能是**双层 gzip**，解一层后仍需再解一层）。
-- **为什么必须用技能自带脚本，不能让 AI 现写？**
-  `scripts/` 里的是经过验证的路径：它们在示例数据上跑过，边界情况有文档记录。AI 现场生成的代码是
-  "结果悄悄出错"的最常见来源。遇到没覆盖的情况，先改命令行参数；不够就复制脚本到临时目录做最小改动
-  并说明改了什么；只有完全没有对应脚本时才允许新写，且新写后要回沉淀到 `scripts/`。
+![marker 热图示例](/skills/scRNA-seq/marker_heatmap.png)
 
-## 相关链接
+---
 
-- [GitHub 源码与 SKILL.md](https://github.com/nihuanhe/claw2bio/tree/main/bioinformatics/sc_RNA_seq/scRNA-seq)
-- 相关技能：[拟时序分析](/zh/skills/scRNA-seq-pseudotime) · [虚拟敲除](/zh/skills/scRNA-seq-virtual-ko)
+## Step 4｜换成你自己的数据
+
+把你自己数据所在的文件夹交给它（10X mtx / h5 / h5ad / rds / 文本矩阵 / 华大 BGI / 多样本混杂均可；输入文件永不被修改，解包导出都进 `<output>/.staging/`）。如有分组信息，准备一张两列 `sample,group` 的 CSV。输入 prompt：
+
+```
+My own single-cell data is at: <paste the path to your data folder here>.
+<Optional: my metadata table (two columns: sample,group) is at: <path>.>
+My organism is <human / mouse>.
+1. First run the skill's built-in input check (stage 00.5 auto-detects and fixes common format
+   problems — 10X mtx / h5 / h5ad / rds / text matrices / BGI). Show me what it detected and
+   fixed; if anything needs my decision, ask me before proceeding.
+2. IMPORTANT metadata pitfall: the "sample" column in my metadata CSV must contain the FULL
+   sample names (e.g., GSM6045825_wt_filtered_gene_bc_matrices_h5_1), not just the GSM number —
+   otherwise samples silently fail to match and the run degrades to exploration mode. Verify
+   that every metadata row matched a real sample before continuing, and show me the match table.
+3. If my data is compressed as .h5ad.gz / .RDS.gz, decompress it first (some files are even
+   double-gzipped — decompress again if R still reports "unknown input format").
+4. If my dataset is large (tens of thousands of cells or more), ask me whether to first run a
+   downsampled exploration pass (--downsample) before the full run — full runs can take tens
+   of minutes to an hour and need most of my 16 GB RAM.
+5. Run the full pipeline with the skill's own scripts in scripts/ — do NOT write new analysis
+   code from scratch. If the run crashes midway, use --resume to continue from the last
+   checkpoint instead of starting over.
+6. When the run succeeds, show me the QC plots, UMAPs, marker dotplot/heatmap, and explain
+   the REPORT.md line by line.
+```
+
+等候 AI agent 运行结束，核心交付物是 **`annotated_seurat.rds`**（QC 后、聚类、注释好的 Seurat v5 对象）——保存好它，拟时序和虚拟敲除都要用它。
+
+---
+
+## Step 5｜读懂 REPORT.md
+
+输入 prompt：
+
+```
+Please explain the REPORT.md in my scRNA-seq results folder line by line:
+1. What each output file is and what it contains (annotated_seurat.rds, the marker tables,
+   annotation_per_cluster.csv, the QC/UMAP/marker figures, the checkpoints);
+2. How many cells passed QC per sample, how many clusters were found, and how each cluster
+   was annotated — do the SingleR annotations agree with the marker genes? Flag any cluster
+   whose identity looks doubtful;
+3. If my run used Harmony integration: does the before/after integration UMAP comparison show
+   good batch mixing without over-correction?
+4. Any warnings or things I should pay attention to.
+After explaining, tell me which figures can be used directly in a paper or presentation, and
+remind me that pseudotime analysis and virtual knockout are separate skills that both consume
+my annotated_seurat.rds.
+```
+
+阅读完 AI 的解释，如果有不懂的直接问它。
+
+---
+
+## 更多分析
+
+下面两个下游技能都吃本流程的 `annotated_seurat.rds`，安装方式与本技能完全相同（一键 prompt 或网站下载 zip 包）。**同样需要 ≥16 GB 内存 + 多核 CPU**：
+
+### 单细胞拟时序 —— scRNA-seq-pseudotime
+
+**一句话：从注释好的 Seurat 对象出发，用 monocle3 学轨迹、排拟时序、找拟时序相关基因。** 起点（root cluster / 细胞类型）由你指定——这是生物学决策，技能会打印 cluster → 标签对照表帮你选。
+
+详细介绍与下载：/zh/skills/scRNA-seq-pseudotime
+
+### 单细胞虚拟敲除 —— scRNA-seq-virtual-ko
+
+**一句话：指定一个基因，用 scTenifoldKnk 在计算机里"敲除"它，看调控网络怎么变。** 输出差异调控基因表和两张图，是产生候选机制假设的利器（计算预测，需实验验证）。
+
+详细介绍与下载：/zh/skills/scRNA-seq-virtual-ko

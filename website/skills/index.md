@@ -3,6 +3,8 @@
 All skills are lab-validated fixed scripts packaged in the standard `SKILL.md` format.
 Chinese tutorials are online; English tutorials are being prepared.
 
+> **First time here? Start with [Set up your first AI Agent](/skills/ai-agent-setup)** — install an AI agent from scratch, then come back to pick a skill.
+
 ## 🧪 Experiment Data Processing
 
 | Skill | What it does |

@@ -1,80 +1,155 @@
-# RNA-seq 富集分析（GO / KEGG / Reactome）
+# 零基础——用 AI Agent 做 RNA-seq 富集分析（GO / KEGG / Reactome） | 全程复制粘贴
 
-> 一句话：DEG 表进，GO / KEGG / Reactome 富集表和点图出——GO 与 Reactome 全程离线，KEGG 联网失败自动用本地缓存。
+本教程以 workbuddy 作为 AI agent、Hy3 作为 AI API 为例。AI agent 本身的安装与配置请看[AI Agent 安装教程](/zh/skills/ai-agent-setup)。
 
-::: info 获取本技能 · Get this skill
-**方式 A —— 一键引导 prompt（推荐）**。复制下面这段，粘贴到你的 AI agent IDE：
+**在开始之前（必读）：**
+
+- **如果你是第一次用 AI agent 做生信分析，强烈建议先跟一遍 [bulk-RNA-seq 差异分析教程](/zh/skills/bulk-RNA-seq)**，熟悉"装技能 → 配环境 → 跑示例 → 换自己数据"的完整流程，再回来做本技能。
+- **本技能是 bulk-RNA-seq 的下游技能**：它吃的是 bulk-RNA-seq 流程产出的 `DEG_*.csv` 差异分析结果表。请先跑完 bulk-RNA-seq 教程并保留好它的 output 文件夹，再来做富集分析。
+- 一句话：**DEG 表进，GO / KEGG / Reactome 富集表和点图出**——GO 与 Reactome 全程离线，KEGG 联网失败自动用本地缓存，断网也能出图。
+
+**教程结构：**
+
+- **Step 1**｜安装 RNA-seq-enrichment 技能（只需一次）
+- **Step 2**｜配置运行环境（只需一次）
+- **Step 3**｜跑通示例数据
+- **Step 4**｜换成你自己的数据
+- **Step 5**｜读懂 REPORT.md
+- **更多分析**｜下游技能简介（指定基因柱状图 / GSEA）
+
+---
+
+## Step 1｜Install the RNA-seq-enrichment skill
+
+输入以下 prompt：
 
 ```
-请帮我安装 Claw2Bio 技能库中的 "RNA-seq-enrichment" 技能：
-1. 从 GitHub 仓库 https://github.com/nihuanhe/claw2bio 只拉取 bioinformatics/bulk_RNA_seq/RNA-seq-enrichment
-   这一个文件夹（用 sparse checkout，不要克隆整库）。
-2. 阅读其中的 SKILL.md 并注册该技能。
-3. 运行 examples/ 里的示例验证环境，把输出的图给我看。
+Please install the "RNA-seq-enrichment" skill for me, into the D:\claw2bio folder:
+1. Create a folder named claw2bio in the root of the D: drive (if it doesn't exist yet).
+2. From the GitHub repository https://github.com/nihuanhe/claw2bio, fetch ONLY the folder
+   bioinformatics/bulk_RNA_seq/RNA-seq-enrichment (use sparse checkout — do NOT clone the whole
+   repository), and place it at D:\claw2bio\RNA-seq-enrichment.
+3. If downloading from GitHub fails or is too slow, download the zip from this mirror link instead:
+   https://claw2bio.site/downloads/RNA-seq-enrichment.zip
+   and extract it to D:\claw2bio\RNA-seq-enrichment.
+4. Read the SKILL.md inside, then confirm to me that the skill is ready and list the contents
+   of the folder.
+(If my PC has no D: drive, install to C:\claw2bio instead and tell me the actual path.)
 ```
 
-**方式 B —— 独立 zip 包**（约 11 MB，本站下载）：<https://claw2bio.site/downloads/RNA-seq-enrichment.zip>
+Step 1 完成后，打开文件管理器确认 `D:\claw2bio\RNA-seq-enrichment` 文件夹存在，里面有 `scripts/`、`examples/`、`SKILL.md` 等内容。
 
-**方式 C —— 全量示例数据**：已包含在方式 B 包内（同一个压缩包）。
-:::
+---
 
-## 它能做什么
+## Step 2｜Set up the runtime environment
 
-前提是先跑完 [bulk-RNA-seq 常规流程](/zh/skills/bulk-RNA-seq)。指向它的输出目录（或任何含 `DEG_*.csv` 的文件夹），每个 contrast 拆出上调 / 下调两个基因集，用 clusterProfiler 分别做 GO（BP/MF/CC，永远离线走 OrgDb）、KEGG（在线优先，失败自动回退本地缓存）、Reactome（永远离线）富集，每个方向 × 通路库出一张表和一张点图：
+如果你已经按 bulk-RNA-seq 教程装好了 R（4.5 或以上），这一步主要是补装富集分析专用的 R 包。输入 prompt：
 
-![GO BP 富集点图](/skills/RNA-seq-enrichment/GO_BP_dotplot.png)
-
-GO Biological Process 富集点图——点大小为基因数，颜色为校正后 P 值。
-
-![KEGG 富集点图](/skills/RNA-seq-enrichment/KEGG_dotplot.png)
-
-KEGG 通路富集点图（离线缓存兜底，断网也能出图）。
-
-![Reactome 富集点图](/skills/RNA-seq-enrichment/Reactome_dotplot.png)
-
-Reactome 通路富集点图（开放许可，缓存可随技能分发）。
-
-## 快速上手（30 秒）
-
-```bash
-cd bioinformatics/bulk_RNA_seq/RNA-seq-enrichment
-Rscript scripts/00_check_deps.R --organism mouse        # 依赖检查
-Rscript scripts/enrich.R examples/input examples/output --organism mouse
+```
+Please set up the runtime environment for the "RNA-seq-enrichment" skill at
+D:\claw2bio\RNA-seq-enrichment:
+1. R should already be installed from the bulk-RNA-seq tutorial — verify that R is installed
+   and report its version to me (it must be 4.5 or above). If R is missing, stop and tell me.
+2. Install all R packages this skill needs (clusterProfiler and its dependencies): try CRAN /
+   Bioconductor online first; if any package fails or is too slow (especially large annotation
+   packages such as org.Hs.eg.db and org.Mm.eg.db), stop and tell me — the bulk-RNA-seq skill's
+   resources/ folder has precompiled packages and a mirror download address that both skills share.
+3. Once the packages are in, run scripts/build_pathway_cache.R --organism both ONCE to build the
+   local pathway cache (this lets KEGG fall back to local data when offline; Reactome and GO are
+   always offline).
+4. Finally, run the dependency-check script scripts/00_check_deps.R --organism mouse inside the
+   skill folder and show me the result.
 ```
 
-## 输入格式
+Step 2 结束后，AI agent 会告诉你依赖检查是否全部通过。
 
-- 一个目录，里面有 bulk-RNA-seq 流程产出的 `DEG_*.csv`（含 `gene`、`log2fc`、`padj` 列；DESeq2 的 `log2FoldChange`、edgeR/limma 的 `logFC` 列名会自动归一化）。
+---
 
-## 输出文件
+## Step 3｜跑通示例数据
 
-| 文件 | 内容 |
-|---|---|
-| `GO_<contrast>_<up\|down>_<BP\|MF\|CC>.csv` + `_dotplot.png` | 每个 contrast × 方向 × 本体论的 GO 表和点图 |
-| `KEGG_<contrast>_<up\|down>.csv` + `_dotplot.png` | KEGG 富集表和点图 |
-| `Reactome_<contrast>_<up\|down>.csv` + `_dotplot.png` | Reactome 富集表和点图 |
-| `REPORT.md` | 逐文件产出说明 |
+输入 prompt：
 
-## 参数
+```
+The skill is installed at D:\claw2bio\RNA-seq-enrichment. Please run the full enrichment
+pipeline on the bundled example data:
+1. Example input is at D:\claw2bio\RNA-seq-enrichment\examples\input\
+2. Write results to D:\claw2bio\RNA-seq-enrichment\examples\output\
+3. Prefer the skill's own scripts in scripts/ — do NOT write new analysis code from scratch.
+4. When the run succeeds, show me the key result figures in this order: first the GO Biological
+   Process dotplot, then the KEGG dotplot, and finally the Reactome dotplot; then explain the
+   generated REPORT.md line by line.
+```
 
-| 参数 | 默认值 | 说明 |
-|---|---|---|
-| `--organism` | `mouse` | `mouse` / `human` |
-| `--padj` | 0.05 | 校正 P 值阈值 |
-| `--log2fc` | 1 | \|log2FC\| 阈值 |
-| `--offline` | 关 | 跳过 KEGG 在线尝试，直接用本地缓存 |
+运行成功后，你应该看到三类点图（示例效果如下，你的网站实跑结果会替换成自己的截图）：
 
-## 常见问题
+GO Biological Process 富集点图——点大小为基因数，颜色为校正后 P 值：
 
-- **断网 / KEGG 接口超时** → 自动回退本地缓存；新机器先跑一次 `Rscript scripts/build_pathway_cache.R --organism both` 建缓存（KEGG 缓存因版权只存本地，不上 COS）。
-- **没有 OrgDb 包** → 用 bulk-RNA-seq 技能 `resources/` 里的预编译包（COS 镜像），一次安装两个技能共用。
-- **DEG 表不是本流程出的** → 只要有 `gene` / `log2fc`(或 `logFC` / `log2FoldChange`) / `padj` 列即可读入。
-- **为什么必须用技能自带脚本，不能让 AI 现写？**
-  `scripts/` 里的是经过验证的路径：它们在示例数据上跑过，边界情况有文档记录。AI 现场生成的代码是
-  "结果悄悄出错"的最常见来源。遇到没覆盖的情况，先改命令行参数；不够就复制脚本到临时目录做最小改动
-  并说明改了什么；只有完全没有对应脚本时才允许新写，且新写后要回沉淀到 `scripts/`。
+![GO BP 富集点图示例](/skills/RNA-seq-enrichment/GO_BP_dotplot.png)
 
-## 相关链接
+KEGG 通路富集点图（离线缓存兜底，断网也能出图）：
 
-- [GitHub 源码与 SKILL.md](https://github.com/nihuanhe/claw2bio/tree/main/bioinformatics/bulk_RNA_seq/RNA-seq-enrichment)
-- 相关技能：[bulk RNA-seq 差异分析](/zh/skills/bulk-RNA-seq) · [指定基因柱状图](/zh/skills/RNA-seq-gene-plot) · [GSEA](/zh/skills/RNA-seq-GSEA)
+![KEGG 富集点图示例](/skills/RNA-seq-enrichment/KEGG_dotplot.png)
+
+Reactome 通路富集点图：
+
+![Reactome 富集点图示例](/skills/RNA-seq-enrichment/Reactome_dotplot.png)
+
+---
+
+## Step 4｜换成你自己的数据
+
+此时就可以把 bulk-RNA-seq 流程跑出来的**你自己的** output 文件夹交给它了（里面应有 `DEG_*.csv`）。输入 prompt：
+
+```
+My own differential-expression results are at: <paste the path to your bulk-RNA-seq output
+folder here — it should contain DEG_*.csv files>.
+Please first check whether the folder and the DEG tables have any format problems (required
+columns: gene, log2fc — logFC / log2FoldChange are also accepted — and padj); if so, fix them
+and tell me what you did. Once the data checks out, run the full enrichment pipeline
+(GO BP/MF/CC, KEGG, and Reactome, with up- and down-regulated genes analyzed separately) and
+show me the result dotplots.
+Prefer the skill's own scripts in scripts/; if anything needs adapting, make the smallest
+possible change — do NOT write large amounts of new code.
+My organism is <mouse / human> — use the matching --organism setting. If you are not sure,
+ask me before running.
+```
+
+等候 AI agent 运行结束，它会按"每个对比 × 上调/下调 × 每个通路库"各出一张表和一张点图。
+
+---
+
+## Step 5｜读懂 REPORT.md
+
+让 AI 给你解析结果：
+
+```
+Please explain the REPORT.md in my enrichment results folder line by line:
+1. What each output file is and what it contains (GO BP/MF/CC, KEGG, Reactome; up- vs
+   down-regulated gene sets);
+2. For my main comparison, which pathways are the most significantly enriched among the
+   up-regulated genes, and which among the down-regulated genes;
+3. Any warnings or things I should pay attention to (e.g., KEGG falling back to the local
+   cache, or a direction with too few genes to enrich).
+After explaining, tell me which figures and tables can be used directly in a paper or
+presentation.
+```
+
+阅读完 AI 的解释，如果有不懂的直接问它。
+
+---
+
+## 更多分析
+
+本技能只做基于阈值的富集分析（上调/下调分开）。下面两个技能与它是同一批下游，安装方式完全相同（一键 prompt 或网站下载 zip 包），都吃 bulk-RNA-seq 的 output：
+
+### 指定基因表达柱状图 —— RNA-seq-gene-plot
+
+**一句话：把某个基因从归一化矩阵里单独拎出来画图。** 某基因在各组表达多少（柱状图 + SD + 抖动散点 + 统计标注），或同组内两个基因谁高谁低（配对 t 检验），适合论文里挑关键基因出图。
+
+详细介绍与下载：/zh/skills/RNA-seq-gene-plot
+
+### GSEA —— RNA-seq-GSEA
+
+**一句话：不设阈值，用全基因排序列表做富集。** 对 MSigDB 格式的 GMT 基因集做 fgsea 富集，内置 Reactome 演示基因集开箱即用。注意 MSigDB 不含 KEGG 基因集——要做 KEGG 请用本技能（RNA-seq-enrichment）。
+
+详细介绍与下载：/zh/skills/RNA-seq-GSEA
